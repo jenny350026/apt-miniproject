@@ -1,0 +1,11 @@
+*
+!*/
+!**/.gitignore
+!**/*.py
+!**/*.json
+!**/*.java
+!**/*.patch
+!**/*.txt
+!**/*.dat
+!**/*.html
+!**/*.yaml

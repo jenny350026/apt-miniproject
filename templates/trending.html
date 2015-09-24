@@ -1,0 +1,32 @@
+{% extends "/templates/base.html" %}
+
+{% block content %}
+<h2>Top # Trending Streams</h2>
+<div>
+	<img src="/img?img_id=cover_image_id"></img>
+	<p># views in past hour</p>
+</div>
+<form>
+<p>Email trending report</p>
+<div>
+	<input type="radio" name="email_frequency" id="noreports" value="noreports"/>
+	<label for="noreports">No reports</label>
+</div>
+
+<div>
+	<input type="radio" name="email_frequency" id="every5min" value="every5min"/>
+	<label for="every5min">Every 5 minutes</label>
+</div>
+
+<div>
+	<input type="radio" name="email_frequency" id="everyhour" value="everyhour"/>
+	<label for="everyhour">Every 1 hour</label>
+</div>
+
+<div>
+	<input type="radio" name="email_frequency" id="everyday" value="everyday"/>
+	<label for="everyday">Every day</label>
+</div>
+<input type="submit" value="Update Rate">
+</form>
+{% endblock %}

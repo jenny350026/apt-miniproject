@@ -1,0 +1,16 @@
+{% extends "/templates/base.html" %}
+
+{% block content %}
+<div>
+	<input type="text" name="search">
+	<input type="submit" value="Search">
+</div>
+
+<div>
+	<p>
+	# results for search, 
+	click on an image to view stream
+	</p>
+	<img src="/img?img_id=cover_image_id"></img>
+</div>
+{% endblock %}

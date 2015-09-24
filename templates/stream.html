@@ -1,0 +1,19 @@
+{% extends "/templates/base.html" %}
+
+{% block content %}
+<div>
+	<img src="/img?img_id=some_image_id"></img>
+	<img src="/img?img_id=some_image_id"></img>
+	<img src="/img?img_id=some_image_id"></img>
+	<input type="submit" value="More pictures">
+</div>
+
+<form>
+	Add an Image
+    <div><input type="file" name="img"/></div>
+	<div><input type="text" name="comments" placeholder="Comments"></div>
+	<div><input type="submit" value="Upload File"></div>
+</form>
+
+<div><input type="submit" value="Subscribe"></div>
+{% endblock %}

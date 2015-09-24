@@ -1,0 +1,25 @@
+{% extends "/templates/base.html" %}
+
+{% block content %}
+<h2>Strems I own</h2>
+<table>
+	<tr>
+		<th>Name</th><th>Last New Picture</th><th>Number of Pictures</th><th>Delete</th>
+	<tr>
+	<tr>
+		<td>Unknown Name</td><td>Unknown Last New Picture</td><td>Unknown Number of Pictures</td><td><input type="checkbox" name="delete"</td>
+	<tr>
+</table>
+<input type="submit", value="Delete Checked">
+
+<h2>Strems I subscribed to</h2>
+<table>
+	<tr>
+		<th>Name</th><th>Last New Picture</th><th>Number of Pictures</th><th>Views</th><th>Unsubscribe</th>
+	<tr>
+	<tr>
+		<td>Unknown Name</td><td>Unknown Last New Picture</td><td>Unknown Number of Pictures</td><td>Unknown Views</td><td><input type="checkbox" name="delete"</td>
+	<tr>
+</table>
+<input type="submit", value="Unsubscribe Checked Streams">
+{% endblock %}
