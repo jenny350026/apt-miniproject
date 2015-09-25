@@ -2,13 +2,13 @@
 
 {% block content %}
 <div>
-	<img src="/img?img_id=some_image_id"></img>
-	<img src="/img?img_id=some_image_id"></img>
-	<img src="/img?img_id=some_image_id"></img>
+    {% for image in images %}
+	    <img src="/img?img_id={{ image.key.urlsafe() }}"></img>
+    {% endfor %}
 	<input type="submit" value="More pictures">
 </div>
 
-<form>
+<form action="/stream?name={{ stream_name }}" method="post">
 	Add an Image
     <div><input type="file" name="img"/></div>
 	<div><input type="text" name="comments" placeholder="Comments"></div>

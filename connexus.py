@@ -32,6 +32,7 @@ class Subscriber(ndb.Model):
 class View(ndb.Model):
 	stream = ndb.StructuredProperty(Stream)
 	time = ndb.DateTimeProperty(auto_now_add=True)
+	comment = ndb.StringProperty()
 	
 class MainPage(webapp2.RequestHandler):
 	def get(self):
@@ -78,7 +79,7 @@ class Create(webapp2.RequestHandler):
 			subscriber.email = email
 			subscriber.put()
 		
-		self.redirect('/manage')
+		self.redirect('/stream?' + urllib.urlencode( { name : stream.name }))
 
 	def get(self):
 		template_values = {}
@@ -86,10 +87,24 @@ class Create(webapp2.RequestHandler):
 		self.response.write(template.render(template_values))
 		
 class ViewStream(webapp2.RequestHandler):
-	def get(self):
-		template_values = {}
-		template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
-		self.response.write(template.render(template_values))
+    def get(self):
+        stream_name = self.request.get('name')
+        images = Image.query(Image.stream.name == stream_name)
+        template_values = { 'images' : images,
+                            'stream_name' : stream_name }
+        template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
+        self.response.write(template.render(template_values))
+
+    def post(self):
+        image = Image()
+        image.comment = self.request.get('comment')
+        raw_image = self.request.get('img')
+        raw_image = images.resize(raw_image, 200, 200)
+        image.image = raw_image
+
+        image.put()
+
+        self.redirect('/stream?' + urllib.urlencode( { name : self.request.get('name') } ))
 		
 class ViewAll(webapp2.RequestHandler):
 	def get(self):
@@ -117,8 +132,9 @@ class Error(webapp2.RequestHandler):
 
 class GetImage(webapp2.RequestHandler):
     def get(self):
+        image = ndb.Key(urlsafe=self.request.get('img_id')).get()
         self.response.headers['Content-Type'] = 'image/png'
-        self.response.out.write('No image')
+        self.response.out.write(image.image)
 		
 		
 app = webapp2.WSGIApplication([
