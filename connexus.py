@@ -5,6 +5,7 @@ from google.appengine.api import images
 
 import jinja2
 import webapp2
+import urllib
 import os
 import re
 
@@ -79,7 +80,7 @@ class Create(webapp2.RequestHandler):
 			subscriber.email = email
 			subscriber.put()
 		
-		self.redirect('/stream?' + urllib.urlencode( { name : stream.name }))
+		self.redirect('/stream?' + urllib.urlencode( { 'name' : stream.name }))
 
 	def get(self):
 		template_values = {}
@@ -89,7 +90,7 @@ class Create(webapp2.RequestHandler):
 class ViewStream(webapp2.RequestHandler):
     def get(self):
         stream_name = self.request.get('name')
-        images = Image.query(Image.stream.name == stream_name)
+        images = Image.query(Image.stream.name == stream_name).fetch()
         template_values = { 'images' : images,
                             'stream_name' : stream_name }
         template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
@@ -101,10 +102,11 @@ class ViewStream(webapp2.RequestHandler):
         raw_image = self.request.get('img')
         raw_image = images.resize(raw_image, 200, 200)
         image.image = raw_image
+        image.stream = Stream.query(Stream.name == self.request.get('name')).fetch()[0]
 
         image.put()
 
-        self.redirect('/stream?' + urllib.urlencode( { name : self.request.get('name') } ))
+        self.redirect('/stream?' + urllib.urlencode( { 'name' : self.request.get('name') } ))
 		
 class ViewAll(webapp2.RequestHandler):
 	def get(self):

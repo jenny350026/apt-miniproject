@@ -8,12 +8,13 @@
 	<input type="submit" value="More pictures">
 </div>
 
-<form action="/stream?name={{ stream_name }}" method="post">
+<form action="/stream?name={{ stream_name }}" enctype="multipart/form-data" method="post">
 	Add an Image
     <div><input type="file" name="img"/></div>
-	<div><input type="text" name="comments" placeholder="Comments"></div>
-	<div><input type="submit" value="Upload File"></div>
+    <div><input type="text" name="comments" placeholder="Comments"></div>
+    <div><input type="submit" value="Upload File"></div>
 </form>
 
+<br>
 <div><input type="submit" value="Subscribe"></div>
 {% endblock %}
