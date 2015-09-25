@@ -64,6 +64,17 @@ class Manage(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('/templates/manage.html')
 		self.response.write(template.render(template_values))
 
+class DeleteStream(webapp2.RequestHandler):
+	def post(self):
+		streams = Stream().query(Stream.author_email == users.get_current_user().email())
+		for stream in streams:
+			i = self.request.get(stream.name)
+			if i:
+				if i == 'on':
+					stream.key.delete()
+		self.redirect('/manage') 
+
+
 class Create(webapp2.RequestHandler):
 	def post(self):
 		stream = Stream()
@@ -145,6 +156,7 @@ class GetImage(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/', MainPage),
 	('/manage', Manage),
+	('/deleteStream', DeleteStream),
 	('/create', Create),
 	('/stream', ViewStream),
 	('/view_all', ViewAll),
