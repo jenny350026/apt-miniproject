@@ -85,7 +85,7 @@ class Create(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('/templates/create.html')
 		self.response.write(template.render(template_values))
 		
-class Streams(webapp2.RequestHandler):
+class ViewStream(webapp2.RequestHandler):
 	def get(self):
 		template_values = {}
 		template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
@@ -93,7 +93,7 @@ class Streams(webapp2.RequestHandler):
 		
 class ViewAll(webapp2.RequestHandler):
 	def get(self):
-		template_values = {}
+		template_values = { 'streams' : Stream.query() }
 		template = JINJA_ENVIRONMENT.get_template('/templates/view.html')
 		self.response.write(template.render(template_values))
 		
@@ -125,7 +125,7 @@ app = webapp2.WSGIApplication([
     ('/', MainPage),
 	('/manage', Manage),
 	('/create', Create),
-	('/stream', Streams),
+	('/stream', ViewStream),
 	('/view_all', ViewAll),
 	('/search', Search),
 	('/trending', Trending),
