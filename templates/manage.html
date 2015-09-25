@@ -3,12 +3,15 @@
 {% block content %}
 <h2>Streams I own</h2>
 <table>
+	
 	<tr>
 		<th>Name</th><th>Last New Picture</th><th>Number of Pictures</th><th>Delete</th>
 	<tr>
+	{% for stream in streams %}
 	<tr>
-		<td>Unknown Name</td><td>Unknown Last New Picture</td><td>Unknown Number of Pictures</td><td><input type="checkbox" name="delete"</td>
+		<td>{{stream.author_email}}</td><td>Unknown Last New Picture</td><td>Unknown Number of Pictures</td><td><input type="checkbox" name="delete"</td>
 	<tr>
+	{% endfor%}
 </table>
 <input type="submit", value="Delete Checked">
 
