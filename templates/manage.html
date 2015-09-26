@@ -12,9 +12,9 @@
 		<tr>
 		{% for stream in streams %}
 		<tr>
-			<td>{{stream.name}}</td>
-			<td>Unknown Last New Picture</td>
-			<td>Unknown Number of Pictures</td>
+			<td>{{ stream.name }}</td>
+			<td>{{ stream.last_update_time }}</td>
+			<td>{{ stream.num_picture }}</td>
 			<td><input type="checkbox" name="{{ stream.name }}"</td>
 		<tr>
 		{% endfor%}
@@ -27,9 +27,15 @@
 	<tr>
 		<th>Name</th><th>Last New Picture</th><th>Number of Pictures</th><th>Views</th><th>Unsubscribe</th>
 	<tr>
+	{% for subscriber in subscribers %}	
 	<tr>
-		<td>Unknown Name</td><td>Unknown Last New Picture</td><td>Unknown Number of Pictures</td><td>Unknown Views</td><td><input type="checkbox" name="delete"</td>
+		<td>{{ subscriber.stream.name}}</td>
+		<td>{{ subscriber.stream.last_update_time }}</td>
+		<td>{{ subscriber.stream.number }}</td>
+		<td>Unknown Views</td>
+		<td><input type="checkbox" name="delete"</td>
 	<tr>
+	{% endfor %}
 </table>
 <input type="submit", value="Unsubscribe Checked Streams">
 {% endblock %}

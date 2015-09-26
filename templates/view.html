@@ -4,7 +4,7 @@
 <h2>View All Streams</h2>
 <div>
     {% for stream in streams %}
-	    <a href="/stream?name={{ stream.name }}"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
+	    <a href="/stream?stream_id={{ stream.key.urlsafe() }}"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
     {% endfor %}
 </div>
 {% endblock %}

@@ -3,11 +3,13 @@ from google.appengine.ext import ndb
 from google.appengine.api import mail
 from google.appengine.api import images
 
+import logging
 import jinja2
 import webapp2
 import urllib
 import os
 import re
+import time
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader = jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -20,20 +22,23 @@ class Stream(ndb.Model):
 	name = ndb.StringProperty()
 	tag = ndb.StringProperty()
 	cover_url = ndb.StringProperty()	
+	create_time = ndb.DateTimeProperty(auto_now_add = True)
+	last_update_time = ndb.DateTimeProperty(indexed = False)
+	num_picture = ndb.IntegerProperty(indexed = False)
 
 class Image(ndb.Model):
-	stream = ndb.StructuredProperty(Stream)
-	date = ndb.DateTimeProperty(auto_now_add=True)
+	stream = ndb.KeyProperty(kind = Stream)
+	date = ndb.DateTimeProperty(auto_now_add = True)
 	image = ndb.BlobProperty()
 	comment = ndb.StringProperty()
 
 class Subscriber(ndb.Model):
-	stream = ndb.StructuredProperty(Stream)
+	stream = ndb.KeyProperty(kind = Stream)
 	email = ndb.StringProperty()
 
 class View(ndb.Model):
-	stream = ndb.StructuredProperty(Stream)
-	time = ndb.DateTimeProperty(auto_now_add=True)
+	stream = ndb.KeyProperty(kind = Stream)
+	time = ndb.DateTimeProperty(auto_now_add = True)
 	comment = ndb.StringProperty()
 	
 class MainPage(webapp2.RequestHandler):
@@ -59,9 +64,25 @@ class MainPage(webapp2.RequestHandler):
 class Manage(webapp2.RequestHandler):
 	def get(self):
 		streams = Stream().query(Stream.author_email == users.get_current_user().email())
+		for stream in streams:
+			update_time = Image.query(Image.stream == stream.key).order(-Image.date).fetch(1)
+			if len(update_time) > 0:
+				stream.last_update_time = update_time[0].date 
+			else:
+				stream.last_update_time = stream.create_time	
+
+			stream.num_picture = Image.query(Image.stream == stream.key).count(limit=None)
+			stream.put()
+
+		subscribers = Subscriber().query(Subscriber.email == users.get_current_user().email())
+		#subscribers.fetch(1)[0].stream.number = 10
+		#subscribers.fetch(1)[0].put()
+
 		template_values = {
-		'streams' : streams
+			'streams' : streams,
+			'subscribers' : subscribers
 		}
+
 		template = JINJA_ENVIRONMENT.get_template('/templates/manage.html')
 		self.response.write(template.render(template_values))
 
@@ -69,10 +90,10 @@ class DeleteStream(webapp2.RequestHandler):
 	def post(self):
 		streams = Stream().query(Stream.author_email == users.get_current_user().email())
 		for stream in streams:
-			i = self.request.get(stream.name)
-			if i:
-				if i == 'on':
-					stream.key.delete()
+			stream_name = self.request.get(stream.name)
+			if stream_name and stream_name == 'on':
+				stream.key.delete()
+		time.sleep(0.1)
 		self.redirect('/manage') 
 
 
@@ -92,11 +113,11 @@ class Create(webapp2.RequestHandler):
 
 		for email in re.split('\s*,\s*', self.request.get('receipients')):
 			subscriber = Subscriber()
-			subscriber.stream = stream
+			subscriber.stream = stream.key
 			subscriber.email = email
 			subscriber.put()
 		
-		self.redirect('/stream?' + urllib.urlencode( { 'name' : stream.name }))
+		self.redirect('/stream?' + urllib.urlencode( { 'stream_id' : stream.key.urlsafe() }))
 
 	def get(self):
 		template_values = {}
@@ -105,28 +126,54 @@ class Create(webapp2.RequestHandler):
 		
 class ViewStream(webapp2.RequestHandler):
     def get(self):
-        stream_name = self.request.get('name')
-        images = Image.query(Image.stream.name == stream_name).fetch()
+        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+        stream = stream_key.get()
+        images = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
         template_values = { 'images' : images,
-                            'stream_name' : stream_name }
+                            'stream' : stream }
         template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
         self.response.write(template.render(template_values))
 
     def post(self):
-        image = Image()
-        image.comment = self.request.get('comment')
-        raw_image = self.request.get('img')
-        raw_image = images.resize(raw_image, 200, 200)
-        image.image = raw_image
-        image.stream = Stream.query(Stream.name == self.request.get('name')).fetch()[0]
+    	upload = self.request.get('upload')   
+    	subscribe = self.request.get('subscribe')
+    	logging.info('Starting Main handler %s', subscribe)
+    	if subscribe == 'on':
+			logging.info('subscribe == on')
+			subscriber = Subscriber()
+			subscriber.email = users.get_current_user().email()
+			subscriber.stream = ndb.Key(urlsafe = self.request.get('stream_id')).get().key
+			subscriber.put()
+			self.redirect('/stream?' + urllib.urlencode( { 'stream_id' : subscriber.stream.urlsafe() })) 
+    	if upload == 'on':
+    		logging.info('upload == on')
+	        image = Image()
+	        image.comment = self.request.get('comment')
+	        raw_image = self.request.get('img')
+	        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+	        image_list = Image.query(Image.stream == stream_key).order(-Image.date).fetch()    
+	        if raw_image:
+	        	image.image = images.resize(raw_image, 200, 200)
+		        image.stream = stream_key
 
-        image.put()
+		        image.put()
+		        time.sleep(1)
+		        template_values = { 'images' : image_list,
+	                            	'stream' : stream_key.get() }
+	        else:
+		        template_values = { 'images' : image_list,
+		        					'no_file_error' : "no file",        					
+	                            	'stream' : stream_key.get() }
+	    
+	        template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
+	        self.response.write(template.render(template_values))
 
-        self.redirect('/stream?' + urllib.urlencode( { 'name' : self.request.get('name') } ))
+		
+
 		
 class ViewAll(webapp2.RequestHandler):
 	def get(self):
-		template_values = { 'streams' : Stream.query() }
+		template_values = { 'streams' : Stream.query().order(-Stream.create_time) }
 		template = JINJA_ENVIRONMENT.get_template('/templates/view.html')
 		self.response.write(template.render(template_values))
 		
