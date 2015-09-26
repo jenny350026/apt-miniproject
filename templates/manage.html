@@ -33,7 +33,7 @@
 			<td>{{ subscription.stream.get().name }}</td>
 			<td>{{ subscription.stream.get().last_update_time }}</td>
 			<td>{{ subscription.stream.get().num_picture }}</td>
-			<td>Unknown Views</td>
+			<td>{{ view_count_list[loop.index0] }}</td>
 			<td><input type="checkbox" name="{{ subscription.stream.get().name }}"</td>
 		<tr>
 		{% endfor %}

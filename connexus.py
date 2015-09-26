@@ -74,9 +74,14 @@ class Manage(webapp2.RequestHandler):
 			stream.put()
 
 		subscribed = Subscriber().query(Subscriber.email == users.get_current_user().email())
+		view_count_list = []
+		for sub in subscribed:		
+			view_count = View.query(View.stream == sub.stream).count(limit=None)
+			view_count_list.append(view_count)
 
 		template_values = {
 			'streams' : streams,
+			'view_count_list' : view_count_list,
 			'subscribed' : subscribed
 		}
 
@@ -131,11 +136,20 @@ class Create(webapp2.RequestHandler):
 		
 class ViewStream(webapp2.RequestHandler):
     def get(self):
+    	
+
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
         stream = stream_key.get()
         images = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
         subscribed = Subscriber().query(ndb.AND(Subscriber.email == users.get_current_user().email(), 
 										 Subscriber.stream == stream_key))
+
+        view = self.request.get('view')
+        if view:
+        	v = View()
+        	v.stream = stream_key
+        	v.put()
+
         template_values = { 'images' : images,
         					'no_file_error' : self.request.get('no_file_error'),
         					'subscribed' : subscribed,
