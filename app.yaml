@@ -8,8 +8,6 @@ handlers:
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
-- url: /stylesheets
-  static_dir: stylesheets
 - url: /
   script: connexus.app
 - url: /(.*)

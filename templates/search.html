@@ -1,16 +1,21 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
+<form action="\search?" method="post">
+    <div>
+    	<input type="text" name="search">
+    	<input type="submit" value="Search">
+    </div>
+</form>
+{% if result %}
 <div>
-	<input type="text" name="search">
-	<input type="submit" value="Search">
-</div>
-
-<div>
-	<p>
-	# results for search, 
+    <p>
+	{{ result | length }} results for search, 
 	click on an image to view stream
 	</p>
-	<img src="/img?img_id=cover_image_id"></img>
+    {% for stream in result %}   
+    	<a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
+    {% endfor %}
 </div>
+{% endif %}
 {% endblock %}
