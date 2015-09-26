@@ -8,7 +8,7 @@
 	<input type="submit" value="More pictures">
 </div>
 
-<form action="/stream?stream_id={{ stream.key.urlsafe() }}&upload=on" enctype="multipart/form-data" method="post">
+<form action="/upload?stream_id={{ stream.key.urlsafe() }}" enctype="multipart/form-data" method="post">
 	Add an Image
     <div><input type="file" name="img"/></div>
     <div><input type="text" name="comments" placeholder="Comments"></div>
@@ -17,7 +17,12 @@
 </form>
 
 <br>
-<form action="/stream?stream_id={{ stream.key.urlsafe() }}&subscribe=on" method="post">
-	<div><input type="submit" value="Subscribe"></div>
+<form action="/subscribe?stream_id={{ stream.key.urlsafe() }}" method="post">
+    {% if subscribed.fetch() | length %}
+        <div><input type="submit" value="Unsubscribe"></div>
+    {% else %}
+        <div><input type="submit" value="Subscribe"></div>
+    {% endif %}
+
 </form>
 {% endblock %}

@@ -12,7 +12,7 @@
 		<tr>
 		{% for stream in streams %}
 		<tr>
-			<td>{{ stream.name }}</td>
+			<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&q=on">{{ stream.name }}</a></td>
 			<td>{{ stream.last_update_time }}</td>
 			<td>{{ stream.num_picture }}</td>
 			<td><input type="checkbox" name="{{ stream.name }}"</td>
@@ -23,19 +23,21 @@
 </form>
 
 <h2>Streams I subscribed to</h2>
-<table>
-	<tr>
-		<th>Name</th><th>Last New Picture</th><th>Number of Pictures</th><th>Views</th><th>Unsubscribe</th>
-	<tr>
-	{% for subscriber in subscribers %}	
-	<tr>
-		<td>{{ subscriber.stream.name}}</td>
-		<td>{{ subscriber.stream.last_update_time }}</td>
-		<td>{{ subscriber.stream.number }}</td>
-		<td>Unknown Views</td>
-		<td><input type="checkbox" name="delete"</td>
-	<tr>
-	{% endfor %}
-</table>
-<input type="submit", value="Unsubscribe Checked Streams">
+<form action="/unsubscribe" method="post">
+	<table>
+		<tr>
+			<th>Name</th><th>Last New Picture</th><th>Number of Pictures</th><th>Views</th><th>Unsubscribe</th>
+		<tr>
+		{% for subscription in subscribed %}	
+		<tr>
+			<td>{{ subscription.stream.get().name }}</td>
+			<td>{{ subscription.stream.get().last_update_time }}</td>
+			<td>{{ subscription.stream.get().num_picture }}</td>
+			<td>Unknown Views</td>
+			<td><input type="checkbox" name="{{ subscription.stream.get().name }}"</td>
+		<tr>
+		{% endfor %}
+	</table>
+	<input type="submit", value="Unsubscribe Checked Streams">
+</form>
 {% endblock %}

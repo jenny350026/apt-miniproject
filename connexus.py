@@ -23,7 +23,7 @@ class Stream(ndb.Model):
 	tag = ndb.StringProperty()
 	cover_url = ndb.StringProperty()	
 	create_time = ndb.DateTimeProperty(auto_now_add = True)
-	last_update_time = ndb.DateTimeProperty(indexed = False)
+	last_update_time = ndb.DateTimeProperty()
 	num_picture = ndb.IntegerProperty(indexed = False)
 
 class Image(ndb.Model):
@@ -39,7 +39,6 @@ class Subscriber(ndb.Model):
 class View(ndb.Model):
 	stream = ndb.KeyProperty(kind = Stream)
 	time = ndb.DateTimeProperty(auto_now_add = True)
-	comment = ndb.StringProperty()
 	
 class MainPage(webapp2.RequestHandler):
 	def get(self):
@@ -74,13 +73,11 @@ class Manage(webapp2.RequestHandler):
 			stream.num_picture = Image.query(Image.stream == stream.key).count(limit=None)
 			stream.put()
 
-		subscribers = Subscriber().query(Subscriber.email == users.get_current_user().email())
-		#subscribers.fetch(1)[0].stream.number = 10
-		#subscribers.fetch(1)[0].put()
+		subscribed = Subscriber().query(Subscriber.email == users.get_current_user().email())
 
 		template_values = {
 			'streams' : streams,
-			'subscribers' : subscribers
+			'subscribed' : subscribed
 		}
 
 		template = JINJA_ENVIRONMENT.get_template('/templates/manage.html')
@@ -93,9 +90,17 @@ class DeleteStream(webapp2.RequestHandler):
 			stream_name = self.request.get(stream.name)
 			if stream_name and stream_name == 'on':
 				stream.key.delete()
-		time.sleep(0.1)
+		time.sleep(1)
 		self.redirect('/manage') 
 
+class Unsubscribe(webapp2.RequestHandler):
+	def post(self):
+		subscribed_streams = Subscriber().query(Subscriber.email == users.get_current_user().email())
+		for subscriber in subscribed_streams.fetch():
+			stream_name = self.request.get(subscriber.stream.get().name)
+			if stream_name and stream_name == 'on':
+				subscriber.key.delete()
+		self.redirect('/manage') 
 
 class Create(webapp2.RequestHandler):
 	def post(self):
@@ -129,46 +134,50 @@ class ViewStream(webapp2.RequestHandler):
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
         stream = stream_key.get()
         images = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
+        subscribed = Subscriber().query(ndb.AND(Subscriber.email == users.get_current_user().email(), 
+										 Subscriber.stream == stream_key))
         template_values = { 'images' : images,
+        					'no_file_error' : self.request.get('no_file_error'),
+        					'subscribed' : subscribed,
                             'stream' : stream }
         template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
         self.response.write(template.render(template_values))
 
-    def post(self):
-    	upload = self.request.get('upload')   
-    	subscribe = self.request.get('subscribe')
-    	logging.info('Starting Main handler %s', subscribe)
-    	if subscribe == 'on':
-			logging.info('subscribe == on')
+
+class Upload(webapp2.RequestHandler):
+	def post(self):
+		image = Image()
+		image.comment = self.request.get('comment')
+		raw_image = self.request.get('img')
+		stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+		image_list = Image.query(Image.stream == stream_key).order(-Image.date).fetch()    
+		if raw_image:
+			image.image = images.resize(raw_image, 200, 200)
+			image.stream = stream_key
+			image.put()
+			time.sleep(1)
+			redirect_dict = { 'stream_id' : stream_key.urlsafe(),'no_file_error' : "" }
+		else:
+			redirect_dict = { 'stream_id' : stream_key.urlsafe(),'no_file_error' : "no file" }
+		self.redirect('/stream?' + urllib.urlencode( redirect_dict )) 
+
+
+class Subscribe(webapp2.RequestHandler):
+	def post(self):
+		stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+		# Check if s/he has already subscribed the stream
+		subscribed = Subscriber().query(ndb.AND(Subscriber.email == users.get_current_user().email(), 
+										 Subscriber.stream == stream_key))
+		if len(subscribed.fetch()):
+			for sub in subscribed.fetch():
+				sub.key.delete()
+		else:
 			subscriber = Subscriber()
 			subscriber.email = users.get_current_user().email()
 			subscriber.stream = ndb.Key(urlsafe = self.request.get('stream_id')).get().key
 			subscriber.put()
-			self.redirect('/stream?' + urllib.urlencode( { 'stream_id' : subscriber.stream.urlsafe() })) 
-    	if upload == 'on':
-    		logging.info('upload == on')
-	        image = Image()
-	        image.comment = self.request.get('comment')
-	        raw_image = self.request.get('img')
-	        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
-	        image_list = Image.query(Image.stream == stream_key).order(-Image.date).fetch()    
-	        if raw_image:
-	        	image.image = images.resize(raw_image, 200, 200)
-		        image.stream = stream_key
-
-		        image.put()
-		        time.sleep(1)
-		        template_values = { 'images' : image_list,
-	                            	'stream' : stream_key.get() }
-	        else:
-		        template_values = { 'images' : image_list,
-		        					'no_file_error' : "no file",        					
-	                            	'stream' : stream_key.get() }
-	    
-	        template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
-	        self.response.write(template.render(template_values))
-
-		
+		time.sleep(1)
+		self.redirect('/stream?' + urllib.urlencode({ 'stream_id' : stream_key.urlsafe() }))
 
 		
 class ViewAll(webapp2.RequestHandler):
@@ -180,6 +189,16 @@ class ViewAll(webapp2.RequestHandler):
 class Search(webapp2.RequestHandler):
 	def get(self):
 		template_values = {}
+		template = JINJA_ENVIRONMENT.get_template('/templates/search.html')
+		self.response.write(template.render(template_values))
+	def post(self):
+		keyword = self.request.get('search')
+		result = []
+		streams = Stream().query().order(-Stream.last_update_time).fetch()
+		for stream in streams:
+			if keyword in stream.name:
+				result.append(stream)
+		template_values = {'result' : result }
 		template = JINJA_ENVIRONMENT.get_template('/templates/search.html')
 		self.response.write(template.render(template_values))
 		
@@ -206,8 +225,11 @@ app = webapp2.WSGIApplication([
     ('/', MainPage),
 	('/manage', Manage),
 	('/deleteStream', DeleteStream),
+	('/unsubscribe', Unsubscribe),
 	('/create', Create),
 	('/stream', ViewStream),
+	('/upload', Upload),
+	('/subscribe', Subscribe),
 	('/view_all', ViewAll),
 	('/search', Search),
 	('/trending', Trending),
