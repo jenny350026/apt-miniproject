@@ -74,7 +74,7 @@ class Manage(webapp2.RequestHandler):
     def get(self):
         # query all streams that the user owns, updates the last_update_time and num_pictures in the stream
         # TODO possibly sort stream by created time
-        streams = Stream().query(Stream.author_email == users.get_current_user().email())
+        streams = Stream().query(Stream.author_email == users.get_current_user().email()).order(Stream.create_time)
         for stream in streams:
             self.update_last_update_time(stream)
             self.update_num_picture(stream)
