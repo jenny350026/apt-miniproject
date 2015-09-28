@@ -12,8 +12,8 @@
 		<tr>
 		{% for stream in streams %}
 		<tr>
-			<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&q=on">{{ stream.name }}</a></td>
-			<td>{{ stream.last_update_time }}</td>
+			<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true">{{ stream.name }}</a></td>
+			<td>{{ stream.last_update_time.strftime("%Y-%m-%d %I:%M:%S %p") }}</td>
 			<td>{{ stream.num_picture }}</td>
 			<td><input type="checkbox" name="{{ stream.name }}"</td>
 		<tr>
@@ -30,10 +30,10 @@
 		<tr>
 		{% for subscription in subscribed %}	
 		<tr>
-			<td>{{ subscription.stream.get().name }}</td>
-			<td>{{ subscription.stream.get().last_update_time }}</td>
+			<td><a href="/stream?stream_id={{ subscription.stream.urlsafe() }}&view=true">{{ subscription.stream.get().name }}</a></td>
+			<td>{{ subscription.stream.get().last_update_time.strftime("%Y-%m-%d %I:%M:%S %p")}}</td>
 			<td>{{ subscription.stream.get().num_picture }}</td>
-			<td>{{ view_count_list[loop.index0] }}</td>
+			<td>{{ subscription.stream.get().view_count }}</td>
 			<td><input type="checkbox" name="{{ subscription.stream.get().name }}"</td>
 		<tr>
 		{% endfor %}
