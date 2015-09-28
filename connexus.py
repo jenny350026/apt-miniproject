@@ -29,7 +29,7 @@ class Stream(ndb.Model):
     create_time = ndb.DateTimeProperty(auto_now_add = True)
     last_update_time = ndb.DateTimeProperty()
     num_picture = ndb.IntegerProperty(indexed = False)
-    view_count = ndb.IntegerProperty(indexed = False)
+    view_count = ndb.IntegerProperty()
 
 class Image(ndb.Model):
     stream = ndb.KeyProperty(kind = Stream)
@@ -106,6 +106,7 @@ class Manage(webapp2.RequestHandler):
 class DeleteStream(webapp2.RequestHandler):
     def post(self):
         streams = Stream().query(Stream.author_email == users.get_current_user().email())
+        #TODO delete relevent Views and Images and Subscribers
         for stream in streams:
             stream_name = self.request.get(stream.name)
             if stream_name and stream_name == 'on':
@@ -135,23 +136,25 @@ class Create(webapp2.RequestHandler):
             stream.cover_url = self.request.get('cover_url')
             stream.put()
 
-            for email in re.split('\s*,\s*', self.request.get('receipients')):
+            email_list = [email for email in re.split('\s*,\s*', self.request.get('receipients')) if email]
+            for email in email_list:
                 subscriber = Subscriber()
                 subscriber.stream = stream.key
                 subscriber.email = email
                 subscriber.put()
 
             # send email to subscribers 
-            owner_message = self.reqeuset.get('message')
-            mail.send_mail( sender = stream.author_email,
-                            to = self.request.get('receipients'),
-                            subject = "You are now subscribed to " + stream.name + "stream on Connexus!",
-                            body = """
+            if len(email_list) > 0:
+                owner_message = self.request.get('message')
+                mail.send_mail( sender = stream.author_email,
+                                to = ','.join(email_list),
+                                subject = "You are now subscribed to " + stream.name + "stream on Connexus!",
+                                body = """
 You are now subscribed to %s stream on Connexus! 
 Message from the stream owner: 
 %s
 
-Connexus: http://apt-miniproject-1078.appspot.com/""" % (stream.name, owner_message))
+Connexus: http://apt-miniproject-1078.appspot.com/streams?stream_id=%s""" % (stream.name, owner_message, stream.key.urlsafe()))
             
             self.redirect('/stream?' + urllib.urlencode( { 'stream_id' : stream.key.urlsafe() }))
 
@@ -242,7 +245,8 @@ class Search(webapp2.RequestHandler):
         
 class Trending(webapp2.RequestHandler):
     def get(self):
-        template_values = {}
+        streams = Stream.query().order(-Stream.view_count).fetch()
+        template_values = { 'streams' : streams }
         template = JINJA_ENVIRONMENT.get_template('/templates/trending.html')
         self.response.write(template.render(template_values))
         

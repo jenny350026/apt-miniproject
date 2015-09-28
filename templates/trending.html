@@ -1,10 +1,12 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
-<h2>Top # Trending Streams</h2>
+<h2>Top {{ streams | length }} Trending Streams</h2>
 <div>
-	<img src="/img?img_id=cover_image_id"></img>
-	<p># views in past hour</p>
+    {% for stream in streams %}
+    <a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
+	<p>{{ streams.view_count }} views in past hour</p>
+    {% endfor %}
 </div>
 <form>
 <p>Email trending report</p>
