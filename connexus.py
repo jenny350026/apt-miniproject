@@ -148,7 +148,7 @@ class Create(webapp2.RequestHandler):
                 owner_message = self.request.get('message')
                 mail.send_mail( sender = stream.author_email,
                                 to = ','.join(email_list),
-                                subject = "You are now subscribed to " + stream.name + "stream on Connexus!",
+                                subject = "You are now subscribed to " + stream.name + " stream on Connexus!",
                                 body = """
 You are now subscribed to %s stream on Connexus! 
 Message from the stream owner: 
@@ -245,7 +245,7 @@ class Search(webapp2.RequestHandler):
         
 class Trending(webapp2.RequestHandler):
     def get(self):
-        streams = Stream.query().order(-Stream.view_count).fetch()
+        streams = Stream.query(Stream.view_count != None).order(-Stream.view_count).fetch()
         template_values = { 'streams' : streams }
         template = JINJA_ENVIRONMENT.get_template('/templates/trending.html')
         self.response.write(template.render(template_values))

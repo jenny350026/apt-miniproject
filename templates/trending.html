@@ -2,12 +2,12 @@
 
 {% block content %}
 <h2>Top {{ streams | length }} Trending Streams</h2>
-<div>
-    {% for stream in streams %}
-    <a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
-	<p>{{ streams.view_count }} views in past hour</p>
-    {% endfor %}
-</div>
+{% for stream in streams %}
+    <div>
+        <a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
+    	<p>{{ stream.view_count }} views in past hour</p>
+    </div>
+{% endfor %}
 <form>
 <p>Email trending report</p>
 <div>
