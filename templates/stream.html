@@ -9,11 +9,15 @@
 </div>
 
 <form action="/upload?stream_id={{ stream.key.urlsafe() }}" enctype="multipart/form-data" method="post">
-	Add an Image
-    <div><input type="file" name="img"/></div>
-    <div><input type="text" name="comments" placeholder="Comments"></div>
-    {{ no_file_error }}
-    <div><input type="submit" value="Upload File"></div>
+    <div>
+    	Add an Image <br>
+        <input type="file" name="img"/> <br>
+        <input type="text" name="comments" placeholder="Comments"> <br>
+        {{ no_file_error }}
+    </div>
+    <div>
+        <input type="submit" value="Upload File">
+    </div>
 </form>
 
 <br>

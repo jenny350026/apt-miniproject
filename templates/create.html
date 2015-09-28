@@ -2,16 +2,25 @@
 
 {% block content %}
 <form action="/create?" method="post">
-	Name your stream
-	<div><input type="text" name="stream_name"></div>
-	Add subscribers
-	<div><textarea name="receipients" rows="3" cols = "30" placeholder="comma-separated email addresses"></textarea></div>
-	<div><textarea name="message" rows="5" cols = "30" placeholder="optional message for invite"></textarea></div>
-	Tag your stream
-	<div><textarea name="tags" rows="5" cols = "30" placeholder="comma-separated hashtags"></textarea></div>
-	URL to cover image
-	<div><input type="text" name="cover_url" placeholder="optional"></div>
+    <div>
+	Name your stream <br>
+	<input type="text" name="stream_name">
+    {{ no_name_error }}
+    </div>
+    <div>
+	Add subscribers <br>
+	<textarea name="receipients" rows="3" cols = "30" placeholder="comma-separated email addresses"></textarea> <br>
+    <textarea name="message" rows="5" cols = "30" placeholder="optional message for invite"></textarea>
+    </div>
+	<div>
+	Tag your stream <br>
+    <textarea name="tags" rows="5" cols = "30" placeholder="comma-separated hashtags"></textarea>
+    </div>
+	<div>
+	URL to cover image <br>
+    <input type="text" name="cover_url" placeholder="optional">
+    </div>
 	
-	<div><input type="submit" value="Create Stream"></div>
+	<input type="submit" value="Create Stream">
 <form>
 {% endblock %}

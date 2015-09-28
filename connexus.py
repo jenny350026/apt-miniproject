@@ -71,12 +71,14 @@ class MainPage(webapp2.RequestHandler):
         
 class Manage(webapp2.RequestHandler):
     def get(self):
+        # query all streams that the user owns, updates the last_update_time and num_pictures in the stream
         streams = Stream().query(Stream.author_email == users.get_current_user().email())
         for stream in streams:
             self.update_last_update_time(stream)
             self.update_num_picture(stream)
             stream.put()
 
+        # query all streams that the user subscribed to, updates the last_update_time, num_pictures in the stream, and view_count for the stream
         subscribed = Subscriber().query(Subscriber.email == users.get_current_user().email())
         view_count_list = []
         for sub in subscribed:        
@@ -94,6 +96,7 @@ class Manage(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('/templates/manage.html')
         self.response.write(template.render(template_values))
 
+    # helper functions
     def update_last_update_time(self, stream):
        update_time = Image.query(Image.stream == stream.key).order(-Image.date).fetch(1)
        if len(update_time) > 0:
@@ -114,6 +117,10 @@ class DeleteStream(webapp2.RequestHandler):
         for stream in streams:
             stream_name = self.request.get(stream.name)
             if stream_name and stream_name == 'on':
+                # delete all Subcriber entries to the stream
+                ndb.delete_multi(map(lambda x:x.key, Subscriber.query(Subscriber.stream == stream.key).fetch()))
+                ndb.delete_multi(map(lambda x:x.key, View.query(View.stream == stream.key).fetch()))
+                ndb.delete_multi(map(lambda x:x.key, Image.query(Image.stream == stream.key).fetch()))
                 stream.key.delete()
         time.sleep(1)
         self.redirect('/manage') 
@@ -129,8 +136,13 @@ class Unsubscribe(webapp2.RequestHandler):
 
 class Create(webapp2.RequestHandler):
     def post(self):
+        # if a stream_name is not given, return to /create with error mesage
+        if len(self.request.get('stream_name')) == 0:
+            template = JINJA_ENVIRONMENT.get_template('/templates/create.html')
+            self.response.write(template.render({ 'no_name_error' : "stream name required" }))
+
         # if a stream with the same name exists, go to error page
-        if( len(Stream.query(Stream.name == self.request.get('stream_name')).fetch()) > 0):
+        elif len(Stream.query(Stream.name == self.request.get('stream_name')).fetch()) > 0:
             self.redirect('/error')
         else:
             stream = Stream()
@@ -160,6 +172,7 @@ Message from the stream owner:
 
 Connexus: http://apt-miniproject-1078.appspot.com/stream?stream_id=%s""" % (stream.name, owner_message, stream.key.urlsafe()))
 
+            time.sleep(1)
             self.redirect('/manage')
 
     def get(self):
@@ -171,10 +184,14 @@ class ViewStream(webapp2.RequestHandler):
     def get(self):
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
         stream = stream_key.get()
-        images = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
-        subscribed = Subscriber().query(ndb.AND(Subscriber.email == users.get_current_user().email(), 
-                                         Subscriber.stream == stream_key))
 
+        # query all images in the current stream
+        images = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
+        subscribed = Subscriber().query(ndb.AND(
+                                            Subscriber.email == users.get_current_user().email(), 
+                                            Subscriber.stream == stream_key))
+
+        # add a new View entry for counting trending streams
         view = self.request.get('view')
         if view:
             v = View()
@@ -256,8 +273,8 @@ class Search(webapp2.RequestHandler):
 class Trending(webapp2.RequestHandler):
     def get(self):
         streams = Stream.query(Stream.view_count != None).order(-Stream.view_count).fetch()
-        # TODO get digest options
-        # look in database, if no setting yet for user, select no report, otherwise select the current user option
+
+        # if no setting yet for user, select no report, otherwise select the current user option
         user_option = UserOption.query(UserOption.user == users.get_current_user()).fetch()
         if len(user_option) == 0:
             user_option = UserOption()
@@ -279,6 +296,7 @@ class Trending(webapp2.RequestHandler):
         if len(user_option) > 0:
             user_option[0].option = frequency
             user_option[0].put()
+        # else actually should not be reach
         else:
             user_option = UserOption()
             user_option.user = users.get_current_user()
@@ -303,6 +321,7 @@ class GetImage(webapp2.RequestHandler):
 
 class UpdateTrending(webapp2.RequestHandler):
     def get(self):
+        # TODO should be updating trending_view_count not total
         views_within_one_hour = View.query(View.time >= (datetime.now() - timedelta(hours=1)))
         streams = map(lambda x:x.stream, views_within_one_hour.fetch())
         stream_count = Counter(streams).most_common(5)
@@ -313,15 +332,17 @@ class UpdateTrending(webapp2.RequestHandler):
 
 class EmailTrending(webapp2.RequestHandler):
     def get(self):
-        frequency = self.request.get('frequency')
-        # TODO send trending digest email here
+        # query all user with the specified frequency option
+        frequency = int(self.request.get('frequency'))
+        email_list = map(lambda x:x.user.email(), UserOption.query(UserOption.option == frequency).fetch())
 
-        mail.send_mail(sender = 'trending@apt-miniproject-1078.appspotmail.com',
-                                to = 'jenny350026@hotmail.com',
-                                subject = 'testing email trending',
-                                body = """
-I'm just testing email trending. The frequency is %s""" % (frequency))
-        
+        # send email if the list is not empty
+        if len(email_list) > 0:
+            mail.send_mail(sender = 'trending@apt-miniproject-1078.appspotmail.com',
+                                    to = ",".join(email_list),
+                                    subject = 'Top trending streams on apt-miniproject-1078.appspotmail.com',
+                                    body = """
+apt-miniproject-1078.appspot.com/trending""")
         
         
 app = webapp2.WSGIApplication([
