@@ -12,7 +12,10 @@ handlers:
   script: connexus.app
 - url: /tasks/update_trending
   script: connexus.app
-  login: optional
+  login: admin
+- url: /tasks/email_trending
+  script: connexus.app
+  login: admin
 - url: /.*
   script: connexus.app
   login: required

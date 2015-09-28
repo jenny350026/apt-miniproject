@@ -8,25 +8,25 @@
     	<p>{{ stream.view_count }} views in past hour</p>
     </div>
 {% endfor %}
-<form>
+<form action="/trending?" method="post">
 <p>Email trending report</p>
 <div>
-	<input type="radio" name="email_frequency" id="noreports" value="noreports"/>
+	<input type="radio" name="email_frequency" id="noreports" value="0" {% if user_option.option == 0 %} checked {% endif %}/>
 	<label for="noreports">No reports</label>
 </div>
 
 <div>
-	<input type="radio" name="email_frequency" id="every5min" value="every5min"/>
+	<input type="radio" name="email_frequency" id="every5min" value="5" {% if user_option.option == 5 %} checked {% endif %}/>
 	<label for="every5min">Every 5 minutes</label>
 </div>
 
 <div>
-	<input type="radio" name="email_frequency" id="everyhour" value="everyhour"/>
+	<input type="radio" name="email_frequency" id="everyhour" value="60" {% if user_option.option == 60 %} checked {% endif %}/>
 	<label for="everyhour">Every 1 hour</label>
 </div>
 
 <div>
-	<input type="radio" name="email_frequency" id="everyday" value="everyday"/>
+	<input type="radio" name="email_frequency" id="everyday" value="1440" {% if user_option.option == 1440 %} checked {% endif %}/>
 	<label for="everyday">Every day</label>
 </div>
 <input type="submit" value="Update Rate">

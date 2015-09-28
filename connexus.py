@@ -44,6 +44,10 @@ class Subscriber(ndb.Model):
 class View(ndb.Model):
     stream = ndb.KeyProperty(kind = Stream)
     time = ndb.DateTimeProperty(auto_now_add = True)
+
+class UserOption(ndb.Model):
+    user = ndb.UserProperty()
+    option = ndb.IntegerProperty()
     
 class MainPage(webapp2.RequestHandler):
     def get(self):
@@ -155,8 +159,7 @@ Message from the stream owner:
 %s
 
 Connexus: http://apt-miniproject-1078.appspot.com/stream?stream_id=%s""" % (stream.name, owner_message, stream.key.urlsafe()))
-            
-            # self.redirect('/stream?' + urllib.urlencode( { 'stream_id' : stream.key.urlsafe() }))
+
             self.redirect('/manage')
 
     def get(self):
@@ -228,7 +231,7 @@ class Subscribe(webapp2.RequestHandler):
         
 class ViewAll(webapp2.RequestHandler):
     def get(self):
-        # TODO possibly in increasing create_time according to instruction
+        # TODO possibly order in increasing create_time according to instruction
         template_values = { 'streams' : Stream.query().order(-Stream.create_time) }
         template = JINJA_ENVIRONMENT.get_template('/templates/view.html')
         self.response.write(template.render(template_values))
@@ -253,16 +256,38 @@ class Search(webapp2.RequestHandler):
 class Trending(webapp2.RequestHandler):
     def get(self):
         streams = Stream.query(Stream.view_count != None).order(-Stream.view_count).fetch()
-        template_values = { 'streams' : streams }
-        template = JINJA_ENVIRONMENT.get_template('/templates/trending.html')
-        self.response.write(template.render(template_values))
         # TODO get digest options
         # look in database, if no setting yet for user, select no report, otherwise select the current user option
+        user_option = UserOption.query(UserOption.user == users.get_current_user()).fetch()
+        if len(user_option) == 0:
+            user_option = UserOption()
+            user_option.user = users.get_current_user()
+            user_option.option = 0
+            user_option.put()
+        else:
+            user_option = user_option[0]
+
+        template_values = { 'streams' : streams,
+                            'user_option' : user_option }
+        template = JINJA_ENVIRONMENT.get_template('/templates/trending.html')
+        self.response.write(template.render(template_values))
 
     def post(self):
-        # TODO set digest options
+        frequency = int(self.request.get('email_frequency'))
+        user_option = UserOption.query(UserOption.user == users.get_current_user()).fetch()
 
-        self.response.write(template.render({}))
+        if len(user_option) > 0:
+            user_option[0].option = frequency
+            user_option[0].put()
+        else:
+            user_option = UserOption()
+            user_option.user = users.get_current_user()
+            user_option.option = frequency
+            user_option.put()
+        
+        time.sleep(1)
+        self.redirect('/trending')
+        
         
 class Error(webapp2.RequestHandler):
     def get(self):
@@ -286,7 +311,17 @@ class UpdateTrending(webapp2.RequestHandler):
             stream.view_count = view_count
             stream.put()
 
+class EmailTrending(webapp2.RequestHandler):
+    def get(self):
+        frequency = self.request.get('frequency')
         # TODO send trending digest email here
+
+        mail.send_mail(sender = 'trending@apt-miniproject-1078.appspotmail.com',
+                                to = 'jenny350026@hotmail.com',
+                                subject = 'testing email trending',
+                                body = """
+I'm just testing email trending. The frequency is %s""" % (frequency))
+        
         
         
 app = webapp2.WSGIApplication([
@@ -303,6 +338,7 @@ app = webapp2.WSGIApplication([
     ('/trending', Trending),
     ('/error', Error),
     ('/img', GetImage),
-    ('/tasks/update_trending', UpdateTrending)
+    ('/tasks/update_trending', UpdateTrending),
+    ('/tasks/email_trending', EmailTrending)
     
 ], debug=True)
