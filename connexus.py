@@ -30,6 +30,7 @@ class Stream(ndb.Model):
     last_update_time = ndb.DateTimeProperty()
     num_picture = ndb.IntegerProperty(indexed = False)
     view_count = ndb.IntegerProperty()
+    trending_view_count = ndb.IntegerProperty()
 
 class Image(ndb.Model):
     stream = ndb.KeyProperty(kind = Stream)
@@ -72,6 +73,7 @@ class MainPage(webapp2.RequestHandler):
 class Manage(webapp2.RequestHandler):
     def get(self):
         # query all streams that the user owns, updates the last_update_time and num_pictures in the stream
+        # TODO possibly sort stream by created time
         streams = Stream().query(Stream.author_email == users.get_current_user().email())
         for stream in streams:
             self.update_last_update_time(stream)
@@ -189,11 +191,12 @@ class ViewStream(webapp2.RequestHandler):
         images = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
         subscribed = Subscriber().query(ndb.AND(
                                             Subscriber.email == users.get_current_user().email(), 
-                                            Subscriber.stream == stream_key))
+                                            Subscriber.stream == stream_key)).fetch()
 
-        # add a new View entry for counting trending streams
+        # add a new View entry to record number of views, owner view does not count
         view = self.request.get('view')
-        if view:
+        is_owner = stream.author_email == users.get_current_user().email()
+        if view and not is_owner:
             v = View()
             v.stream = stream_key
             v.put()
@@ -201,12 +204,13 @@ class ViewStream(webapp2.RequestHandler):
         template_values = { 'images' : images,
                             'no_file_error' : self.request.get('no_file_error'),
                             'subscribed' : subscribed,
-                            'stream' : stream }
+                            'stream' : stream,
+                            'is_owner': is_owner }
         template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
         self.response.write(template.render(template_values))
 
     def post(self):
-        # TODO possibly define action for "more picture" button
+        # TODO define action for "more picture" button
         self.response.write(template.render({}))
 
 
@@ -272,7 +276,7 @@ class Search(webapp2.RequestHandler):
         
 class Trending(webapp2.RequestHandler):
     def get(self):
-        streams = Stream.query(Stream.view_count != None).order(-Stream.view_count).fetch()
+        streams = Stream.query(Stream.trending_view_count != None).order(-Stream.trending_view_count).fetch()
 
         # if no setting yet for user, select no report, otherwise select the current user option
         user_option = UserOption.query(UserOption.user == users.get_current_user()).fetch()
@@ -322,12 +326,13 @@ class GetImage(webapp2.RequestHandler):
 class UpdateTrending(webapp2.RequestHandler):
     def get(self):
         # TODO should be updating trending_view_count not total
+        # TODO need to set other streams to 0
         views_within_one_hour = View.query(View.time >= (datetime.now() - timedelta(hours=1)))
         streams = map(lambda x:x.stream, views_within_one_hour.fetch())
         stream_count = Counter(streams).most_common(5)
-        for stream_key, view_count in stream_count:
+        for stream_key, trending_view_count in stream_count:
             stream = stream_key.get()
-            stream.view_count = view_count
+            stream.trending_view_count = trending_view_count
             stream.put()
 
 class EmailTrending(webapp2.RequestHandler):
