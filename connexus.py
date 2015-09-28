@@ -154,9 +154,10 @@ You are now subscribed to %s stream on Connexus!
 Message from the stream owner: 
 %s
 
-Connexus: http://apt-miniproject-1078.appspot.com/streams?stream_id=%s""" % (stream.name, owner_message, stream.key.urlsafe()))
+Connexus: http://apt-miniproject-1078.appspot.com/stream?stream_id=%s""" % (stream.name, owner_message, stream.key.urlsafe()))
             
-            self.redirect('/stream?' + urllib.urlencode( { 'stream_id' : stream.key.urlsafe() }))
+            # self.redirect('/stream?' + urllib.urlencode( { 'stream_id' : stream.key.urlsafe() }))
+            self.redirect('/manage')
 
     def get(self):
         template_values = {}
@@ -183,6 +184,10 @@ class ViewStream(webapp2.RequestHandler):
                             'stream' : stream }
         template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
         self.response.write(template.render(template_values))
+
+    def post(self):
+        # TODO possibly define action for "more picture" button
+        self.response.write(template.render({}))
 
 
 class Upload(webapp2.RequestHandler):
@@ -223,6 +228,7 @@ class Subscribe(webapp2.RequestHandler):
         
 class ViewAll(webapp2.RequestHandler):
     def get(self):
+        # TODO possibly in increasing create_time according to instruction
         template_values = { 'streams' : Stream.query().order(-Stream.create_time) }
         template = JINJA_ENVIRONMENT.get_template('/templates/view.html')
         self.response.write(template.render(template_values))
@@ -236,6 +242,7 @@ class Search(webapp2.RequestHandler):
         keyword = self.request.get('search')
         result = []
         streams = Stream().query().order(-Stream.last_update_time).fetch()
+        # TODO possibly improve search with tags etc.
         for stream in streams:
             if keyword in stream.name:
                 result.append(stream)
@@ -249,6 +256,13 @@ class Trending(webapp2.RequestHandler):
         template_values = { 'streams' : streams }
         template = JINJA_ENVIRONMENT.get_template('/templates/trending.html')
         self.response.write(template.render(template_values))
+        # TODO get digest options
+        # look in database, if no setting yet for user, select no report, otherwise select the current user option
+
+    def post(self):
+        # TODO set digest options
+
+        self.response.write(template.render({}))
         
 class Error(webapp2.RequestHandler):
     def get(self):
@@ -271,8 +285,8 @@ class UpdateTrending(webapp2.RequestHandler):
             stream = stream_key.get()
             stream.view_count = view_count
             stream.put()
-        self.response.out.write("p")
-            
+
+        # TODO send trending digest email here
         
         
 app = webapp2.WSGIApplication([
