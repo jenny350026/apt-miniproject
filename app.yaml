@@ -10,9 +10,11 @@ handlers:
   upload: favicon\.ico
 - url: /
   script: connexus.app
-- url: /(.*)
+- url: /((?!tasks).*)
   script: connexus.app
   login: required
+- url: /tasks/update_trending
+  script: connexus.app
 
 libraries:
 - name: webapp2

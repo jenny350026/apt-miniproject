@@ -1,0 +1,4 @@
+cron:
+- description: update trending every 5 minutes
+  url: /tasks/update_trending
+  schedule: every 5 minutes

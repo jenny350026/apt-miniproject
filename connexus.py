@@ -3,6 +3,9 @@ from google.appengine.ext import ndb
 from google.appengine.api import mail
 from google.appengine.api import images
 
+from collections import Counter
+from datetime import datetime, timedelta
+
 import logging
 import jinja2
 import webapp2
@@ -10,6 +13,7 @@ import urllib
 import os
 import re
 import time
+
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader = jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -138,6 +142,7 @@ class Create(webapp2.RequestHandler):
                 subscriber.put()
 
             # send email to subscribers 
+            owner_message = self.reqeuset.get('message')
             mail.send_mail( sender = stream.author_email,
                             to = self.request.get('receipients'),
                             subject = "You are now subscribed to " + stream.name + "stream on Connexus!",
@@ -146,7 +151,7 @@ You are now subscribed to %s stream on Connexus!
 Message from the stream owner: 
 %s
 
-Connexus: http://apt-miniproject-1078.appspot.com/""" % (stream.name, self.request.get('comment')))
+Connexus: http://apt-miniproject-1078.appspot.com/""" % (stream.name, owner_message))
             
             self.redirect('/stream?' + urllib.urlencode( { 'stream_id' : stream.key.urlsafe() }))
 
@@ -252,6 +257,18 @@ class GetImage(webapp2.RequestHandler):
         image = ndb.Key(urlsafe=self.request.get('img_id')).get()
         self.response.headers['Content-Type'] = 'image/png'
         self.response.out.write(image.image)
+
+class UpdateTrending(webapp2.RequestHandler):
+    def get(self):
+        views_within_one_hour = View.query(View.time >= (datetime.now() - timedelta(hours=1)))
+        streams = map(lambda x:x.stream, views_within_one_hour.fetch())
+        stream_count = Counter(streams).most_common(5)
+        for stream_key, view_count in stream_count:
+            stream = stream_key.get()
+            stream.view_count = view_count
+            stream.put()
+        self.response.out.write("p")
+            
         
         
 app = webapp2.WSGIApplication([
@@ -267,6 +284,7 @@ app = webapp2.WSGIApplication([
     ('/search', Search),
     ('/trending', Trending),
     ('/error', Error),
-    ('/img', GetImage)
+    ('/img', GetImage),
+    ('/tasks/update_trending', UpdateTrending)
     
 ], debug=True)
