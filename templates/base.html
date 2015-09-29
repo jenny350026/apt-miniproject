@@ -4,24 +4,24 @@
   <head>
 	<title>Connexus</title>
   </head>
-  <body>
+  
 	{% block header %}
 	<h1><a href="/">Connex.us</a></h1>
-	<ul style="list-style: none;">
-		<li><a href="/manage">Manage</a></li>
-		<li><a href="/create">Create</a></li>
-		<li><a href="/view_all">View</a></li>
-		<li><a href="/search">Search</a></li>
-		<li><a href="/trending">Trending</a></li>
-		<li><a href="">Social</a></li>
+	<table>
+		<td><a href="/manage">Manage</a></td>
+		<td><a href="/create">Create</a></td>
+		<td><a href="/view_all">View</a></td>
+		<td><a href="/search">Search</a></td>
+		<td><a href="/trending">Trending</a></td>
+		<td><a href="">Social</a></td>
 		{% if logged_in == true %}
-		<li><a href="{{ url|safe }}">{{ url_linktext }}</a></li>
+		<td><a href="{{ url|safe }}">{{ url_linktext }}</a></td>
 		{% endif %}
-	</ul>
+	</table>
 	{% endblock %}
 	
 	{% block content %}
 	{% endblock %}
-  </body>
+  
 </html>
 {% endautoescape %}
