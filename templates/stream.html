@@ -1,6 +1,7 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
+<h2>{{ stream.name }}</h2>
 <div>
     {% for image in images %}
 	    <img src="/img?img_id={{ image.key.urlsafe() }}"></img>

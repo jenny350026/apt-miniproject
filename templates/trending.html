@@ -5,7 +5,7 @@
 {% for stream in streams %}
     <div>
         <a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
-    	<p>{{ stream.trending_view_count }} views in past hour</p>
+    	<p>{{ stream.trending_view_count }} view{% if stream.trending_view_count > 1 %}s{% endif %} in past hour</p>
     </div>
 {% endfor %}
 <form action="/trending?" method="post">
