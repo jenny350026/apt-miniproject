@@ -182,47 +182,6 @@ Connexus: http://apt-miniproject-1078.appspot.com/stream?stream_id=%s""" % (stre
         
 class ViewStream(webapp2.RequestHandler):
     def get(self):
-        logging.debug("value of my var is %s", str(self.request.get('stream_id')))
-        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
-        start = self.request.get('start')
-        if start == "":
-            start = 0
-
-        stream = stream_key.get()
-
-        # query all images in the current stream
-        images = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
-        subscribed = Subscriber().query(ndb.AND(
-                                            Subscriber.email == users.get_current_user().email(), 
-                                            Subscriber.stream == stream_key)).fetch()
-
-
-        # add a new View entry to record number of views, owner view does not count
-        view = self.request.get('view')
-        is_owner = (stream.user == users.get_current_user())
-        if view and not is_owner:
-            v = View()
-            v.stream = stream_key
-            v.put()
-
-        if len(images) < (int(start) + 3):
-            end = len(images)
-        else:
-            end = int(start) + 3
-
-
-        stream_link = 'stream?stream_id=' + stream_key.urlsafe()
-        template_values = { 'images' : images[int(start):int(end)],
-                            'no_file_error' : self.request.get('no_file_error'),
-                            'start' : start,
-                            'share_link' : stream_link,
-                            'subscribed' : subscribed,
-                            'stream' : stream,
-                            'is_owner': is_owner }
-        template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
-        self.response.write(template.render(template_values))
-
-    def post(self):
         # TODO define action for "more picture" button
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
         next_start = self.request.get('next_start')        
@@ -264,6 +223,13 @@ class ViewStream(webapp2.RequestHandler):
                             'is_owner': is_owner }
         template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
         self.response.write(template.render(template_values))
+
+    def post(self):
+        next_start = self.request.get('next_start')        
+        if next_start == "" or next_start == None:
+            next_start = 0
+        redirect_dict = { 'stream_id' : self.request.get('stream_id'), 'next_start' : next_start }
+        self.redirect('/stream?' + urllib.urlencode( redirect_dict )) 
         
 
 
