@@ -306,7 +306,7 @@ class Search(webapp2.RequestHandler):
         
 class Trending(webapp2.RequestHandler):
     def get(self):
-        streams = Stream.query(Stream.trending_view_count != 0).order(-Stream.trending_view_count).fetch()
+        streams = Stream.query(ndb.AND(Stream.trending_view_count != 0, Stream.trending_view_count != None)).order(-Stream.trending_view_count).fetch(5)
 
         # if no setting yet for user, select no report, otherwise select the current user option
         user_option = UserOption.query(UserOption.user == users.get_current_user()).fetch()
@@ -369,11 +369,14 @@ class EmailTrending(webapp2.RequestHandler):
         # send email if the list is not empty
         # TODO change body 
         if len(email_list) > 0:
+            # first generate email body from template
+            template = JINJA_ENVIRONMENT.get_template('/templates/email_trending.html')
+            streams = Stream.query(ndb.AND(Stream.trending_view_count != 0, Stream.trending_view_count != None)).order(-Stream.trending_view_count).fetch(5)
             message = mail.EmailMessage(sender = 'Connexus-trending <trending@apt-miniproject-1078.appspotmail.com>',
                                         to = ','.join(email_list),
                                         subject = 'Top trending streams on Connexus')
-            message.html = """
-<html> <body> <h1>apt-miniproject-1078.appspot.com/trending</h> </body> </html>"""
+            message.html = template.render({'streams' : streams })
+
             message.send()
 
 class Social(webapp2.RequestHandler):
