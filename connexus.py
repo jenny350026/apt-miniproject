@@ -403,11 +403,12 @@ class EmailTrending(webapp2.RequestHandler):
         # send email if the list is not empty
         # TODO change body 
         if len(email_list) > 0:
-            mail.send_mail(sender = 'Connexus-trending <trending@apt-miniproject-1078.appspotmail.com>',
-                                    to = ",".join(email_list),
-                                    subject = 'Top trending streams on Connexus',
-                                    body = """
-<html> <body> <h1>apt-miniproject-1078.appspot.com/trending</h> </body> </html>""")
+            message = mail.EmailMessage(sender = 'Connexus-trending <trending@apt-miniproject-1078.appspotmail.com>',
+                                        to = ','.join(email_list),
+                                        subject = 'Top trending streams on Connexus')
+            message.html = """
+<html> <body> <h1>apt-miniproject-1078.appspot.com/trending</h> </body> </html>"""
+            message.send()
 
 class Social(webapp2.RequestHandler):
     def get(self):
