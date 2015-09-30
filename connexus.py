@@ -341,7 +341,7 @@ class EmailTrending(webapp2.RequestHandler):
                                     to = ",".join(email_list),
                                     subject = 'Top trending streams on Connexus',
                                     body = """
-apt-miniproject-1078.appspot.com/trending""")
+<html> <body> <h1>apt-miniproject-1078.appspot.com/trending</h> </body> </html>""")
         
         
 app = webapp2.WSGIApplication([
