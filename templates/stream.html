@@ -6,13 +6,28 @@
     {% for image in images %}
 	    <img src="/img?img_id={{ image.key.urlsafe() }}"></img>
     {% endfor %}
-	<input type="submit" value="More pictures">
+    <!-- Your share button code -->
+    <div class="fb-share-button" 
+        data-href={{ share_link }}
+        data-layout="button_count">
+    </div>
+    
+    <table>
+        <tr>
+            {% for tag in stream.tags %}
+            <td>#{{ tag }}</td>
+            {% endfor %}
+        </tr>
+    </table>
+    <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
+	   <input type="submit" value="More pictures">
+    </form>
 </div>
 
 <form action="/upload?stream_id={{ stream.key.urlsafe() }}" enctype="multipart/form-data" method="post">
     <div>
     	Add an Image <br>
-        <input type="file" name="img"/> <br>
+        <input type="file" name="img"> <br>
         <input type="text" name="comments" placeholder="Comments"> <br>
         {{ no_file_error }}
     </div>

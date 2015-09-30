@@ -16,7 +16,7 @@
 			<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true">{{ stream.name }}</a></td>
 			<td>{{ stream.last_update_time.strftime("%Y-%m-%d %I:%M:%S %p") }}</td>
 			<td>{{ stream.num_picture }}</td>
-			<td>{{ my_view_count_list[loop.index0] }}</td>
+			<td>{{ stream.view_count }}</td>
 			<td><input type="checkbox" name="{{ stream.name }}"</td>
 		<tr>
 		{% endfor%}

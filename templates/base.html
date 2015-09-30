@@ -4,7 +4,25 @@
   <head>
 	<title>Connexus</title>
   </head>
-  
+  <body>
+  	<div id="fb-root"></div>
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '834667199987269',
+          xfbml      : true,
+          version    : 'v2.4'
+        });
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
 	{% block header %}
 	<h1><a href="/">Connex.us</a></h1>
 	<table>
@@ -13,7 +31,7 @@
 		<td><a href="/view_all">View</a></td>
 		<td><a href="/search">Search</a></td>
 		<td><a href="/trending">Trending</a></td>
-		<td><a href="">Social</a></td>
+		<td><a href="/social">Social</a></td>
 		{% if logged_in == true %}
 		<td><a href="{{ url|safe }}">{{ url_linktext }}</a></td>
 		{% endif %}
@@ -22,6 +40,6 @@
 	
 	{% block content %}
 	{% endblock %}
-  
+  </body>
 </html>
 {% endautoescape %}
