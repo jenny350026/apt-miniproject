@@ -27,3 +27,8 @@ indexes:
   - name: stream.name
   - name: date
     direction: desc
+
+- kind: Stream
+  properties:
+  - name: user
+  - name: create_time

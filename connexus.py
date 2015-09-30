@@ -24,7 +24,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 class Stream(ndb.Model):
     user = ndb.UserProperty()
     name = ndb.StringProperty()
-    tag = ndb.StringProperty()
+    tags = ndb.StringProperty(repeated=True)
     cover_url = ndb.StringProperty()    
     create_time = ndb.DateTimeProperty(auto_now_add = True)
     last_update_time = ndb.DateTimeProperty()
@@ -81,7 +81,6 @@ class Manage(webapp2.RequestHandler):
 
         # query all streams that the user subscribed to, updates the last_update_time, num_pictures in the stream, and view_count for the stream
         subscribed = Subscriber().query(Subscriber.email == users.get_current_user().email())
-        view_count_list = []
         for sub in subscribed:        
             stream = sub.stream.get()
             self.update_last_update_time(stream)
@@ -148,7 +147,8 @@ class Create(webapp2.RequestHandler):
             stream = Stream()
             stream.user = users.get_current_user()
             stream.name = self.request.get('stream_name')
-            stream.tag = self.request.get('tags')
+            tags = self.request.get('tags')
+            stream.tags = [x.strip() for x in tags.split(',')]
             stream.cover_url = self.request.get('cover_url')
             stream.put()
 
@@ -182,7 +182,12 @@ Connexus: http://apt-miniproject-1078.appspot.com/stream?stream_id=%s""" % (stre
         
 class ViewStream(webapp2.RequestHandler):
     def get(self):
+        logging.debug("value of my var is %s", str(self.request.get('stream_id')))
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+        start = self.request.get('start')
+        if start == "":
+            start = 0
+
         stream = stream_key.get()
 
         # query all images in the current stream
@@ -190,6 +195,7 @@ class ViewStream(webapp2.RequestHandler):
         subscribed = Subscriber().query(ndb.AND(
                                             Subscriber.email == users.get_current_user().email(), 
                                             Subscriber.stream == stream_key)).fetch()
+
 
         # add a new View entry to record number of views, owner view does not count
         view = self.request.get('view')
@@ -199,8 +205,17 @@ class ViewStream(webapp2.RequestHandler):
             v.stream = stream_key
             v.put()
 
-        template_values = { 'images' : images,
+        if len(images) < (int(start) + 3):
+            end = len(images)
+        else:
+            end = int(start) + 3
+
+
+        stream_link = 'stream?stream_id=' + stream_key.urlsafe()
+        template_values = { 'images' : images[int(start):int(end)],
                             'no_file_error' : self.request.get('no_file_error'),
+                            'start' : start,
+                            'share_link' : stream_link,
                             'subscribed' : subscribed,
                             'stream' : stream,
                             'is_owner': is_owner }
@@ -209,7 +224,47 @@ class ViewStream(webapp2.RequestHandler):
 
     def post(self):
         # TODO define action for "more picture" button
-        self.response.write(template.render({}))
+        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+        next_start = self.request.get('next_start')        
+        if next_start == "" or next_start == None:
+            next_start = 0
+        start = int(next_start)
+        stream = stream_key.get()
+
+        # query all images in the current stream
+        images = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
+        subscribed = Subscriber().query(ndb.AND(
+                                            Subscriber.email == users.get_current_user().email(), 
+                                            Subscriber.stream == stream_key)).fetch()
+
+
+        # add a new View entry to record number of views, owner view does not count
+        view = self.request.get('view')
+        is_owner = (stream.user == users.get_current_user())
+        if view and not is_owner:
+            v = View()
+            v.stream = stream_key
+            v.put()
+
+        if len(images) < (start + 3):
+            end = len(images)
+            next_start = 0
+        else:
+            end = start + 3
+            next_start = end
+
+
+        stream_link = 'stream?stream_id=' + stream_key.urlsafe()
+        template_values = { 'images' : images[start:end],
+                            'no_file_error' : self.request.get('no_file_error'),
+                            'next_start' : next_start,
+                            'share_link' : stream_link,
+                            'subscribed' : subscribed,
+                            'stream' : stream,
+                            'is_owner': is_owner }
+        template = JINJA_ENVIRONMENT.get_template('/templates/stream.html')
+        self.response.write(template.render(template_values))
+        
 
 
 class Upload(webapp2.RequestHandler):
@@ -263,12 +318,23 @@ class Search(webapp2.RequestHandler):
     def post(self):
         keyword = self.request.get('search')
         result = []
-        streams = Stream().query().order(-Stream.last_update_time).fetch()
-        # TODO possibly improve search with tags etc.
-        for stream in streams:
-            if keyword in stream.name:
-                result.append(stream)
-        template_values = {'result' : result }
+        if keyword == "":
+            no_keyword = "on"
+        else:
+            no_keyword = "off"            
+            streams = Stream().query().order(-Stream.last_update_time).fetch()
+            # TODO possibly improve search with tags etc.
+            for stream in streams:
+                if keyword.lower() in stream.name.lower():
+                    result.append(stream)
+                else:
+                    for stream_tag in stream.tags:
+                        if keyword.lower() in stream_tag.lower():
+                            result.append(stream)
+
+
+        template_values = { 'result' : result,                            
+                            'no_keyword' : no_keyword }
         template = JINJA_ENVIRONMENT.get_template('/templates/search.html')
         self.response.write(template.render(template_values))
         
@@ -342,6 +408,13 @@ class EmailTrending(webapp2.RequestHandler):
                                     subject = 'Top trending streams on Connexus',
                                     body = """
 apt-miniproject-1078.appspot.com/trending""")
+
+class Social(webapp2.RequestHandler):
+    def get(self):
+        template_values = {}
+        template = JINJA_ENVIRONMENT.get_template('/templates/social.html')
+        self.response.write(template.render(template_values))
+
         
         
 app = webapp2.WSGIApplication([
@@ -359,6 +432,7 @@ app = webapp2.WSGIApplication([
     ('/error', Error),
     ('/img', GetImage),
     ('/tasks/update_trending', UpdateTrending),
-    ('/tasks/email_trending', EmailTrending)
+    ('/tasks/email_trending', EmailTrending),
+    ('/social', Social)
     
 ], debug=True)
