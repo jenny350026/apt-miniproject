@@ -1,49 +1,221 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
-<h2>{{ stream.name }}</h2>
-<div>
-    {% for image in images %}
-	    <img src="/img?img_id={{ image.key.urlsafe() }}"></img>
-    {% endfor %}
-    <!-- Your share button code -->
-    <div class="fb-share-button" 
-        data-href={{ share_link }}
-        data-layout="button_count">
+<script src="./dropzone/dist/dropzone.js"></script>
+<script>    
+    // "myAwesomeDropzone" is the camelized version of the HTML element's ID
+    Dropzone.options.myDropzone = {
+        paramName: "file", // The name that will be used to transfer the file
+        maxFilesize: 2, // MB
+        clickable: true,
+        addRemoveLinks: true,
+
+        accept: function(file, done) {
+            if (file.name == "justinbieber.jpg") {
+                done("Naha, you don't.");
+                alert("Added file.");
+            }
+            else { 
+                done("Excellent!");
+                alert("Added file.");
+            }
+        }
+    };
+</script>
+
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong> {{ stream.name }} </strong> 
+            by
+            <i style="font-size: medium;">{{ stream.user.email() }}</i>
+        </div>
+
+        <div class="panel-body">
+            {% if images %}
+                {% for image in images %}
+            	    <img src="/img?img_id={{ image.key.urlsafe() }}"></img>
+                {% endfor %}
+                <!-- Your share button code -->
+                <div class="fb-share-button" 
+                    data-href={{ share_link }}
+                    data-layout="button_count">
+                </div>
+            {% else %}
+                <div class="jumbotrom text-center">
+                    <h1>The sream is empty</h1>
+                </div>
+            {% endif %}
+            
+            <ul class="nav navbar-nav">
+                {% for tag in stream.tags %}
+                    <td>#{{ tag }}</td>
+                {% endfor %}
+            </ul>
+
+            <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
+        	   <button type="submit" class="btn btn-lg btn-primary">More Pictures</button>
+            </form>
+        </div>
     </div>
-    
-    <table>
-        <tr>
-            {% for tag in stream.tags %}
-            <td>#{{ tag }}</td>
-            {% endfor %}
-        </tr>
-    </table>
-    <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
-	   <input type="submit" value="More pictures">
-    </form>
+
+    <div class="panel panel-default">
+        {% if is_owner == true %}
+        <div class="panel-heading">Upload pictures to 
+            <strong> {{ stream.name }} </strong> 
+        </div>
+        {% else %}
+        <div class="panel-heading">
+            {% if subscribed | length %}    
+                Unsubscribe
+            {% else %}
+                Subscribe
+            {% endif %}
+            to <strong> {{ stream.name }} </strong> 
+        </div>
+        {% endif %}
+
+        <div class="panel-body">
+            {% if is_owner == true %}
+
+            <div id="actions" class="row">
+                <form action="/upload?stream_id={{ stream.key.urlsafe() }}" enctype="multipart/form-data" class="dropzone" method="post" id="my_dropzone">
+                    <div>
+                    	Add an Image <br>
+                        <!-- <input type="file" name="file"> <br> -->
+                        <input type="text" name="comments" placeholder="Comments"> <br>
+                        {{ no_file_error }}
+                    </div>
+
+                    <div class="col-lg-7">
+
+                        <span class="btn btn-success fileinput-button dz-clickable" type="file" name="files[]" multiple>
+                            <i class="glyphicon glyphicon-plus"></i>
+                            <span>Add files</span>
+                        </span>
+
+                        <button type="submit" class="btn btn-primary start">
+                            <i class="glyphicon glyphicon-upload"></i>
+                            <span>Start upload</span>
+                        </button>
+
+                        <button type="reset" class="btn btn-warning cancel">
+                            <i class="glyphicon glyphicon-ban-circle"></i>
+                            <span>Cancel upload</span>
+                        </button>
+
+                            <!-- The global file processing state -->
+                        <span class="fileupload-process"></span>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="btn btn-lg btn-primary">Upload File</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table table-striped" class="files" id="previews">
+
+              <div id="template" class="file-row">
+                <!-- This is used as the file preview template -->
+                <div>
+                    <span class="preview"><img data-dz-thumbnail /></span>
+                </div>
+                <div>
+                    <p class="name" data-dz-name></p>
+                    <strong class="error text-danger" data-dz-errormessage></strong>
+                </div>
+                <div>
+                    <p class="size" data-dz-size></p>
+                    <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                      <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+                    </div>
+                </div>
+
+                <div>
+
+                  <button class="btn btn-primary start">
+                      <i class="glyphicon glyphicon-upload"></i>
+                      <span>Start</span>
+                  </button>
+
+                  <button data-dz-remove class="btn btn-warning cancel">
+                      <i class="glyphicon glyphicon-ban-circle"></i>
+                      <span>Cancel</span>
+                  </button>
+                  <button data-dz-remove class="btn btn-danger delete">
+                    <i class="glyphicon glyphicon-trash"></i>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {% else %}
+
+            <form action="/subscribe?stream_id={{ stream.key.urlsafe() }}" method="post">                
+                <div><button type="submit" class="btn btn-lg btn-primary">
+                {% if subscribed | length %}    
+                    Unsubscribe
+                {% else %}
+                    Subscribe
+                {% endif %}
+                </button></div>                
+            </form>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
-<form action="/upload?stream_id={{ stream.key.urlsafe() }}" enctype="multipart/form-data" method="post">
-    <div>
-    	Add an Image <br>
-        <input type="file" name="img"> <br>
-        <input type="text" name="comments" placeholder="Comments"> <br>
-        {{ no_file_error }}
-    </div>
-    <div>
-        <input type="submit" value="Upload File">
-    </div>
-</form>
+<script>
+      // Get the template HTML and remove it from the doument
+      var previewNode = document.querySelector("#template");
+      previewNode.id = "";
+      var previewTemplate = previewNode.parentNode.innerHTML;
+      previewNode.parentNode.removeChild(previewNode);
 
-<br>
-{% if is_owner != true %}
-<form action="/subscribe?stream_id={{ stream.key.urlsafe() }}" method="post">
-    {% if subscribed | length %}
-        <div><input type="submit" value="Unsubscribe"></div>
-    {% else %}
-        <div><input type="submit" value="Subscribe"></div>
-    {% endif %}
-</form>
-{% endif %}
+      var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+        url: "http://www.torrentplease.com/dropzone.php", // Set the url
+        thumbnailWidth: 80,
+        thumbnailHeight: 80,
+        parallelUploads: 20,
+        previewTemplate: previewTemplate,
+        autoQueue: false, // Make sure the files aren't queued until manually added
+        previewsContainer: "#previews", // Define the container to display the previews
+        clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+      });
+
+      myDropzone.on("addedfile", function(file) {
+        // Hookup the start button
+        file.previewElement.querySelector(".start").onclick = function() { myDropzone.enqueueFile(file); };
+      });
+
+      // Update the total progress bar
+      myDropzone.on("totaluploadprogress", function(progress) {
+        document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
+      });
+
+      myDropzone.on("sending", function(file) {
+        // Show the total progress bar when upload starts
+        document.querySelector("#total-progress").style.opacity = "1";
+        // And disable the start button
+        file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
+      });
+
+      // Hide the total progress bar when nothing's uploading anymore
+      myDropzone.on("queuecomplete", function(progress) {
+        document.querySelector("#total-progress").style.opacity = "0";
+      });
+
+      // Setup the buttons for all transfers
+      // The "add files" button doesn't need to be setup because the config
+      // `clickable` has already been specified.
+      document.querySelector("#actions .start").onclick = function() {
+        myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
+      };
+      document.querySelector("#actions .cancel").onclick = function() {
+        myDropzone.removeAllFiles(true);
+      };
+</script>
 {% endblock %}

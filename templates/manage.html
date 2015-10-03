@@ -1,45 +1,84 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
-<h2>Streams I own</h2>
-<form action="/deleteStream" method="post">
-	<table>		
-		<tr>
-			<th>Name</th>
-			<th>Last New Picture</th>
-			<th>Number of Pictures</th>
-			<th>Views</th>
-			<th>Delete</th>
-		<tr>
-		{% for stream in streams %}
-		<tr>
-			<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true">{{ stream.name }}</a></td>
-			<td>{{ stream.last_update_time.strftime("%Y-%m-%d %I:%M:%S %p") }}</td>
-			<td>{{ stream.num_picture }}</td>
-			<td>{{ stream.view_count }}</td>
-			<td><input type="checkbox" name="{{ stream.name }}"</td>
-		<tr>
-		{% endfor%}
-	</table>
-	<input type="submit", value="Delete Checked">
-</form>
+<div class="container">
 
-<h2>Streams I subscribed to</h2>
-<form action="/unsubscribe" method="post">
-	<table>
-		<tr>
-			<th>Name</th><th>Last New Picture</th><th>Number of Pictures</th><th>Views</th><th>Unsubscribe</th>
-		<tr>
-		{% for subscription in subscribed %}	
-		<tr>
-			<td><a href="/stream?stream_id={{ subscription.stream.urlsafe() }}&view=true">{{ subscription.stream.get().name }}</a></td>
-			<td>{{ subscription.stream.get().last_update_time.strftime("%Y-%m-%d %I:%M:%S %p")}}</td>
-			<td>{{ subscription.stream.get().num_picture }}</td>
-			<td>{{ subscription.stream.get().view_count }}</td>
-			<td><input type="checkbox" name="{{ subscription.stream.get().name }}"</td>
-		<tr>
-		{% endfor %}
-	</table>
-	<input type="submit", value="Unsubscribe Checked Streams">
-</form>
+	<div class="panel panel-default">
+		<div class="panel-heading"><h1>Streams I own</h1></div>
+
+		<div class="panel-body">
+			<div class="row">
+				<form action="/deleteStream" method="post">
+					<div class="col-md-12">
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Name</th>
+									<th>Last New Picture</th>
+									<th>Number of Pictures</th>
+									<th>Views</th>
+									<th>Delete</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for stream in streams %}
+								<tr>
+									<td>{{ loop.index }}</td>
+									<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true">@{{ stream.name }}</a></td>
+									<td>{{ stream.last_update_time.strftime("%Y/%m/%d %I:%M %p") }}</td>
+									<td>{{ stream.num_picture }}</td>
+									<td>{{ stream.view_count }}</td>
+									<td><input type="checkbox" name="{{ stream.name }}"</td>
+								<tr>
+								{% endfor%}
+							</tbody>
+						</table>
+
+						<button type="submit" class="btn btn-lg btn-primary">Delete Checked</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading"><h1>Streams I subscribed to</h1></div>
+
+		<div class="panel-body">
+			<div class="row">
+				<form action="/unsubscribe" method="post">
+					<div class="col-md-12">
+						<table class="table table-condensed">
+				            <thead>
+				              <tr>
+				                <th>#</th>
+				                <th>Name</th>
+				                <th>Last New Picture</th>
+				                <th>Number of Pictures</th>
+				                <th>Views</th>
+				                <th>Unsubscribe</th>
+				              </tr>
+				            </thead>
+
+				            <tbody>
+				            	{% for subscription in subscribed %}	
+								<tr>
+									<td>{{ loop.index }}</td>
+									<td><a href="/stream?stream_id={{ subscription.stream.urlsafe() }}&view=true">{{ subscription.stream.get().name }}</a></td>
+									<td>{{ subscription.stream.get().last_update_time.strftime("%Y-%m-%d %I:%M:%S %p")}}</td>
+									<td>{{ subscription.stream.get().num_picture }}</td>
+									<td>{{ subscription.stream.get().view_count }}</td>
+									<td><input type="checkbox" name="{{ subscription.stream.get().name }}"</td>
+								<tr>
+								{% endfor %}
+				            </tbody>
+				          </table>
+				          <button type="submit" class="btn btn-lg btn-primary">Unsubscribe Checked Streams</button>
+				    </div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}

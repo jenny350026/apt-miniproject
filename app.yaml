@@ -16,6 +16,14 @@ handlers:
 - url: /tasks/email_trending
   script: connexus.app
   login: admin
+- url: /dropzone
+  static_dir: dropzone
+- url: /css
+  static_dir: css
+- url: /js
+  static_dir: js
+- url: /fonts
+  static_dir: fonts
 - url: /.*
   script: connexus.app
   login: required

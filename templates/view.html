@@ -1,15 +1,23 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
-<h2>View All Streams</h2>
-<table>
-    <tr>
-        {% for stream in streams %}
-        <td>
-    	    <a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
-            <div> {{ stream.name }} </div>
-        </td>
-        {% endfor %}
-    </tr>
-</table>
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading"><h1>View All Streams</h1></div>
+
+        <div class="panel-body">
+            <ul class="nav navbar-nav">
+                {% for stream in streams %}
+                <li><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
+                <div> {{ stream.name }} </div></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 {% endblock %}

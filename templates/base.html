@@ -2,9 +2,20 @@
 {% autoescape true %}
 <html lang="en">
   <head>
-	<title>Connexus</title>
+    <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+        <!-- Bootstrap -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom styles for this template -->
+        <link href="css/theme.css" rel="stylesheet">
+	 <title>Connexus</title>
   </head>
-  <body>
+
+  <body role="document">
   	<div id="fb-root"></div>
     <script>
       window.fbAsyncInit = function() {
@@ -25,22 +36,41 @@
        }(document, 'script', 'facebook-jssdk'));
     </script>
 	{% block header %}
-	<h1><a href="/">Connex.us</a></h1>
-	<table>
-		<td><a href="/manage">Manage</a></td>
-		<td><a href="/create">Create</a></td>
-		<td><a href="/view_all">View</a></td>
-		<td><a href="/search">Search</a></td>
-		<td><a href="/trending">Trending</a></td>
-		<td><a href="/social">Social</a></td>
-		{% if logged_in == true %}
-		<td><a href="{{ url|safe }}">{{ url_linktext }}</a></td>
-		{% endif %}
-	</table>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Connex.us</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+
+          <ul class="nav navbar-nav">
+            <li><a href="/manage">Manage</a></li>
+            <li><a href="/create">Create</a></li>
+            <li><a href="/view_all">View</a></li>
+            <li><a href="/search">Search</a></li>
+            <li><a href="/trending">Trending</a></li>
+            <li><a href="/social">Social</a></li>
+            {% if logged_in == true %}
+            <li><a href="{{ url|safe }}">{{ url_linktext }}</li>
+            {% endif %}
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
 	{% endblock %}
 	
 	{% block content %}
 	{% endblock %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
   </body>
 </html>
 {% endautoescape %}

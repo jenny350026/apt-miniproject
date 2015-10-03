@@ -1,26 +1,37 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
-<form action="/create?" method="post">
-    <div>
-	Name your stream <br>
-	<input type="text" name="stream_name">
-    {{ no_name_error }}
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading"><h1>Create new stream</h1></div>
+
+        <div class="panel-body">
+            <form action="/create?" method="post">
+                <div>
+                	Name your stream <br>
+                	<input type="text" name="stream_name">
+                    {{ no_name_error }}
+                </div>
+                <div>
+                	Add subscribers <br>
+                	<textarea name="receipients" rows="3" cols = "30" placeholder="comma-separated email addresses"></textarea> <br>
+                    <textarea name="message" rows="5" cols = "30" placeholder="optional message for invite"></textarea>
+                </div>
+            	<div>
+                	Tag your stream <br>
+                    <textarea name="tags" rows="5" cols = "30" placeholder="comma-separated hashtags"></textarea>
+                </div>
+            	<div>
+                	URL to cover image <br>
+                    <input type="text" name="cover_url" placeholder="optional">
+                </div>
+
+                <div>
+            	   <button type="submit" class="btn btn-lg btn-primary">Create Stream</button>
+                </div>
+            <form>
+        </div>
     </div>
-    <div>
-	Add subscribers <br>
-	<textarea name="receipients" rows="3" cols = "30" placeholder="comma-separated email addresses"></textarea> <br>
-    <textarea name="message" rows="5" cols = "30" placeholder="optional message for invite"></textarea>
-    </div>
-	<div>
-	Tag your stream <br>
-    <textarea name="tags" rows="5" cols = "30" placeholder="comma-separated hashtags"></textarea>
-    </div>
-	<div>
-	URL to cover image <br>
-    <input type="text" name="cover_url" placeholder="optional">
-    </div>
-	
-	<input type="submit" value="Create Stream">
-<form>
+</div>
+
 {% endblock %}

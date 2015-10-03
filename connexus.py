@@ -237,7 +237,7 @@ class Upload(webapp2.RequestHandler):
     def post(self):
         image = Image()
         image.comment = self.request.get('comment')
-        raw_image = self.request.get('img')
+        raw_image = self.request.get('file')
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
         image_list = Image.query(Image.stream == stream_key).order(-Image.date).fetch()    
         if raw_image:
