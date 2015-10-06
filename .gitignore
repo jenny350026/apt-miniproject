@@ -9,3 +9,10 @@
 !**/*.dat
 !**/*.html
 !**/*.yaml
+!bootstrap/*
+!dropzone/*
+!jquery/*
+!jquery-ui/*
+!jquery-ui-map/*
+!lightbox2/*
+
