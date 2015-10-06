@@ -18,12 +18,16 @@ handlers:
   login: admin
 - url: /dropzone
   static_dir: dropzone
-- url: /css
-  static_dir: css
-- url: /js
-  static_dir: js
-- url: /fonts
-  static_dir: fonts
+- url: /bootstrap
+  static_dir: bootstrap
+- url: /jquery-ui
+  static_dir: jquery-ui
+- url: /jquery-ui-map
+  static_dir: jquery-ui-map
+- url: /jquery
+  static_dir: jquery
+- url: /lightbox2
+  static_dir: lightbox2
 - url: /.*
   script: connexus.app
   login: required

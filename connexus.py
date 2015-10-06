@@ -13,6 +13,7 @@ import urllib
 import os
 import re
 import time
+import json
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -72,6 +73,7 @@ class MainPage(webapp2.RequestHandler):
         
 class Manage(webapp2.RequestHandler):
     def get(self):
+        logging.info('Starting Main handler')
         # query all streams that the user owns, updates the last_update_time and num_pictures in the stream
         streams = Stream().query(Stream.user == users.get_current_user()).order(Stream.create_time)
         for stream in streams:
@@ -235,13 +237,15 @@ class ViewStream(webapp2.RequestHandler):
 
 class Upload(webapp2.RequestHandler):
     def post(self):
+        logging.info('Upload file!')
         image = Image()
         image.comment = self.request.get('comment')
         raw_image = self.request.get('file')
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
         image_list = Image.query(Image.stream == stream_key).order(-Image.date).fetch()    
         if raw_image:
-            image.image = images.resize(raw_image, 200, 200)
+            # image.image = images.resize(raw_image, 400, 400)
+            image.image = raw_image
             image.stream = stream_key
             image.put()
             time.sleep(1)
@@ -267,6 +271,22 @@ class Subscribe(webapp2.RequestHandler):
             subscriber.put()
         time.sleep(1)
         self.redirect('/stream?' + urllib.urlencode({ 'stream_id' : stream_key.urlsafe() }))
+
+class SearchRequest(webapp2.RequestHandler):
+    def get(self):
+        term = self.request.get('term')
+        self.response.headers['Content-Type'] = 'application/json'   
+        # template_values = { 'streams' : Stream.query().order(-Stream.create_time) }
+        streams = Stream().query().order(-Stream.last_update_time).fetch()
+        # TODO possibly improve search with tags etc.
+        stream_dict = dict()
+        for stream in streams:
+            if term.lower() in stream.name.lower():
+                stream_dict[stream.name] = stream.name
+        obj = dict()
+        obj['stream_names'] = stream_dict
+
+        self.response.out.write(json.dumps(obj))
 
         
 class ViewAll(webapp2.RequestHandler):
@@ -339,7 +359,13 @@ class Trending(webapp2.RequestHandler):
         
         time.sleep(1)
         self.redirect('/trending')
-        
+class GeoView(webapp2.RequestHandler):
+    def get(self):
+        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+        stream = stream_key.get()
+        template_values = { 'stream' : stream }
+        template = JINJA_ENVIRONMENT.get_template('/templates/geoview.html')
+        self.response.write(template.render(template_values))        
         
 class Error(webapp2.RequestHandler):
     def get(self):
@@ -396,11 +422,13 @@ app = webapp2.WSGIApplication([
     ('/subscribe', Subscribe),
     ('/view_all', ViewAll),
     ('/search', Search),
+    ('/search_request', SearchRequest),
     ('/trending', Trending),
     ('/error', Error),
     ('/img', GetImage),
     ('/tasks/update_trending', UpdateTrending),
     ('/tasks/email_trending', EmailTrending),
+    ('/geoview', GeoView),
     ('/social', Social)
     
 ], debug=True)

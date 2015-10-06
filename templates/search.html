@@ -1,12 +1,15 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
-<form action="\search?" method="post">
+
+
+<!-- <form action="\search?" method="post">
     <div>
-    	<input type="text" name="search">
+    	<input type="text" name="search" id="query" placeholder="Type search keyword here" class="form-control ui-autocomplete-input" autocomplete="off">
         <button type="submit" class="btn btn-lg btn-primary">Search</button>
     </div>
-</form>
+</form> -->
+
 {% if no_keyword == "on" %}
 <div>
     Please enter a keyword.

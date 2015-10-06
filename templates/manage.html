@@ -1,49 +1,46 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
-<div class="container">
 
 	<div class="panel panel-default">
-		<div class="panel-heading"><h1>Streams I own</h1></div>
+		<div class="panel-heading">Streams I own</div>
 
 		<div class="panel-body">
-			<div class="row">
-				<form action="/deleteStream" method="post">
-					<div class="col-md-12">
-						<table class="table table-condensed">
-							<thead>
-								<tr>
-									<th>#</th>
-									<th>Name</th>
-									<th>Last New Picture</th>
-									<th>Number of Pictures</th>
-									<th>Views</th>
-									<th>Delete</th>
-								</tr>
-							</thead>
-							<tbody>
-								{% for stream in streams %}
-								<tr>
-									<td>{{ loop.index }}</td>
-									<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true">@{{ stream.name }}</a></td>
-									<td>{{ stream.last_update_time.strftime("%Y/%m/%d %I:%M %p") }}</td>
-									<td>{{ stream.num_picture }}</td>
-									<td>{{ stream.view_count }}</td>
-									<td><input type="checkbox" name="{{ stream.name }}"</td>
-								<tr>
-								{% endfor%}
-							</tbody>
-						</table>
+			<form action="/deleteStream" method="post">
+				<div class="col-md-12">
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Name</th>
+								<th>Last New Picture</th>
+								<th>Number of Pictures</th>
+								<th>Views</th>
+								<th>Delete</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for stream in streams %}
+							<tr>
+								<td>{{ loop.index }}</td>
+								<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true">@{{ stream.name }}</a></td>
+								<td>{{ stream.last_update_time.strftime("%Y/%m/%d %I:%M %p") }}</td>
+								<td>{{ stream.num_picture }}</td>
+								<td>{{ stream.view_count }}</td>
+								<td><input type="checkbox" name="{{ stream.name }}"</td>
+							<tr>
+							{% endfor%}
+						</tbody>
+					</table>
 
-						<button type="submit" class="btn btn-lg btn-primary">Delete Checked</button>
-					</div>
-				</form>
-			</div>
+					<button type="submit" class="btn btn-md btn-primary">Delete Checked</button>
+				</div>
+			</form>
 		</div>
 	</div>
 
 	<div class="panel panel-default">
-		<div class="panel-heading"><h1>Streams I subscribed to</h1></div>
+		<div class="panel-heading">Streams I subscribed to</div>
 
 		<div class="panel-body">
 			<div class="row">
@@ -74,11 +71,10 @@
 								{% endfor %}
 				            </tbody>
 				          </table>
-				          <button type="submit" class="btn btn-lg btn-primary">Unsubscribe Checked Streams</button>
+				          <button type="submit" class="btn btn-md btn-primary">Unsubscribe Checked Streams</button>
 				    </div>
 				</form>
 			</div>
 		</div>
 	</div>
-</div>
 {% endblock %}

@@ -1,0 +1,38 @@
+{% extends "/templates/base.html" %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="col-md-8">
+                <strong> {{ stream.name }} </strong> 
+                by
+                <i style="font-size: medium;">{{ stream.user.email() }}</i>
+            </div>
+            
+            <div class="col-md-4 text-right">
+                <form action="/stream?">
+                    <button type="submit" class="btn btn-md btn-primary">Back to stream view</button>
+                    <input type="hidden" name="stream_id" value="{{ stream.key.urlsafe() }}" />
+                </form>
+            </div>
+            <div id="intelligent_gap"></div>            
+        </div>
+        <div class="panel-body">
+            <div id="map_canvas" class="map rounded"></div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    $(function() { 
+        demo.add(function() {
+            $('#map_canvas').gmap({'center': '57.7973333,12.0502107', 'zoom': 10, 'disableDefaultUI':true, 'callback': function() {
+                var self = this;
+                self.addMarker({'position': this.get('map').getCenter() }).click(function() {
+                    self.openInfoWindow({ 'content': 'Hello World!' }, this);
+                }); 
+            }});
+        }).load();
+    });
+</script>
+
+{% endblock %}

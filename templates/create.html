@@ -1,9 +1,8 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
-<div class="container">
     <div class="panel panel-default">
-        <div class="panel-heading"><h1>Create new stream</h1></div>
+        <div class="panel-heading">Create new stream</div>
 
         <div class="panel-body">
             <form action="/create?" method="post">
@@ -27,11 +26,10 @@
                 </div>
 
                 <div>
-            	   <button type="submit" class="btn btn-lg btn-primary">Create Stream</button>
+            	   <button type="submit" class="btn btn-md btn-primary" id="createBtn">Create Stream</button>
                 </div>
             <form>
         </div>
     </div>
-</div>
 
 {% endblock %}
