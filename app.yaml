@@ -24,6 +24,8 @@ handlers:
   static_dir: jquery-ui
 - url: /jquery-ui-map
   static_dir: jquery-ui-map
+- url: /jQRangeSlider
+  static_dir: jQRangeSlider
 - url: /jquery
   static_dir: jquery
 - url: /lightbox2

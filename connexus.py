@@ -5,6 +5,7 @@ from google.appengine.api import images
 
 from collections import Counter
 from datetime import datetime, timedelta
+from random import randint
 
 import logging
 import jinja2
@@ -37,6 +38,8 @@ class Image(ndb.Model):
     stream = ndb.KeyProperty(kind = Stream)
     date = ndb.DateTimeProperty(auto_now_add = True)
     image = ndb.BlobProperty()
+    latitude = ndb.IntegerProperty()
+    longitude = ndb.IntegerProperty()
     comment = ndb.StringProperty()
 
 class Subscriber(ndb.Model):
@@ -236,11 +239,22 @@ class ViewStream(webapp2.RequestHandler):
 
 
 class Upload(webapp2.RequestHandler):
-    def post(self):
-        logging.info('Upload file!')
+    def post(self):        
         image = Image()
         image.comment = self.request.get('comment')
         raw_image = self.request.get('file')
+        longitude = self.request.get('longitude')
+        latitude = self.request.get('latitude')
+        if longitude:
+            image.longitude = longitude
+        else:
+            image.longitude = randint(-180, 180)
+
+        if latitude:
+            image.latitude = latitude
+        else:
+            image.latitude = randint(-90, 90)
+
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
         image_list = Image.query(Image.stream == stream_key).order(-Image.date).fetch()    
         if raw_image:
@@ -359,13 +373,33 @@ class Trending(webapp2.RequestHandler):
         
         time.sleep(1)
         self.redirect('/trending')
+
 class GeoView(webapp2.RequestHandler):
     def get(self):
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
         stream = stream_key.get()
         template_values = { 'stream' : stream }
         template = JINJA_ENVIRONMENT.get_template('/templates/geoview.html')
-        self.response.write(template.render(template_values))        
+        self.response.write(template.render(template_values))  
+
+class GetImageLocation(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json'  
+        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+        stream = stream_key.get()
+
+        image_list = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
+        latLng_dict_list = []
+        for image in image_list:
+            latLng_dict = dict()
+            latLng_dict['lat'] = image.latitude
+            latLng_dict['lng'] = image.longitude
+            latLng_dict_list.append(latLng_dict)
+
+        obj = dict()
+        obj['image_location'] = latLng_dict_list
+
+        self.response.out.write(json.dumps(obj))
         
 class Error(webapp2.RequestHandler):
     def get(self):
@@ -429,6 +463,7 @@ app = webapp2.WSGIApplication([
     ('/tasks/update_trending', UpdateTrending),
     ('/tasks/email_trending', EmailTrending),
     ('/geoview', GeoView),
+    ('/get_image_location', GetImageLocation),
     ('/social', Social)
     
 ], debug=True)

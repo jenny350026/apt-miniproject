@@ -19,18 +19,72 @@
         </div>
         <div class="panel-body">
             <div id="map_canvas" class="map rounded"></div>
+            <div id="slider"></div>
         </div>
     </div>
 
 <script type="text/javascript">
+    
+
+    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+
+    $("#slider").dateRangeSlider({
+        bounds: {min: new Date(2015, 0, 1), max: new Date(2015, 11, 31, 12, 59, 59)},
+        defaultValues: {min: new Date(2015, 1, 10), max: new Date(2015, 4, 22)},
+        scales: [{
+            first: function(value){ return value; },
+            end: function(value) {return value; },
+            next: function(value){
+                var next = new Date(value);
+                return new Date(next.setMonth(value.getMonth() + 1));
+            },
+            label: function(value){
+                return months[value.getMonth()];
+            },
+            format: function(tickContainer, tickStart, tickEnd){
+                tickContainer.addClass("myCustomClass");
+            }
+        }]
+    });
+
+
+
     $(function() { 
         demo.add(function() {
-            $('#map_canvas').gmap({'center': '57.7973333,12.0502107', 'zoom': 10, 'disableDefaultUI':true, 'callback': function() {
-                var self = this;
-                self.addMarker({'position': this.get('map').getCenter() }).click(function() {
-                    self.openInfoWindow({ 'content': 'Hello World!' }, this);
-                }); 
-            }});
+            $('#map_canvas').gmap({'zoom': 2, 'disableDefaultUI':true}).bind('init', function(evt, map) { 
+                var bounds = map.getBounds();
+                var southWest = bounds.getSouthWest();
+                var northEast = bounds.getNorthEast();
+                var lat, lng;
+
+
+                $.getJSON( "/get_image_location?stream_id={{ stream.key.urlsafe() }}", function( data ) {
+
+                    $.each(data.image_location, function(index, element) {
+                        lat = element.lat;
+                        lng = element.lng;     
+                        $('#map_canvas').gmap('addMarker', {                     
+                            'position': new google.maps.LatLng(lat, lng) 
+                        });                   
+                    });
+
+
+                    for( var i = 0; i < 10; i++ ) {
+                        $('#map_canvas').gmap('addMarker', {                     
+                            'position': new google.maps.LatLng(0, 0) 
+                        });  
+                    }
+                    $('#map_canvas').gmap('set', 'MarkerClusterer', new MarkerClusterer($('#map_canvas').gmap('get', 'map'), $('#map_canvas').gmap('get', 'markers')));
+
+                    
+                });
+                
+                
+                
+                // To call methods in MarkerClusterer simply call 
+                // $('#map_canvas').gmap('get', 'MarkerClusterer').callingSomeMethod();
+            });
+        
         }).load();
     });
 </script>
