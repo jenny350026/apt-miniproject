@@ -117,17 +117,31 @@ class Manage(webapp2.RequestHandler):
 
 class DeleteStream(webapp2.RequestHandler):
     def post(self):
-        streams = Stream().query(Stream.user == users.get_current_user())
-        for stream in streams:
-            stream_name = self.request.get(stream.name)
-            if stream_name and stream_name == 'on':
-                # delete all subcriber, view and image entries to the stream
-                ndb.delete_multi(map(lambda x:x.key, Subscriber.query(Subscriber.stream == stream.key).fetch()))
-                ndb.delete_multi(map(lambda x:x.key, View.query(View.stream == stream.key).fetch()))
-                ndb.delete_multi(map(lambda x:x.key, Image.query(Image.stream == stream.key).fetch()))
-                stream.key.delete()
+        stream_name = self.request.get_all('stream_name') 
+        logging.info(stream_name[0])
+        for streams in stream_name:
+            logging.info(streams)
+            stream = Stream().query(Stream.name == streams).fetch(1)[0]        
+            # delete all subcriber, view and image entries to the stream
+            ndb.delete_multi(map(lambda x:x.key, Subscriber.query(Subscriber.stream == stream.key).fetch()))
+            ndb.delete_multi(map(lambda x:x.key, View.query(View.stream == stream.key).fetch()))
+            ndb.delete_multi(map(lambda x:x.key, Image.query(Image.stream == stream.key).fetch()))
+            stream.key.delete()
         time.sleep(1)
-        self.redirect('/manage') 
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.write('Success')
+
+        # streams = Stream().query(Stream.user == users.get_current_user())
+        # for stream in streams:
+        #     stream_name = self.request.get(stream.name)
+        #     if stream_name and stream_name == 'on':
+        #         # delete all subcriber, view and image entries to the stream
+        #         ndb.delete_multi(map(lambda x:x.key, Subscriber.query(Subscriber.stream == stream.key).fetch()))
+        #         ndb.delete_multi(map(lambda x:x.key, View.query(View.stream == stream.key).fetch()))
+        #         ndb.delete_multi(map(lambda x:x.key, Image.query(Image.stream == stream.key).fetch()))
+        #         stream.key.delete()
+        # time.sleep(1)
+        # self.redirect('/manage') 
 
 class Unsubscribe(webapp2.RequestHandler):
     def post(self):

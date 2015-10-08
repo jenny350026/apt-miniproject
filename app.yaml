@@ -20,6 +20,8 @@ handlers:
   static_dir: dropzone
 - url: /bootstrap
   static_dir: bootstrap
+- url: /Flat-ui
+  static_dir: Flat-ui
 - url: /jquery-ui
   static_dir: jquery-ui
 - url: /jquery-ui-map

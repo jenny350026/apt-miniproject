@@ -41,40 +41,41 @@
                 
         </div>
             <div class="row">
-            <ul class="nav navbar-nav">
-                
-            {% if images %}
-                {% for image in images %}
-                    <li><a class="example-image-link" href="/img?img_id={{ image.key.urlsafe() }}" data-lightbox="example-set" data-title=""><img class="example-image rounded" src="/img?img_id={{ image.key.urlsafe() }}" width="200" height="auto" alt=""/></a></li>
-                {% endfor %}
-            </ul>
-
-            {% else %}
-                <div class="jumbotrom text-center">
-                    <h1>The sream is empty</h1>
-                </div>
-            {% endif %}
-            
-            <div class="row">
-                
                 <ul class="nav navbar-nav">
-                    {% for tag in stream.tags %}
-                        {% if tag | length %}    
-                        <td>#{{ tag }}</td>
-                        {% endif %}
+                    
+                {% if images %}
+                    {% for image in images %}
+                        <li><a class="example-image-link" href="/img?img_id={{ image.key.urlsafe() }}" data-lightbox="example-set" data-title=""><img class="example-image rounded" src="/img?img_id={{ image.key.urlsafe() }}" width="200" height="auto" alt=""/></a></li>
                     {% endfor %}
                 </ul>
-            
-            
-                <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
-            	   <button type="submit" class="btn btn-md btn-primary">More Pictures</button>
-                   <!-- Your share button code -->
-                    <a class="fb-share-button" 
-                        data-href={{ share_link }}
-                        data-layout="button_count">
-                    </a>
-                </form>
+
+                {% else %}
+                    <div class="jumbotrom text-center">
+                        <h1>The sream is empty</h1>
+                    </div>
+                {% endif %}
                 
+                <div class="row">
+                    
+                    <ul class="nav navbar-nav">
+                        {% for tag in stream.tags %}
+                            {% if tag | length %}    
+                            <td>#{{ tag }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                
+                
+                    <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
+                	   <button type="submit" class="btn btn-md btn-primary">More Pictures</button>
+                       <!-- Your share button code -->
+                        <a class="fb-share-button" 
+                            data-href={{ share_link }}
+                            data-layout="button_count">
+                        </a>
+                    </form>
+                    
+                </div>
             </div>
         </div>
     
@@ -98,14 +99,14 @@
         <div class="panel-body">
             {% if is_owner == true %}
 
-            <div id="actions" >
+            <div id="actions">
                 <form action="/upload?stream_id={{ stream.key.urlsafe() }}" enctype="multipart/form-data" class="dropzone" method="post" id="my_dropzone">
                     <div>
                         <!-- <input type="text" name="comments" placeholder="Comments"> <br> -->
                         {{ no_file_error }}
                     </div>
 
-                    <div class="col-lg-5" style="display:inline;">
+                    <div class="col-md-5" style="display:inline;">
 
                         <span class="btn btn-success fileinput-button dz-clickable" type="file" name="files[]" multiple>
                             <i class="glyphicon glyphicon-plus"></i>
@@ -126,7 +127,7 @@
                         <span class="fileupload-process"></span>
                     </div>
 
-                    <div class="col-lg-7" style="margin-top: 10px;">
+                    <div class="col-md-7" style="margin-top: 10px;">
                         <!-- The global file processing state -->
                         <span class="fileupload-process">
                             <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -134,10 +135,6 @@
                             </div>
                         </span>
                     </div>
-
-<!--                     <div>
-                        <button type="submit" class="btn btn-lg btn-primary">Upload File</button>
-                    </div> -->
                 </form>
             </div>
 
@@ -146,21 +143,20 @@
                 <div id="template" class="file-row">
                     <!-- This is used as the file preview template -->
                     <div>
-                        <div style="display:inline, span {margin-left:10px;}">                        
+                        <div class="col-md-5" style="display:inline, span {margin-left:10px;}">                        
                             <span class="preview"><img data-dz-thumbnail /></span>
                             <span class="name" data-dz-name ></span>
                             <strong class="error text-danger" data-dz-errormessage></strong>
                             <span class="size" data-dz-size></span>
                         </div>
 
-                        <div>
-                            
-                            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="upload-progress">
-                                <div class="progress-bar progress-bar-success" style="{width:0%; margin-top: 10px;}" data-dz-uploadprogress></div>
+                        <div class="col-md-5">                            
+                            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="upload-progress" style="margin-top: 10px;">
+                                <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
                             </div>
                         </div>
 
-                        <div>
+                        <div class="col-md-5" style="margin-bottom: 10px;">
                             <button class="btn btn-primary start">
                                 <i class="glyphicon glyphicon-upload"></i>
                                 <span>Start</span>
@@ -185,7 +181,7 @@
             {% else %}
 
             <form action="/subscribe?stream_id={{ stream.key.urlsafe() }}" method="post">                
-                <div><button type="submit" class="btn btn-lg btn-primary">
+                <div><button type="submit" class="btn btn-md btn-primary">
                 {% if subscribed | length %}    
                     Unsubscribe
                 {% else %}
