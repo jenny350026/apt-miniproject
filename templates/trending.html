@@ -1,6 +1,7 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
+<div class="col-md-10 col-md-offset-1">
     <div class="panel panel-default">
         <div class="panel-heading">Top {{ streams | length }} Trending Streams</div>
 
@@ -17,14 +18,16 @@
             </table>
             <form action="/trending?" method="post">
             <p>Email trending report</p>
-            <div>
+            <div>    
+                <label for="noreports">                            
             	<input type="radio" name="email_frequency" id="noreports" value="0" {% if user_option.option == 0 %} checked {% endif %}/>
-            	<label for="noreports">No reports</label>
+            	No reports</label>
             </div>
 
             <div>
+                <label for="every5min">
             	<input type="radio" name="email_frequency" id="every5min" value="5" {% if user_option.option == 5 %} checked {% endif %}/>
-            	<label for="every5min">Every 5 minutes</label>
+            	Every 5 minutes</label>
             </div>
 
             <div>
@@ -40,4 +43,5 @@
             </form>
         </div>
     </div>
+</DIV>
 {% endblock %}

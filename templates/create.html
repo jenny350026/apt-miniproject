@@ -1,35 +1,37 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
+<div class="col-md-10 col-md-offset-1">
     <div class="panel panel-default">
 
         <div class="panel-heading">Create new stream</div>
 
         <div class="panel-body">
             <form action="/create?" method="post">
-                <div>
+                <div class="col-xs-6">
                 	Name your stream <br>
-                	<input type="text" name="stream_name">
+                	<input type="text" name="stream_name" class="form-control">
                     {{ no_name_error }}
                 </div>
-                <div>
+                <div class="col-xs-8">
                 	Add subscribers <br>
-                	<textarea name="receipients" rows="3" cols = "30" placeholder="comma-separated email addresses"></textarea> <br>
-                    <textarea name="message" rows="5" cols = "30" placeholder="optional message for invite"></textarea>
+                	<textarea name="receipients" rows="3" cols = "30" placeholder="comma-separated email addresses" class="form-control"></textarea> <br>
+                    <textarea name="message" rows="5" cols = "30" placeholder="optional message for invite" class="form-control"></textarea>
                 </div>
-            	<div>
+            	<div class="col-xs-8">
                 	Tag your stream <br>
-                    <textarea name="tags" rows="5" cols = "30" placeholder="comma-separated hashtags"></textarea>
+                    <textarea name="tags" rows="5" cols = "30" placeholder="comma-separated hashtags" class="form-control"></textarea>
                 </div>
-            	<div>
+            	<div class="col-xs-8">
                 	URL to cover image <br>
-                    <input type="text" name="cover_url" placeholder="optional">
+                    <input type="text" name="cover_url" placeholder="optional" class="form-control">
                 </div>
 
-                <div>
+                <div class="col-xs-8">
             	   <button type="submit" class="btn btn-md btn-primary" id="createBtn">Create Stream</button>
                 </div>
-            <form>
+            </form>
         </div>
     </div>
+</div>
 {% endblock %}

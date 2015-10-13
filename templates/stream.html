@@ -8,7 +8,7 @@
         maxFilesize: 10, // MB
         clickable: true,
         dictDefaultMessage: "",
-        addRemoveLinks: true,
+        
 
         accept: function(file, done) {
             if (file.name == "justinbieber.jpg") {
@@ -23,10 +23,10 @@
     };
 </script>
 
-
+<div class="col-md-10 col-md-offset-1">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <div class="col-md-8">
+            <div class="col-md-8" style="line-height: 40px;">
                 <strong> {{ stream.name }} </strong> 
                 by
                 <i style="font-size: medium;">{{ stream.user.email() }}</i>
@@ -40,46 +40,53 @@
             <div id="intelligent_gap"></div>
                 
         </div>
-            <div class="row">
-                <ul class="nav navbar-nav">
-                    
-                {% if images %}
-                    {% for image in images %}
-                        <li><a class="example-image-link" href="/img?img_id={{ image.key.urlsafe() }}" data-lightbox="example-set" data-title=""><img class="example-image rounded" src="/img?img_id={{ image.key.urlsafe() }}" width="200" height="auto" alt=""/></a></li>
-                    {% endfor %}
-                </ul>
 
-                {% else %}
-                    <div class="jumbotrom text-center">
-                        <h1>The sream is empty</h1>
-                    </div>
-                {% endif %}
-                
+        <div class="panel-body">
+            <div class="col-xs-12">
                 <div class="row">
-                    
                     <ul class="nav navbar-nav">
-                        {% for tag in stream.tags %}
-                            {% if tag | length %}    
-                            <td>#{{ tag }}</td>
-                            {% endif %}
+                        
+                    {% if images %}
+                        {% for image in images %}
+                            <li><a class="example-image-link" href="/img?img_id={{ image.key.urlsafe() }}" data-lightbox="example-set" data-title=""><img class="example-image rounded" src="/img?img_id={{ image.key.urlsafe() }}" width="200" height="auto" alt=""/></a></li>
                         {% endfor %}
                     </ul>
-                
-                
-                    <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
-                	   <button type="submit" class="btn btn-md btn-primary">More Pictures</button>
-                       <!-- Your share button code -->
-                        <a class="fb-share-button" 
-                            data-href={{ share_link }}
-                            data-layout="button_count">
-                        </a>
-                    </form>
+
+                    {% else %}
+                        <div class="tile">
+                            <div class="jumbotrom text-center">
+                                <h2>The sream is empty</h2>
+                            </div>
+                        </div>
+                    {% endif %}
                     
+                    <div class="row">
+                        
+                        <ul class="nav navbar-nav">
+                            {% for tag in stream.tags %}
+                                {% if tag | length %}    
+                                <td>#{{ tag }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    
+                    </div>
+
+                    <div class="col-xs-4">                                            
+                        <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
+                    	   <button type="submit" class="btn btn-md btn-primary">More Pictures</button>  
+                           <a class="fb-share-button" 
+                            data-href={{ share_link }}
+                            data-layout="button_count"></a>                          
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
     
-
+<div class="col-md-10 col-md-offset-1">
     <div class="panel panel-default">
         {% if is_owner == true %}
         <div class="panel-heading">Upload pictures to 
@@ -87,12 +94,16 @@
         </div>
         {% else %}
         <div class="panel-heading">
+            <span id="subscribe-heading">
             {% if subscribed | length %}    
-                Unsubscribe
+                Unsubscribe from
             {% else %}
-                Subscribe
+                Subscribe to
             {% endif %}
-            to <strong> {{ stream.name }} </strong> 
+            </span>
+            <span>
+            <strong> {{ stream.name }} </strong> 
+            </span>
         </div>
         {% endif %}
 
@@ -105,94 +116,134 @@
                         <!-- <input type="text" name="comments" placeholder="Comments"> <br> -->
                         {{ no_file_error }}
                     </div>
+                    <div class="col-md-12">
+                        <div class="col-md-7">
+                            <span class="btn btn-warning fileinput-button dz-clickable" type="file" name="files[]" multiple>
+                                <i class="fui-plus"></i>
+                                <span>Add files</span>
+                            </span>
 
-                    <div class="col-md-5" style="display:inline;">
+                            <button type="submit" class="btn btn-info start">
+                                <i class="fui-triangle-up"></i>
+                                <span>Start upload</span>
+                            </button>
 
-                        <span class="btn btn-success fileinput-button dz-clickable" type="file" name="files[]" multiple>
-                            <i class="glyphicon glyphicon-plus"></i>
-                            <span>Add files</span>
-                        </span>
+                            <button type="reset" class="btn btn-danger cancel">
+                                <i class="fui-cross"></i>
+                                <span>Cancel upload</span>
+                            </button>
 
-                        <button type="submit" class="btn btn-primary start">
-                            <i class="glyphicon glyphicon-upload"></i>
-                            <span>Start upload</span>
-                        </button>
+                                <!-- The global file processing state -->
+                            <span class="fileupload-process"></span>
+                        </div>
 
-                        <button type="reset" class="btn btn-warning cancel">
-                            <i class="glyphicon glyphicon-ban-circle"></i>
-                            <span>Cancel upload</span>
-                        </button>
-
+                        <div class="col-md-5" style="margin-top: 10px;">
                             <!-- The global file processing state -->
-                        <span class="fileupload-process"></span>
-                    </div>
-
-                    <div class="col-md-7" style="margin-top: 10px;">
-                        <!-- The global file processing state -->
-                        <span class="fileupload-process">
-                            <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                                <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
-                            </div>
-                        </span>
+                            <span class="fileupload-process">
+                                <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                    <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+                                </div>
+                            </span>
+                        </div>
                     </div>
                 </form>
             </div>
 
             <div class="table table-striped" class="files" id="previews">
 
-                <div id="template" class="file-row">
+                <div id="template" class="file-row" >
                     <!-- This is used as the file preview template -->
-                    <div>
-                        <div class="col-md-5" style="display:inline, span {margin-left:10px;}">                        
-                            <span class="preview"><img data-dz-thumbnail /></span>
-                            <span class="name" data-dz-name ></span>
-                            <strong class="error text-danger" data-dz-errormessage></strong>
-                            <span class="size" data-dz-size></span>
-                        </div>
 
-                        <div class="col-md-5">                            
-                            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="upload-progress" style="margin-top: 10px;">
-                                <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+                    <div class="col-md-10 col-md-offset-2" style="margin-top: 10px;">                        
+                        <div class="col-md-6" style="span {margin-left:10px;}">                        
+                            <span class="preview"><img data-dz-thumbnail /></span>
+                            <div>
+                                <span class="name" data-dz-name ></span>
+                                <strong class="error text-danger" data-dz-errormessage></strong>
+                                <span class="size" data-dz-size></span>
                             </div>
                         </div>
 
-                        <div class="col-md-5" style="margin-bottom: 10px;">
-                            <button class="btn btn-primary start">
-                                <i class="glyphicon glyphicon-upload"></i>
+                        <div class="col-md-6">                               
+                            <button class="btn btn-info start">
+                                <i class="fui-triangle-up"></i>
                                 <span>Start</span>
                             </button>
 
                             <button data-dz-remove class="btn btn-warning cancel">
-                                <i class="glyphicon glyphicon-ban-circle"></i>
+                                <i class="fui-cross"></i>
                                 <span>Cancel</span>
                             </button>
 
                             <button data-dz-remove class="btn btn-danger delete">
-                                <i class="glyphicon glyphicon-trash"></i>
+                                <i class="fui-trash"></i>
                                 <span>Delete</span>
                             </button>
+
+                            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="upload-progress" style="margin-top: 10px;">
+                                <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+                            </div>
                         </div>
-                        <!-- End of file preview template -->
-                        
+                        <!-- End of file preview template -->                        
                     </div>
 
             </div>
 
             {% else %}
 
-            <form action="/subscribe?stream_id={{ stream.key.urlsafe() }}" method="post">                
-                <div><button type="submit" class="btn btn-md btn-primary">
-                {% if subscribed | length %}    
-                    Unsubscribe
-                {% else %}
-                    Subscribe
-                {% endif %}
-                </button></div>                
-            </form>
+                <form action="/subscribe?stream_id={{ stream.key.urlsafe() }}" method="post">    
+                    <input type="hidden" id="stream_name" name="{{ stream.key.urlsafe() }}">       
+                    <div><button type="submit" class="btn btn-md btn-primary" id="subscribe">
+                    {% if subscribed | length %}    
+                        Unsubscribe
+                    {% else %}
+                        Subscribe
+                    {% endif %}
+                    </button></div>                
+                </form>
             {% endif %}
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    $("#subscribe").click( function(e) {
+        e.preventDefault();
+        var res = "stream_id=";
+
+        $("#stream_name").each(
+            function() {
+                res += $(this).attr('name');    
+            }            
+        );
+
+        $.ajax({
+            type: 'POST',
+            url: 'subscribe',
+            data: res,
+            success: function(msg) {
+                console.log(msg)
+                if (msg === 'Success') {
+                    if($('#subscribe').text() === "Subscribe") {
+                        console.log("subscribed");
+                        $('#subscribe').text("Unsubscribe");
+                        $('#subscribe-heading').text("Unsubscribe from");
+                    }                        
+                    else {
+                        console.log("unsubscribed");
+                        $('#subscribe').text("Subscribe");
+                        $('#subscribe-heading').text("Subscribe to");
+                    }
+                }                  
+            }
+        });
+    });
+});
+</script>
+
+
 
 <script>
     
@@ -234,10 +285,6 @@
         file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
     });
 
-    
-        
-    
-
     var finish_content = '<div class="alert alert-success" role="alert" id="finish_alert" style="margin-top: 10px;">' +
             '<strong>Well done!</strong> You successfully upload the file.' +
             '</div>';
@@ -247,8 +294,7 @@
     });
 
     // Hide the total progress bar when nothing's uploading anymore
-    myDropzone1.on("queuecomplete", function(progress) {
-        console.log("queuecomplete");
+    myDropzone1.on("queuecomplete", function(progress) {        
         document.querySelector("#total-progress").style.opacity = "0";
     });
 
@@ -257,6 +303,7 @@
     // `clickable` has already been specified.
     document.querySelector("#actions .start").onclick = function() {
         myDropzone1.enqueueFiles(myDropzone1.getFilesWithStatus(Dropzone.ADDED));
+        myDropzone1.processQueue();
     };
 
     document.querySelector("#actions .cancel").onclick = function() {

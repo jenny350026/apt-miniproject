@@ -12,9 +12,11 @@
 
     <!-- jQuery UI autocomplete -->
     <link rel="stylesheet" href="jquery-ui/jquery-ui.min.css" />    
-    <script src="./jquery-ui/jquery-ui.min.js"></script>
+    <script src="./jquery-ui/jquery-ui.js"></script>
+
     <!-- Dropzone -->
     <script src="./dropzone/dist/dropzone.js"></script>
+
     <!-- Lightbox2 -->
     <link href="./lightbox2/dist/css/lightbox.css" rel="stylesheet">
 
@@ -37,9 +39,7 @@
     <link href="./Flat-ui/dist/css/flat-ui.css" rel="stylesheet">
 
     
-    <!-- <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
-    
-    
+    <!-- <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->      
     <!-- <link href="./bootstrap/css/bootstrap-theme.min.css" rel="stylesheet"> -->
     
 
@@ -56,6 +56,7 @@
   </head>
 
   <body role="document">
+
   	<div id="fb-root"></div>
     
     <script>
@@ -93,7 +94,10 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">Connex.us</a>
+          <a class="navbar-brand" href="/">
+            <i class="fui-home"></i>
+            <span>Connex.us</span>
+          </a>
         </div>
 
         <div id="navbar" class="navbar-collapse collapse">
@@ -112,9 +116,12 @@
 
           <form action="\search?" method="post" class="navbar-form navbar-left" role="search">
             <div class="form-group">
-              <input type="text" class="form-control" placeholder="Search" id="query" name="search" class="form-control ui-autocomplete-input" autocomplete="off">
+              <input type="text" placeholder="Search" id="query" name="search" class="form-control ui-autocomplete-input" autocomplete="off">
             </div>
-            <button id="search_auto" type="submit" class="btn btn-primary">Submit</button>
+            <button id="search_auto" type="submit" class="btn btn-primary">
+              <i class="fui-search"></i>
+              <span>Search</span>
+            </button>
           </form>                
             
         </div><!--/.nav-collapse -->
@@ -130,11 +137,14 @@
     </div>
   </div>
   <script>
+  $(document).ready(function() {
     var cache = {};
     $("#query").autocomplete({
         minLength : 1,
         source : function(request, response) {
             var term = request.term;
+            if (term.trim() == '')
+                return;
             if ( term in cache ) {
                 response( cache[ term ] );
                 return;
@@ -152,8 +162,10 @@
             });
         }
     });
+  });
   </script>
   <script src="./lightbox2/dist/js/lightbox.min.js"></script>
+
   </body>
 </html>
 {% endautoescape %}

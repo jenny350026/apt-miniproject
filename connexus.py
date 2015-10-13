@@ -145,12 +145,15 @@ class DeleteStream(webapp2.RequestHandler):
 
 class Unsubscribe(webapp2.RequestHandler):
     def post(self):
+        unsub_streams = self.request.get_all('stream_name') 
         subscribed_streams = Subscriber().query(Subscriber.email == users.get_current_user().email())
         for subscriber in subscribed_streams.fetch():
-            stream_name = self.request.get(subscriber.stream.get().name)
-            if stream_name and stream_name == 'on':
+            stream_name = subscriber.stream.get().name
+            if stream_name and stream_name in unsub_streams:
                 subscriber.key.delete()
-        self.redirect('/manage') 
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.write('Success')
+        
 
 class Create(webapp2.RequestHandler):
     def post(self):
@@ -297,8 +300,10 @@ class Subscribe(webapp2.RequestHandler):
             subscriber.email = users.get_current_user().email()
             subscriber.stream = ndb.Key(urlsafe = self.request.get('stream_id')).get().key
             subscriber.put()
-        time.sleep(1)
-        self.redirect('/stream?' + urllib.urlencode({ 'stream_id' : stream_key.urlsafe() }))
+        
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.write('Success')
+        # self.redirect('/stream?' + urllib.urlencode({ 'stream_id' : stream_key.urlsafe() }))
 
 class SearchRequest(webapp2.RequestHandler):
     def get(self):
@@ -398,21 +403,26 @@ class GeoView(webapp2.RequestHandler):
 
 class GetImageLocation(webapp2.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'application/json'  
+        query_begin_date = self.request.get('start')
+        query_end_date = self.request.get('end')        
+        query_begin_date_obj = datetime.strptime(query_begin_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        query_end_date_obj = datetime.strptime(query_end_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+
         stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
         stream = stream_key.get()
 
         image_list = Image.query(Image.stream == stream_key).order(-Image.date).fetch()
         latLng_dict_list = []
         for image in image_list:
-            latLng_dict = dict()
-            latLng_dict['lat'] = image.latitude
-            latLng_dict['lng'] = image.longitude
-            latLng_dict_list.append(latLng_dict)
+            if query_begin_date_obj <= image.date <= query_end_date_obj:
+                latLng_dict = dict()
+                latLng_dict['lat'] = image.latitude
+                latLng_dict['lng'] = image.longitude
+                latLng_dict_list.append(latLng_dict)
 
         obj = dict()
         obj['image_location'] = latLng_dict_list
-
+        self.response.headers['Content-Type'] = 'application/json'  
         self.response.out.write(json.dumps(obj))
         
 class Error(webapp2.RequestHandler):

@@ -1,92 +1,144 @@
 {% extends "/templates/base.html" %}
 
 {% block content %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <div class="col-md-8">
-                <strong> {{ stream.name }} </strong> 
-                by
-                <i style="font-size: medium;">{{ stream.user.email() }}</i>
-            </div>
-            
-            <div class="col-md-4 text-right">
-                <form action="/stream?">
-                    <button type="submit" class="btn btn-md btn-primary">Back to stream view</button>
-                    <input type="hidden" name="stream_id" value="{{ stream.key.urlsafe() }}" />
-                </form>
-            </div>
-            <div id="intelligent_gap"></div>            
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="col-md-8">
+            <strong> {{ stream.name }} </strong> 
+            by
+            <i style="font-size: medium;">{{ stream.user.email() }}</i>
         </div>
-        <div class="panel-body">
-            <div id="map_canvas" class="map rounded"></div>
-            <div id="slider"></div>
+        
+        <div class="col-md-4 text-right">
+            <form action="/stream?">
+                <button type="submit" class="btn btn-md btn-primary">Back to stream view</button>
+                <input type="hidden" name="stream_id" value="{{ stream.key.urlsafe() }}" />
+            </form>
         </div>
+        <div id="intelligent_gap"></div>            
     </div>
+    <div class="panel-body">
+        <div id="map_canvas" class="map rounded"></div>
+        <p>
+            <label for="geoDateRateDisplay">Date range:</label>
+            <span id="geoDateRateDisplay"></span>
+        </p>
+        <div id="slider"></div>
+    </div>
+</div>
 
 <script type="text/javascript">
-    
 
-    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+    var query_begin_date = null;
+    var query_end_date = null;
+    var timer = null;
 
-    $("#slider").dateRangeSlider({
-        bounds: {min: new Date(2015, 0, 1), max: new Date(2015, 11, 31, 12, 59, 59)},
-        defaultValues: {min: new Date(2015, 1, 10), max: new Date(2015, 4, 22)},
-        scales: [{
-            first: function(value){ return value; },
-            end: function(value) {return value; },
-            next: function(value){
-                var next = new Date(value);
-                return new Date(next.setMonth(value.getMonth() + 1));
-            },
-            label: function(value){
-                return months[value.getMonth()];
-            },
-            format: function(tickContainer, tickStart, tickEnd){
-                tickContainer.addClass("myCustomClass");
-            }
-        }]
-    });
+    var $map = $('#map_canvas');
+    var my_map;
+    var marker_cluster;
 
+    $map.gmap({'zoom': 2, 'disableDefaultUI':true}).bind('init', function(evt, map) {
+        my_map = map;
+        var $ajax = $.getJSON('/get_image_location', {
+                        stream_id: '{{ stream.key.urlsafe() }}',
+                        start: query_begin_date.toISOString(),
+                        end: query_end_date.toISOString()
+                    },
 
-
-    $(function() { 
-        demo.add(function() {
-            $('#map_canvas').gmap({'zoom': 2, 'disableDefaultUI':true}).bind('init', function(evt, map) { 
-                var bounds = map.getBounds();
-                var southWest = bounds.getSouthWest();
-                var northEast = bounds.getNorthEast();
-                var lat, lng;
-
-
-                $.getJSON( "/get_image_location?stream_id={{ stream.key.urlsafe() }}", function( data ) {
-
-                    $.each(data.image_location, function(index, element) {
-                        lat = element.lat;
-                        lng = element.lng;     
-                        $('#map_canvas').gmap('addMarker', {                     
-                            'position': new google.maps.LatLng(lat, lng) 
-                        });                   
+                    function(data) {
+                        $.each( data.image_location, function(index, element) {
+                            $map.gmap('addMarker', {
+                                'position': new google.maps.LatLng(element.lat, element.lng)
+                            });
+                        });
                     });
 
+        $ajax.done(function() {
+            marker_cluster = new MarkerClusterer(map, $map.gmap('get', 'markers'));
+            $map.gmap('set', 'MarkerClusterer', marker_cluster);
+        });
+    });    
 
-                    for( var i = 0; i < 10; i++ ) {
-                        $('#map_canvas').gmap('addMarker', {                     
-                            'position': new google.maps.LatLng(0, 0) 
-                        });  
-                    }
-                    $('#map_canvas').gmap('set', 'MarkerClusterer', new MarkerClusterer($('#map_canvas').gmap('get', 'map'), $('#map_canvas').gmap('get', 'markers')));
+    function load_geo_data(my_map) {
+        var $ajax = $.getJSON('/get_image_location', {
+                        stream_id: '{{ stream.key.urlsafe() }}',
+                        start: query_begin_date.toISOString(),
+                        end: query_end_date.toISOString()
+                    },
 
-                    
-                });
-                
-                
-                
-                // To call methods in MarkerClusterer simply call 
-                // $('#map_canvas').gmap('get', 'MarkerClusterer').callingSomeMethod();
-            });
-        
-        }).load();
+                    function(data) {
+                        $.each( data.image_location, function(index, element) {
+                            $map.gmap('addMarker', {
+                                'position': new google.maps.LatLng(element.lat, element.lng)
+                            });
+                        });
+                    });
+
+        $ajax.done(function() {
+            marker_cluster = new MarkerClusterer(my_map, $map.gmap('get', 'markers'))
+            $map.gmap('set', 'MarkerClusterer', marker_cluster);
+        });
+    }
+
+    function set_query_date_range(begin, end) {
+        query_begin_date = begin;
+        query_end_date = end;
+    }
+
+    function handler() {
+        clear_timer();
+        marker_cluster.clearMarkers();
+        $map.gmap('clear', 'markers');
+        load_geo_data(my_map);
+    }
+
+    function restart_timer() {
+        clear_timer();
+        timer = window.setTimeout(handler, 1000);
+    }
+
+    function clear_timer() {
+        if (timer) {
+            window.clearTimeout(timer);
+        }
+        timer = null;
+    }
+
+    function formatDate(date) {
+        return $.datepicker.formatDate('MM dd, yy', date);
+    }
+
+    function setRangeLabels(low, high) {
+        var prev_year = new Date(); // Today
+        prev_year.setYear(prev_year.getFullYear() - 1);
+
+        var lowDate = new Date(prev_year);
+        lowDate.setDate(prev_year.getDate() + low);
+
+        var highDate = new Date(prev_year);
+        highDate.setDate(prev_year.getDate() + high);
+
+        var label = formatDate(lowDate) + " to " + formatDate(highDate);
+        set_query_date_range(lowDate, highDate);        
+
+        $("#geoDateRateDisplay").html(label);
+    }
+
+    $("#slider").slider({
+        range: true,
+        min: 0,
+        max: 365,
+        values: [0, 365],
+        slide: function (event, ui) {
+            setRangeLabels(ui.values[0], ui.values[1]);
+            restart_timer();
+        }
     });
+
+    setRangeLabels(
+        $("#slider").slider("values", 0),
+        $("#slider").slider("values", 1)
+    );
 </script>
 
 {% endblock %}
