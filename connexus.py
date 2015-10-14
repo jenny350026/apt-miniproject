@@ -260,15 +260,15 @@ class Upload(webapp2.RequestHandler):
     def post(self):        
         image = Image()
         image.comment = self.request.get('comment')
-        longitude = float(self.request.get('longitude'))
-        latitude = float(self.request.get('latitude'))
+        longitude = self.request.get('longitude')
+        latitude = self.request.get('latitude')
         if longitude:
-            image.longitude = longitude
+            image.longitude = float(longitude)
         else:
             image.longitude = randint(-180, 180)
 
         if latitude:
-            image.latitude = latitude
+            image.latitude = float(latitude)
         else:
             image.latitude = randint(-90, 90)
 
@@ -288,11 +288,8 @@ class Upload(webapp2.RequestHandler):
             image.stream = stream_key
             image.put()
             time.sleep(1)
-            redirect_dict = { 'stream_id' : stream_key.urlsafe(),'no_file_error' : "" }
-        else:
-            redirect_dict = { 'stream_id' : stream_key.urlsafe(),'no_file_error' : "no file" }
 
-        self.redirect('/stream?' + urllib.urlencode( redirect_dict )) 
+        self.redirect('/stream?' + urllib.urlencode({ 'stream_id' : stream_key.urlsafe() })) 
 
 
 class Subscribe(webapp2.RequestHandler):
@@ -301,17 +298,18 @@ class Subscribe(webapp2.RequestHandler):
         # Check if s/he has already subscribed the stream
         subscribed = Subscriber().query(ndb.AND(Subscriber.email == users.get_current_user().email(), 
                                          Subscriber.stream == stream_key))
+        self.response.headers['Content-Type'] = 'text/plain'
         if len(subscribed.fetch()):
             for sub in subscribed.fetch():
                 sub.key.delete()
+            self.response.write('Unsubscribe')
         else:
             subscriber = Subscriber()
             subscriber.email = users.get_current_user().email()
             subscriber.stream = ndb.Key(urlsafe = self.request.get('stream_id')).get().key
             subscriber.put()
+            self.response.write('Subscribe')
         
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write('Success')
         # self.redirect('/stream?' + urllib.urlencode({ 'stream_id' : stream_key.urlsafe() }))
 
 class SearchRequest(webapp2.RequestHandler):

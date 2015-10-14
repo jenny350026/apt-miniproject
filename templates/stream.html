@@ -3,24 +3,6 @@
 {% block content %}
 <script>    
     // "myAwesomeDropzone" is the camelized version of the HTML element's ID
-    Dropzone.options.myDropzone = {
-        paramName: "file", // The name that will be used to transfer the file
-        maxFilesize: 10, // MB
-        clickable: true,
-        dictDefaultMessage: "",
-        
-
-        accept: function(file, done) {
-            if (file.name == "justinbieber.jpg") {
-                done("Naha, you don't.");
-                alert("Added file.");
-            }
-            else { 
-                done("Excellent!");
-                alert("Added file.");
-            }
-        }
-    };
     $('#popoverData').popover();
 </script>
 
@@ -120,7 +102,6 @@
                 <form action="/upload?stream_id={{ stream.key.urlsafe() }}" enctype="multipart/form-data" class="dropzone" method="post" id="my_dropzone">
                     <div>
                         <!-- <input type="text" name="comments" placeholder="Comments"> <br> -->
-                        {{ no_file_error }}
                     </div>
                     <div class="col-md-12">
                         <div class="col-md-7">
@@ -145,11 +126,13 @@
 
                         <div class="col-md-5" style="margin-top: 10px;">
                             <!-- The global file processing state -->
+<!--
                             <span class="fileupload-process">
                                 <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                                     <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
                                 </div>
                             </span>
+-->
                         </div>
                     </div>
                 </form>
@@ -165,25 +148,17 @@
                             <span class="preview"><img data-dz-thumbnail /></span>
                             <div>
                                 <span class="name" data-dz-name ></span>
-                                <strong class="error text-danger" data-dz-errormessage></strong>
                                 <span class="size" data-dz-size></span>
+                            </div>
+                            <div>
+                                <strong class="error text-danger" data-dz-errormessage></strong>
                             </div>
                         </div>
 
                         <div class="col-md-6">                               
-                            <button class="btn btn-info start">
-                                <i class="fui-triangle-up"></i>
-                                <span>Start</span>
-                            </button>
-
-                            <button data-dz-remove class="btn btn-warning cancel">
+                            <button data-dz-remove class="btn btn-danger cancel">
                                 <i class="fui-cross"></i>
                                 <span>Cancel</span>
-                            </button>
-
-                            <button data-dz-remove class="btn btn-danger delete">
-                                <i class="fui-trash"></i>
-                                <span>Delete</span>
                             </button>
 
                             <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="upload-progress" style="margin-top: 10px;">
@@ -197,16 +172,14 @@
 
             {% else %}
 
-                <form action="/subscribe?stream_id={{ stream.key.urlsafe() }}" method="post">    
-                    <input type="hidden" id="stream_name" name="{{ stream.key.urlsafe() }}">       
-                    <div><button type="submit" class="btn btn-md btn-primary" id="subscribe">
-                    {% if subscribed | length %}    
-                        Unsubscribe
-                    {% else %}
-                        Subscribe
-                    {% endif %}
-                    </button></div>                
-                </form>
+                <div><button type="submit" class="btn btn-md btn-primary" id="subscribe">
+                {% if subscribed | length %}    
+                    Unsubscribe
+                {% else %}
+                    Subscribe
+                {% endif %}
+                </button></div>                
+
             {% endif %}
             </div>
         </div>
@@ -219,34 +192,24 @@
 $(document).ready(function() {
     $("#subscribe").click( function(e) {
         e.preventDefault();
-        var res = "stream_id=";
-
-        $("#stream_name").each(
-            function() {
-                res += $(this).attr('name');    
-            }            
-        );
-
         $.ajax({
             type: 'POST',
             url: 'subscribe',
-            data: res,
+            data: 'stream_id={{ stream.key.urlsafe() }}',
             success: function(msg) {
                 console.log(msg)
-                if (msg === 'Success') {
-                    if($('#subscribe').text() === "Subscribe") {
-                        toastr.success('Successfully subscribed!');
-                        console.log("subscribed");
-                        $('#subscribe').text("Unsubscribe");
-                        $('#subscribe-heading').text("Unsubscribe from");
-                    }                        
-                    else {
-                        toastr.info('Successfully unsubscribed!');
-                        console.log("unsubscribed");
-                        $('#subscribe').text("Subscribe");
-                        $('#subscribe-heading').text("Subscribe to");
-                    }
-                }                  
+                if (msg === 'Subscribe') {
+                    toastr.success('Successfully subscribed!');
+                    console.log("subscribed");
+                    $('#subscribe').text("Unsubscribe");
+                    $('#subscribe-heading').text("Unsubscribe from");
+                }                        
+                else if(msg === 'Unsubscribe'){
+                    toastr.info('Successfully unsubscribed!');
+                    console.log("unsubscribed");
+                    $('#subscribe').text("Subscribe");
+                    $('#subscribe-heading').text("Subscribe to");
+                }
             }
         });
     });
@@ -264,7 +227,7 @@ $(document).ready(function() {
     previewNode.parentNode.removeChild(previewNode);
 
     var myDropzone1 = new Dropzone(document.body, { // Make the whole body a dropzone
-        url: "http://localhost:15080/upload?stream_id={{ stream.key.urlsafe()}}&view=true", // Set the url
+        url: "/upload?stream_id={{ stream.key.urlsafe()}}&view=true", // Set the url
         thumbnailWidth: 200,
         thumbnailHeight: 200,
         parallelUploads: 20,
@@ -274,10 +237,29 @@ $(document).ready(function() {
         clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
     });
 
-    myDropzone1.on("addedfile", function(file) {
-        // Hookup the start button
-        file.previewElement.querySelector(".start").onclick = function() { myDropzone1.enqueueFile(file); };        
-    });
+    Dropzone.options.myDropzone = {
+        paramName: "file", // The name that will be used to transfer the file
+        maxFilesize: 10, // MB
+        clickable: true,
+        dictDefaultMessage: "",
+        acceptedFiles: "image/*",
+        
+        accept: function(file, done) {
+            if (file.name == "justinbieber.jpg") {
+                done("Naha, you don't.");
+                alert("Added file.");
+            }
+            else { 
+                done("Excellent!");
+                alert("Added file.");
+            }
+        }
+    };
+
+    //myDropzone1.on("addedfile", function(file) {
+    //    // Hookup the start button
+    //    file.previewElement.querySelector(".start").onclick = function() { myDropzone1.enqueueFile(file); };        
+    //});
 
     // Update the total progress bar
     myDropzone1.on("totaluploadprogress", function(progress) {
@@ -312,8 +294,13 @@ $(document).ready(function() {
     // The "add files" button doesn't need to be setup because the config
     // `clickable` has already been specified.
     document.querySelector("#actions .start").onclick = function() {
-        myDropzone1.enqueueFiles(myDropzone1.getFilesWithStatus(Dropzone.ADDED));
-        myDropzone1.processQueue();
+        if(myDropzone1.getFilesWithStatus(Dropzone.ADDED).length > 0){
+            myDropzone1.enqueueFiles(myDropzone1.getFilesWithStatus(Dropzone.ADDED));
+            myDropzone1.processQueue();
+        }
+        else
+            toastr.error('No files selected!');
+            
     };
 
     document.querySelector("#actions .cancel").onclick = function() {

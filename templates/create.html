@@ -37,8 +37,8 @@
 
 <script>
 function validateForm() {
-    var x = document.forms["create_stream"]["stream_name"].value;
-    if (x == null || x == "") {
+    var stream_name = document.forms["create_stream"]["stream_name"].value;
+    if (stream_name == null || stream_name == "") {
         toastr.error("Name must be filled out");
         return false;
     }
