@@ -13,29 +13,26 @@
 
         <div class="panel-body">
             <div>
-                {% if search == 'on' and no_keyword == 'on' %}
-                <div>
-                    Please enter a keyword.
-                </div>
+                {% if search == 'on' and keyword == '' %}
+                    <div>
+                        Please enter a keyword.
+                    </div>
                 {% elif search == 'on'%}
-
-                <div>{{ streams | length }} results found.</div>
-
-                <ul class="nav navbar-nav">
-                    {% for stream in streams %}
-                    <li><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="200" height="200" class="rounded"></img></a>
-                    <div style="text-align: center;"> {{ stream.name }} </div></li>
-                    {% endfor %}
-                </ul>
-
-                {% elif not search == 'on' %}
-                <ul class="nav navbar-nav">
-                    {% for stream in streams %}
-                    <li><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="200" height="200" class="rounded"></img></a>
-                    <div style="text-align: center;"> {{ stream.name }} </div></li>
-                    {% endfor %}
-                </ul>
+                    <div>{{ streams | length }} results found for <strong> {{ keyword }} </strong>.</div>
                 {% endif %}
+
+                <ul class="nav navbar-nav">
+                    {% for stream in streams %}
+                    <li><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src=
+                        {% if stream.cover_url %}
+                            "{{ stream.cover_url }}"
+                        {% else %}
+                            "/static_images/noCoverPhoto.png"
+                        {% endif %}
+                             width="200" height="200" class="rounded"></img></a>
+                    <div style="text-align: center;"> {{ stream.name }} </div></li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>

@@ -35,6 +35,8 @@ handlers:
   static_dir: lightbox2
 - url: /toastr
   static_dir: toastr
+- url: /static_images
+  static_dir: images
 
 - url: /.*
   script: connexus.app

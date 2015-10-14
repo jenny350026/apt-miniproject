@@ -6,16 +6,22 @@
         <div class="panel-heading">Top {{ streams | length }} Trending Streams</div>
 
         <div class="panel-body">
-            <table>
-                <tr>
-                    {% for stream in streams %}
-                    <td><div>
-                        <a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
-                    	<p>{{ stream.trending_view_count }} view{% if stream.trending_view_count > 1 %}s{% endif %} in past hour</p>
-                    </div></td>
-                    {% endfor %}
-                </tr>
-            </table>
+            <ul class="nav navbar-nav">
+                {% for stream in streams %}
+                    <li>
+                        <a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src=
+                            {% if stream.cover_url %}
+                                "{{ stream.cover_url }}"
+                            {% else %}
+                                "/static_images/noCoverPhoto.png"
+                            {% endif %}
+                                 width="200" height="200" class="rounded"></img></a>
+                        <div style="text-align: center;"> {{ stream.name }} </div>
+                        <div style="text-align: center;"> {{ stream.trending_view_count }} view{% if stream.trending_view_count > 1 %}s{% endif %} in past hour</div>
+                    </li>
+                {% endfor %}
+            </ul>
+
             <form action="/trending?" method="post">
             <p>Email trending report</p>
             <div>    

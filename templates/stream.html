@@ -21,7 +21,11 @@
             }
         }
     };
+    $('#popoverData').popover();
 </script>
+
+ <a id="popoverData" class="btn" href="#" data-content="Popover with data-trigger" rel="popover" data-placement="bottom" data-original-title="Title" data-trigger="hover">Popover with data-trigger</a>
+
 
 <div class="col-md-10 col-md-offset-1">
     <div class="panel panel-default">
@@ -40,15 +44,15 @@
             <div id="intelligent_gap"></div>
                 
         </div>
-
         <div class="panel-body">
             <div class="col-xs-12">
                 <div class="row">
                     <ul class="nav navbar-nav">
+
                         
                     {% if images %}
                         {% for image in images %}
-                            <li><a class="example-image-link" href="/img?img_id={{ image.key.urlsafe() }}" data-lightbox="example-set" data-title=""><img class="example-image rounded" src="/img?img_id={{ image.key.urlsafe() }}" width="200" height="auto" alt=""/></a></li>
+                            <li><a id="popover" data-trigger="hover" class="example-image-link" href="/img?img_id={{ image.key.urlsafe() }}" data-lightbox="example-set" data-title=""><img class="example-image rounded" src="/img?img_id={{ image.key.urlsafe() }}" width="200" height="auto" alt=""/></a></li>
                         {% endfor %}
                     </ul>
 
@@ -72,6 +76,7 @@
                     
                     </div>
 
+                    {% if all_images|length > 3 %}
                     <div class="col-xs-4">                                            
                         <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
                     	   <button type="submit" class="btn btn-md btn-primary">More Pictures</button>  
@@ -80,6 +85,7 @@
                             data-layout="button_count"></a>                          
                         </form>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -208,6 +214,8 @@
 </div>
 
 <script>
+
+
 $(document).ready(function() {
     $("#subscribe").click( function(e) {
         e.preventDefault();

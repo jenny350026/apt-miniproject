@@ -3,24 +3,44 @@
 {% block content %}
 <div class="col-md-10 col-md-offset-1">
     <div class="panel panel-default">
-        <div class="panel-heading">Connexus Extension</div>
+        <div class="panel-heading">
+            <span>
+                <strong>Connexus Extension</strong>
+            </span>
+            <span> Add pictures to a stream with a click.</span>
+        </div>
 
         <div class="panel-body">
             <div class="col-md-12">
-                <form action="\upload?" method="post">
-                <div>
-                    <p> Add pictures to a stream with a click.</p>
+                <form action="\upload?" method="post" name="upload_form"  onsubmit="return validateForm()">
+                <div class="row">
+                    
                     <img src="{{ img_url }}">
                 </div>
                 
-                <div class="form-group">
-                    <input type="text" placeholder="Stream to add to" id="chrome_query" name="search" class="form-control ui-autocomplete-input" autocomplete="off">
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" placeholder="Stream to add to" id="chrome_query" name="chrome_upload_stream_name" class="form-control ui-autocomplete-input" autocomplete="off">
+                    </div>
                 </div>
 
-                <div id="map_canvas" class="map rounded"></div>
-                
-                <button type="submit" class="btn btn-md btn-primary">Submit</button>
+                <div class="row">
+                    <div id="map_canvas" class="map rounded"></div>
+                </div>
 
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" name="latitude" id="latitude" placeholder="Latidude" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" name="longitude" id="longitude" placeholder="Longitude" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <input type="hidden" name="img_url" value="{{ img_url }}">
+                    <button type="submit" class="btn btn-md btn-primary">Submit</button>
+                </div>
                 </form> 
             </div>
         </div>
@@ -28,6 +48,20 @@
 </div>
 
 <script>
+
+function validateForm() {
+    var x = document.forms["upload_form"]["chrome_upload_stream_name"].value;
+    if (x == null || x == "") {
+        toastr.error("Stream name must be filled out");
+        return false;
+    }
+    else {
+        toastr.success("Image Uploaded!");
+        return true;
+    }
+}
+
+
   $(document).ready(function() {
     var cache = {};
     $("#chrome_query").autocomplete({
@@ -62,6 +96,21 @@
     $map.gmap({'zoom': 2, 'disableDefaultUI':true}).bind('init', function(evt, map) {
         my_map = map;
     });  
+
+    $('#map_canvas').gmap().bind('init', function(event, map) { 
+    $(map).click( function(event) {
+        $('#map_canvas').gmap('addMarker', {
+            'position': event.latLng, 
+            'draggable': true, 
+            'bounds': false
+        }, function(map, marker) {
+            //do whatever you need with the maker utilizing this variable
+            marker.__gm_id
+            $("#latitude").val(marker.position.lat);
+            $("#longitude").val(marker.position.lng);
+        });
+    });
+});
 
 </script>
 {% endblock %}

@@ -20,3 +20,8 @@ indexes:
   properties:
   - name: user
   - name: create_time
+
+- kind: View
+  properties:
+  - name: stream
+  - name: time

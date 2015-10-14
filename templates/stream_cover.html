@@ -1,0 +1,12 @@
+<ul class="nav navbar-nav">
+                    {% for stream in streams %}
+                    <li><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src=
+                        {% if stream.cover_url %}
+                            "{{ stream.cover_url }}"
+                        {% else %}
+                            "/static_images/noCoverPhoto.png"
+                        {% endif %}
+                             width="200" height="200" class="rounded"></img></a>
+                    <div style="text-align: center;"> {{ stream.name }} </div></li>
+                    {% endfor %}
+</ul>

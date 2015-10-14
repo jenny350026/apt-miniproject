@@ -11,6 +11,7 @@ import logging
 import jinja2
 import webapp2
 import urllib
+import urllib2
 import os
 import re
 import time
@@ -38,8 +39,8 @@ class Image(ndb.Model):
     stream = ndb.KeyProperty(kind = Stream)
     date = ndb.DateTimeProperty(auto_now_add = True)
     image = ndb.BlobProperty()
-    latitude = ndb.IntegerProperty()
-    longitude = ndb.IntegerProperty()
+    latitude = ndb.FloatProperty()
+    longitude = ndb.FloatProperty()
     comment = ndb.StringProperty()
 
 class Subscriber(ndb.Model):
@@ -218,7 +219,6 @@ class ViewStream(webapp2.RequestHandler):
                                             Subscriber.email == users.get_current_user().email(), 
                                             Subscriber.stream == stream_key)).fetch()
 
-
         # add a new View entry to record number of views, owner view does not count
         view = self.request.get('view')
         is_owner = (stream.user == users.get_current_user())
@@ -237,6 +237,7 @@ class ViewStream(webapp2.RequestHandler):
 
         stream_link = 'stream?stream_id=' + stream_key.urlsafe()
         template_values = { 'images' : images[start:end],
+                            'all_images' : images,
                             'no_file_error' : self.request.get('no_file_error'),
                             'next_start' : next_start,
                             'share_link' : stream_link,
@@ -259,9 +260,8 @@ class Upload(webapp2.RequestHandler):
     def post(self):        
         image = Image()
         image.comment = self.request.get('comment')
-        raw_image = self.request.get('file')
-        longitude = self.request.get('longitude')
-        latitude = self.request.get('latitude')
+        longitude = float(self.request.get('longitude'))
+        latitude = float(self.request.get('latitude'))
         if longitude:
             image.longitude = longitude
         else:
@@ -272,8 +272,16 @@ class Upload(webapp2.RequestHandler):
         else:
             image.latitude = randint(-90, 90)
 
-        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
-        image_list = Image.query(Image.stream == stream_key).order(-Image.date).fetch()    
+        chrome_upload_stream_name = self.request.get('chrome_upload_stream_name')
+        raw_image = None
+
+        if chrome_upload_stream_name:
+            stream_key = Stream.query(Stream.name == chrome_upload_stream_name).fetch()[0].key
+            raw_image = urllib2.urlopen(self.request.get('img_url')).read()
+        else:
+            stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+            raw_image = self.request.get('file')    
+
         if raw_image:
             # image.image = images.resize(raw_image, 400, 400)
             image.image = raw_image
@@ -283,6 +291,7 @@ class Upload(webapp2.RequestHandler):
             redirect_dict = { 'stream_id' : stream_key.urlsafe(),'no_file_error' : "" }
         else:
             redirect_dict = { 'stream_id' : stream_key.urlsafe(),'no_file_error' : "no file" }
+
         self.redirect('/stream?' + urllib.urlencode( redirect_dict )) 
 
 
@@ -337,10 +346,7 @@ class Search(webapp2.RequestHandler):
     def post(self):
         keyword = self.request.get('search')
         result = []
-        if keyword == "":
-            no_keyword = "on"
-        else:
-            no_keyword = "off"            
+        if keyword:      
             streams = Stream().query().order(-Stream.last_update_time).fetch()
             # TODO possibly improve search with tags etc.
             for stream in streams:
@@ -354,7 +360,7 @@ class Search(webapp2.RequestHandler):
 
         template_values = { 'streams' : result, 
                             'search' : 'on',                           
-                            'no_keyword' : no_keyword }
+                            'keyword' : keyword }
         template = JINJA_ENVIRONMENT.get_template('/templates/view.html')
         self.response.write(template.render(template_values))
         
