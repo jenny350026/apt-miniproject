@@ -58,6 +58,17 @@
                     
                     </div>
 
+                    <div class="pagination">
+                        <ul>
+                        <li class="previous"><a href="#fakelink" class="fui-arrow-left"></a></li>
+                        {% for index in range(1, total_pages)%}
+                        <li><a href="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ (loop.index - 1) * 3 }}">{{ loop.index }}</a></li>
+                        {% endfor %}
+                        <li class="next"><a href="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" class="fui-arrow-right"></a></li>
+                        </ul>
+                    </div> <!-- /pagination -->
+
+
                     {% if all_images|length > 3 %}
                     <div class="col-xs-4">                                            
                         <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
@@ -99,7 +110,6 @@
             {% if is_owner == true %}
 
             <div id="actions">
-                <form action="/upload?stream_id={{ stream.key.urlsafe() }}" enctype="multipart/form-data" class="dropzone" method="post" id="my_dropzone">
                     <div>
                         <!-- <input type="text" name="comments" placeholder="Comments"> <br> -->
                     </div>
@@ -126,16 +136,16 @@
 
                         <div class="col-md-5" style="margin-top: 10px;">
                             <!-- The global file processing state -->
-<!--
+
                             <span class="fileupload-process">
                                 <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                                     <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
                                 </div>
                             </span>
--->
+
                         </div>
                     </div>
-                </form>
+               
             </div>
 
             <div class="table table-striped" class="files" id="previews">
@@ -230,36 +240,16 @@ $(document).ready(function() {
         url: "/upload?stream_id={{ stream.key.urlsafe()}}&view=true", // Set the url
         thumbnailWidth: 200,
         thumbnailHeight: 200,
-        parallelUploads: 20,
+        maxFilesize: 10, // MB
+        parallelUploads: 20,        
         previewTemplate: previewTemplate,
+        acceptedFiles: "image/*",
+        paramName: "file",
         autoQueue: false, // Make sure the files aren't queued until manually added
         previewsContainer: "#previews", // Define the container to display the previews
         clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
     });
 
-    Dropzone.options.myDropzone = {
-        paramName: "file", // The name that will be used to transfer the file
-        maxFilesize: 10, // MB
-        clickable: true,
-        dictDefaultMessage: "",
-        acceptedFiles: "image/*",
-        
-        accept: function(file, done) {
-            if (file.name == "justinbieber.jpg") {
-                done("Naha, you don't.");
-                alert("Added file.");
-            }
-            else { 
-                done("Excellent!");
-                alert("Added file.");
-            }
-        }
-    };
-
-    //myDropzone1.on("addedfile", function(file) {
-    //    // Hookup the start button
-    //    file.previewElement.querySelector(".start").onclick = function() { myDropzone1.enqueueFile(file); };        
-    //});
 
     // Update the total progress bar
     myDropzone1.on("totaluploadprogress", function(progress) {
@@ -270,11 +260,15 @@ $(document).ready(function() {
         document.querySelector("#total-progress .progress-bar").style.opacity = "0";
     });
 
+    myDropzone1.on("addedfile", function(file) {
+        toastr.info(file.name + " is added!");
+    });
+
     myDropzone1.on("sending", function(file) {
         // Show the total progress bar when upload starts
         document.querySelector("#total-progress").style.opacity = "1";
         // And disable the start button
-        file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
+        // file.previewElement.querySelector("#actions .start").setAttribute("disabled", "disabled");
     });
 
     var finish_content = '<div class="alert alert-success" role="alert" id="finish_alert" style="margin-top: 10px;">' +
@@ -286,7 +280,8 @@ $(document).ready(function() {
     });
 
     // Hide the total progress bar when nothing's uploading anymore
-    myDropzone1.on("queuecomplete", function(progress) {        
+    myDropzone1.on("queuecomplete", function(progress) {  
+        toastr.success('All images uploaded!');      
         document.querySelector("#total-progress").style.opacity = "0";
     });
 
@@ -295,15 +290,17 @@ $(document).ready(function() {
     // `clickable` has already been specified.
     document.querySelector("#actions .start").onclick = function() {
         if(myDropzone1.getFilesWithStatus(Dropzone.ADDED).length > 0){
+            toastr.success('Uploading images!');
             myDropzone1.enqueueFiles(myDropzone1.getFilesWithStatus(Dropzone.ADDED));
-            myDropzone1.processQueue();
+            // myDropzone1.processQueue();
         }
-        else
+        else {
             toastr.error('No files selected!');
-            
+        }
     };
 
     document.querySelector("#actions .cancel").onclick = function() {
+        toastr.error('All files canceled!');
         myDropzone1.removeAllFiles(true);
     };
 </script>

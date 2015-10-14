@@ -237,6 +237,8 @@ class ViewStream(webapp2.RequestHandler):
 
         stream_link = 'stream?stream_id=' + stream_key.urlsafe()
         template_values = { 'images' : images[start:end],
+                            'start' : start,
+                            'total_pages' : len(images)/3,
                             'all_images' : images,
                             'no_file_error' : self.request.get('no_file_error'),
                             'next_start' : next_start,
@@ -281,13 +283,14 @@ class Upload(webapp2.RequestHandler):
         else:
             stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
             raw_image = self.request.get('file')    
-
+        logging.info('uploading files')
         if raw_image:
             # image.image = images.resize(raw_image, 400, 400)
+            logging.info('raw_image')
             image.image = raw_image
             image.stream = stream_key
             image.put()
-            time.sleep(1)
+            time.sleep(2)
 
         self.redirect('/stream?' + urllib.urlencode({ 'stream_id' : stream_key.urlsafe() })) 
 
