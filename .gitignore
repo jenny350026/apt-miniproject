@@ -9,10 +9,15 @@
 !**/*.dat
 !**/*.html
 !**/*.yaml
-!bootstrap/*
-!dropzone/*
-!jquery/*
-!jquery-ui/*
-!jquery-ui-map/*
-!lightbox2/*
+!bootstrap/**
+!css/**
+!dropzone/**
+!jquery/**
+!jquery-ui/**
+!jquery-ui-map/**
+!lightbox2/**
+!Flat-ui/**
+!images/**
+!jQRangeSlider/**
+!toastr/**
 
