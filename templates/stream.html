@@ -134,16 +134,6 @@
                             <span class="fileupload-process"></span>
                         </div>
 
-                        <div class="col-md-5" style="margin-top: 10px;">
-                            <!-- The global file processing state -->
-
-                            <span class="fileupload-process">
-                                <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                                    <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
-                                </div>
-                            </span>
-
-                        </div>
                     </div>
                
             </div>
@@ -245,19 +235,23 @@ $(document).ready(function() {
         previewTemplate: previewTemplate,
         acceptedFiles: "image/*",
         paramName: "file",
+
         autoQueue: false, // Make sure the files aren't queued until manually added
         previewsContainer: "#previews", // Define the container to display the previews
-        clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+        clickable: ".fileinput-button", // Define the element that should be used as click trigger to select files.
+        init: function() {
+            
+        }
     });
 
 
     // Update the total progress bar
-    myDropzone1.on("totaluploadprogress", function(progress) {
-        document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
-    });
+    // myDropzone1.on("totaluploadprogress", function(progress) {
+    //     document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
+    // });
 
     myDropzone1.on("canceled", function(file) {
-        document.querySelector("#total-progress .progress-bar").style.opacity = "0";
+        
     });
 
     myDropzone1.on("addedfile", function(file) {
@@ -266,7 +260,7 @@ $(document).ready(function() {
 
     myDropzone1.on("sending", function(file) {
         // Show the total progress bar when upload starts
-        document.querySelector("#total-progress").style.opacity = "1";
+        
         // And disable the start button
         // file.previewElement.querySelector("#actions .start").setAttribute("disabled", "disabled");
     });
@@ -277,12 +271,13 @@ $(document).ready(function() {
 
     myDropzone1.on("complete", function(file) {
         $("#upload-progress").replaceWith(finish_content);
+        file.previewElement.querySelector(".cancel").setAttribute("disabled", "disabled");
     });
 
     // Hide the total progress bar when nothing's uploading anymore
     myDropzone1.on("queuecomplete", function(progress) {  
         toastr.success('All images uploaded!');      
-        document.querySelector("#total-progress").style.opacity = "0";
+        
     });
 
     // Setup the buttons for all transfers
