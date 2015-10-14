@@ -38,6 +38,9 @@
     <script src="./Flat-ui/dist/js/flat-ui.min.js"></script>
     <link href="./Flat-ui/dist/css/flat-ui.css" rel="stylesheet">
 
+    <!-- toastr -->
+    <link href="./toastr/toastr.css" rel="stylesheet"/>
+    <script type="text/javascript" src="./toastr/toastr.js"></script>
     
     <!-- <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->      
     <!-- <link href="./bootstrap/css/bootstrap-theme.min.css" rel="stylesheet"> -->
@@ -83,6 +86,25 @@
           $('#main').css('opacity', '0.6');
         }
       });
+
+
+    toastr.options = {
+      "closeButton": false,
+      "debug": false,
+      "newestOnTop": false,
+      "progressBar": false,
+      "positionClass": "toast-bottom-left",
+      "preventDuplicates": false,
+      "onclick": null,
+      "showDuration": "300",
+      "hideDuration": "1000",
+      "timeOut": "4000",
+      "extendedTimeOut": "1000",
+      "showEasing": "swing",
+      "hideEasing": "linear",
+      "showMethod": "fadeIn",
+      "hideMethod": "fadeOut"
+    };
     </script>
 	{% block header %}
   <div class="wrapper" style="width: 100%;">
@@ -149,6 +171,7 @@
                 response( cache[ term ] );
                 return;
             }
+
             $(function () {
                 $.getJSON( "/search_request?", request, function( data ) {
                     cache[ term ] = data;

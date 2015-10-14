@@ -227,11 +227,13 @@ $(document).ready(function() {
                 console.log(msg)
                 if (msg === 'Success') {
                     if($('#subscribe').text() === "Subscribe") {
+                        toastr.success('Successfully subscribed!');
                         console.log("subscribed");
                         $('#subscribe').text("Unsubscribe");
                         $('#subscribe-heading').text("Unsubscribe from");
                     }                        
                     else {
+                        toastr.info('Successfully unsubscribed!');
                         console.log("unsubscribed");
                         $('#subscribe').text("Subscribe");
                         $('#subscribe-heading').text("Subscribe to");

@@ -16,6 +16,7 @@ handlers:
 - url: /tasks/email_trending
   script: connexus.app
   login: admin
+
 - url: /dropzone
   static_dir: dropzone
 - url: /bootstrap
@@ -32,6 +33,9 @@ handlers:
   static_dir: jquery
 - url: /lightbox2
   static_dir: lightbox2
+- url: /toastr
+  static_dir: toastr
+
 - url: /.*
   script: connexus.app
   login: required

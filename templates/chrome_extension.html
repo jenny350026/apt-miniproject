@@ -1,0 +1,67 @@
+{% extends "/templates/base.html" %}
+
+{% block content %}
+<div class="col-md-10 col-md-offset-1">
+    <div class="panel panel-default">
+        <div class="panel-heading">Connexus Extension</div>
+
+        <div class="panel-body">
+            <div class="col-md-12">
+                <form action="\upload?" method="post">
+                <div>
+                    <p> Add pictures to a stream with a click.</p>
+                    <img src="{{ img_url }}">
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" placeholder="Stream to add to" id="chrome_query" name="search" class="form-control ui-autocomplete-input" autocomplete="off">
+                </div>
+
+                <div id="map_canvas" class="map rounded"></div>
+                
+                <button type="submit" class="btn btn-md btn-primary">Submit</button>
+
+                </form> 
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    var cache = {};
+    $("#chrome_query").autocomplete({
+        minLength : 1,
+        source : function(request, response) {
+            var term = request.term;
+            if (term.trim() == '')
+                return;
+            if ( term in cache ) {
+                response( cache[ term ] );
+                return;
+            }
+
+            $(function () {
+                $.getJSON( "/search_request?", request, function( data ) {
+                    cache[ term ] = data;
+                    response($.map( data.stream_names, function(value, key) {
+                        return {
+                            label : value,
+                            value : key
+                        };
+                    }));
+                });
+            });
+        }
+    });
+  });
+
+    var $map = $('#map_canvas');
+    var my_map;
+
+    $map.gmap({'zoom': 2, 'disableDefaultUI':true}).bind('init', function(evt, map) {
+        my_map = map;
+    });  
+
+</script>
+{% endblock %}

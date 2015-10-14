@@ -2,14 +2,6 @@
 
 {% block content %}
 
-
-<!-- <form action="\search?" method="post">
-    <div>
-    	<input type="text" name="search" id="query" placeholder="Type search keyword here" class="form-control ui-autocomplete-input" autocomplete="off">
-        <button type="submit" class="btn btn-lg btn-primary">Search</button>
-    </div>
-</form> -->
-
 {% if no_keyword == "on" %}
 <div>
     Please enter a keyword.
@@ -34,7 +26,7 @@
 </div>
 {% else %}
     {% if no_keyword == "off" %}
-    <div>No result if found.</div>
+    <div>No result is found.</div>
     {% endif %}
 {% endif %}
 {% endblock %}

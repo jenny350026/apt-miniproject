@@ -49,6 +49,10 @@
                         $.each( data.image_location, function(index, element) {
                             $map.gmap('addMarker', {
                                 'position': new google.maps.LatLng(element.lat, element.lng)
+                            }).mouseout(function() {
+                                $map.gmap('closeInfoWindow');
+                            }).mouseover(function() {
+                                $map.gmap('openInfoWindow', { 'content': '<img src=\"/img?img_id='+ element.content + '\" width="200" height="200">' }, this);
                             });
                         });
                     });
@@ -70,6 +74,10 @@
                         $.each( data.image_location, function(index, element) {
                             $map.gmap('addMarker', {
                                 'position': new google.maps.LatLng(element.lat, element.lng)
+                            }).mouseout(function() {
+                                $map.gmap('closeInfoWindow');
+                            }).mouseover(function() {
+                                $map.gmap('openInfoWindow', { 'content': element.content }, this);
                             });
                         });
                     });

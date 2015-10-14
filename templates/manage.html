@@ -22,8 +22,8 @@
 						{% for stream in streams %}
 						
 						<tr class="my_streams" id="tablerow{{ stream.name }}">
-							<td>{{ loop.index }}</td>
-							<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true">@{{ stream.name }}</a></td>
+							<td id"index{{ stream.name }}">{{ loop.index }}</td>
+							<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true">{{ stream.name }}</a></td>
 							<td>{{ stream.last_update_time.strftime("%Y/%m/%d %I:%M %p") }}</td>
 							<td>{{ stream.num_picture }}</td>
 							<td>{{ stream.view_count }}</td>
@@ -58,74 +58,81 @@ $(document).ready(function() {
 	$("#unsubscribe").on('click', function(e) {
 		e.preventDefault();
 		var my_subscribes_checked = [];
-		var checked_items = [];
         $(".my_subscribes .checkbox input:checked").each(
             function() {	            		            	
                	my_subscribes_checked.push($(this).attr('name'));		               	
-               	checked_items.push($(this).parent().parent());
             }
         );
 
-        var res = "stream_name=";
-        var i = 0;	 
-        for (i = 0; i < my_subscribes_checked.length; i++) {
-            res += encodeURIComponent(my_subscribes_checked[i]);
-            if (i < my_subscribes_checked.length-1) {
-                res += "&stream_name="
-            }
-        }     
+        if(my_subscribes_checked.length < 1) {
+        	toastr.error('No subscription is selected.')
+        }
+        else {
+        	var res = "stream_name=";
+	        var i = 0;	 
+	        for (i = 0; i < my_subscribes_checked.length; i++) {
+	            res += encodeURIComponent(my_subscribes_checked[i]);
+	            if (i < my_subscribes_checked.length-1) {
+	                res += "&stream_name="
+	            }
+	        }     
 
-        $.ajax({
-            type: 'POST',
-            url: 'unsubscribe',
-            data: res,
-            success: function(msg) {
-            	console.log(msg)
-                if (msg === 'Success') {
-                    for (i = 0; i < checked_items.length; i++) {	                   	
-                    	$('#unsub_tablerow'+ my_subscribes_checked[i]).remove();
-                    }
-
-                }	               
-            }
-        });
-
+	        $.ajax({
+	            type: 'POST',
+	            url: 'unsubscribe',
+	            data: res,
+	            success: function(msg) {
+	            	console.log(msg)
+	                if (msg === 'Success') {
+	                	toastr.success('Successfully unsubscribed!');
+	                    for (i = 0; i < my_subscribes_checked; i++) {	                   	
+	                    	$('#unsub_tablerow'+ my_subscribes_checked[i]).remove();
+	                    }
+	                }          
+	            }
+	        });
+        };
+        
 	});
 
 	$("#remove_stream").on('click', function(e) {			
         e.preventDefault();
         var my_streams_checked = [];
-        var checked_items = [];
+
         $(".my_streams .checkbox input:checked").each(
             function() {	            		            	
-               	my_streams_checked.push($(this).attr('name'));		               	
-               	checked_items.push($(this).parent().parent());
+               	my_streams_checked.push($(this).attr('name'));
             }
         );
+        if(my_streams_checked.length < 1) {
+        	toastr.error("No stream selected.")
+        }
+        else {
+        	var res = "stream_name=";
+	        var i = 0;	      
+	        for (i = 0; i < my_streams_checked.length; i++) {
+	            res += encodeURIComponent(my_streams_checked[i]);
+	            if (i < my_streams_checked.length-1) {
+	                res += "&stream_name="
+	            }
+	        }      	
+	       
+	        $.ajax({
+	            type: 'POST',
+	            url: 'deleteStream',
+	            data: res,
+	            success: function(msg) {
+	                if (msg === 'Success') {
+        				toastr.success("Stream deleted.");
+	                    for (i = 0; i < checked_items.length; i++) {	                   	
+	                    	$('#tablerow'+ my_streams_checked[i]).remove();
+	                    }
 
-        var res = "stream_name=";
-        var i = 0;	      
-        for (i = 0; i < my_streams_checked.length; i++) {
-            res += encodeURIComponent(my_streams_checked[i]);
-            if (i < my_streams_checked.length-1) {
-                res += "&stream_name="
-            }
-        }      	
-       
-        $.ajax({
-            type: 'POST',
-            url: 'deleteStream',
-            data: res,
-            success: function(msg) {
-            	console.log(msg)
-                if (msg === 'Success') {
-                    for (i = 0; i < checked_items.length; i++) {	                   	
-                    	$('#tablerow'+ my_streams_checked[i]).remove();
-                    }
-
-                }	               
-            }
-        });
+	                }	               
+	            }
+	        });
+        }
+        
 
     });
 });

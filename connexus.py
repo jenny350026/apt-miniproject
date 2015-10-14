@@ -352,9 +352,10 @@ class Search(webapp2.RequestHandler):
                             result.append(stream)
 
 
-        template_values = { 'result' : result,                            
+        template_values = { 'streams' : result, 
+                            'search' : 'on',                           
                             'no_keyword' : no_keyword }
-        template = JINJA_ENVIRONMENT.get_template('/templates/search.html')
+        template = JINJA_ENVIRONMENT.get_template('/templates/view.html')
         self.response.write(template.render(template_values))
         
 class Trending(webapp2.RequestHandler):
@@ -415,9 +416,11 @@ class GetImageLocation(webapp2.RequestHandler):
         latLng_dict_list = []
         for image in image_list:
             if query_begin_date_obj <= image.date <= query_end_date_obj:
+                image_key = image.key.urlsafe()
                 latLng_dict = dict()
                 latLng_dict['lat'] = image.latitude
                 latLng_dict['lng'] = image.longitude
+                latLng_dict['content'] = image_key
                 latLng_dict_list.append(latLng_dict)
 
         obj = dict()
@@ -468,6 +471,15 @@ class Social(webapp2.RequestHandler):
         template_values = {}
         template = JINJA_ENVIRONMENT.get_template('/templates/social.html')
         self.response.write(template.render(template_values))
+
+class ChromeExtension(webapp2.RequestHandler):
+    def get(self):
+        image_name = self.request.get('img_url')
+        template_values = {
+            'img_url': image_name
+        }
+        template = JINJA_ENVIRONMENT.get_template('/templates/chrome_extension.html')
+        self.response.write(template.render(template_values))
         
 app = webapp2.WSGIApplication([
     ('/', MainPage),
@@ -488,6 +500,7 @@ app = webapp2.WSGIApplication([
     ('/tasks/email_trending', EmailTrending),
     ('/geoview', GeoView),
     ('/get_image_location', GetImageLocation),
-    ('/social', Social)
+    ('/social', Social),
+    ('/chrome_extension', ChromeExtension)
     
 ], debug=True)
