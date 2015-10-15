@@ -9,6 +9,8 @@
 !**/*.dat
 !**/*.html
 !**/*.yaml
+!**/*.js
+!**/*.png
 !bootstrap/**
 !css/**
 !dropzone/**
