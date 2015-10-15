@@ -196,7 +196,7 @@ Message from %s:
 Connexus: http://apt-miniproject-1078.appspot.com/stream?stream_id=%s""" % (stream.name, stream.user.nickname(), owner_message, stream.key.urlsafe()))
 
             time.sleep(1)
-            self.redirect('/manage')
+            self.redirect('/stream?' + urllib.urlencode({ 'stream_id':stream.key.urlsafe() }))
 
     def get(self):
         template_values = {}
@@ -206,7 +206,13 @@ Connexus: http://apt-miniproject-1078.appspot.com/stream?stream_id=%s""" % (stre
 class ViewStream(webapp2.RequestHandler):
     def get(self):
         # TODO define action for "more picture" button
-        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+        if self.request.get('stream_name'):
+            streams = Stream.query(Stream.name == self.request.get('stream_name')).fetch()
+            if len(streams) > 0:
+                stream_key = streams[0].key
+        else:
+            stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+
         next_start = self.request.get('next_start')        
         if next_start == "" or next_start == None:
             next_start = 0
@@ -487,6 +493,21 @@ class ChromeExtension(webapp2.RequestHandler):
         }
         template = JINJA_ENVIRONMENT.get_template('/templates/chrome_extension.html')
         self.response.write(template.render(template_values))
+
+class CheckStreamName(webapp2.RequestHandler):
+    def get(self):
+        stream_name = self.request.get('stream_name')
+        logging.info("calling check stream" + stream_name)
+        self.response.headers['Content-Type'] = 'text/plain'
+        streams = Stream.query(Stream.name == stream_name).fetch()
+        if(len(streams) > 0):
+            if(users.get_current_user() == streams[0].user):
+                self.response.write('Success')
+            else:
+                self.response.write('No permission')
+        else:
+            self.response.write('No stream')
+            
         
 app = webapp2.WSGIApplication([
     ('/', MainPage),
@@ -508,6 +529,7 @@ app = webapp2.WSGIApplication([
     ('/geoview', GeoView),
     ('/get_image_location', GetImageLocation),
     ('/social', Social),
-    ('/chrome_extension', ChromeExtension)
+    ('/chrome_extension', ChromeExtension),
+    ('/check_stream_name', CheckStreamName)
     
 ], debug=True)

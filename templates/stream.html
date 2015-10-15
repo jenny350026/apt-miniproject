@@ -114,25 +114,23 @@
                         <!-- <input type="text" name="comments" placeholder="Comments"> <br> -->
                     </div>
                     <div class="col-md-12">
-                        <div class="col-md-7">
-                            <span class="btn btn-warning fileinput-button dz-clickable" type="file" name="files[]" multiple>
-                                <i class="fui-plus"></i>
-                                <span>Add files</span>
-                            </span>
+                        <span class="btn btn-warning fileinput-button dz-clickable" type="file" name="files[]" multiple>
+                            <i class="fui-plus"></i>
+                            <span>Add files</span>
+                        </span>
 
-                            <button type="submit" class="btn btn-info start">
-                                <i class="fui-triangle-up"></i>
-                                <span>Start upload</span>
-                            </button>
+                        <button type="submit" class="btn btn-info start">
+                            <i class="fui-triangle-up"></i>
+                            <span>Start upload</span>
+                        </button>
 
-                            <button type="reset" class="btn btn-danger cancel">
-                                <i class="fui-cross"></i>
-                                <span>Cancel upload</span>
-                            </button>
+                        <button type="reset" class="btn btn-danger cancel">
+                            <i class="fui-cross"></i>
+                            <span>Cancel upload</span>
+                        </button>
 
-                                <!-- The global file processing state -->
-                            <span class="fileupload-process"></span>
-                        </div>
+                            <!-- The global file processing state -->
+                        <span class="fileupload-process"></span>
 
                     </div>
                
@@ -269,9 +267,12 @@ $(document).ready(function() {
             '<strong>Well done!</strong> You successfully upload the file.' +
             '</div>';
 
-    myDropzone1.on("complete", function(file) {
+    myDropzone1.on("success", function(file) {
         $("#upload-progress").replaceWith(finish_content);
         file.previewElement.querySelector(".cancel").setAttribute("disabled", "disabled");
+        if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length === 0) {
+            location.reload();
+        }
     });
 
     // Hide the total progress bar when nothing's uploading anymore

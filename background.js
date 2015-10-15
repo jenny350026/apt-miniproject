@@ -1,6 +1,6 @@
 function onClickHandler(info, tab) {
     var sText = info.srcUrl;
-    window.open("http://localhost:15080/chrome_extension?img_url=" + sText, '_blank');
+    window.open("http://localhost:11080/chrome_extension?img_url=" + sText, '_blank');
     
     console.log(sText);
 }
