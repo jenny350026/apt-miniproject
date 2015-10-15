@@ -58,7 +58,7 @@
 <script>
 
 function validateForm() {
-    var x = document.forms["upload_form"]["chrome_upload_stream_name"].value;
+    var x = $("#chrome_query").val();
     if (x == null || x == "") {
         toastr.error("Stream name must be filled out");
         return false;
