@@ -3,11 +3,7 @@
 {% block content %}
 <script>    
     // "myAwesomeDropzone" is the camelized version of the HTML element's ID
-    $('#popoverData').popover();
 </script>
-
- <a id="popoverData" class="btn" href="#" data-content="Popover with data-trigger" rel="popover" data-placement="bottom" data-original-title="Title" data-trigger="hover">Popover with data-trigger</a>
-
 
 <div class="col-md-10 col-md-offset-1">
     <div class="panel panel-default">
@@ -30,7 +26,6 @@
             <div class="col-xs-12">
                 <div class="row">
                     <ul class="nav navbar-nav">
-
                         
                     {% if images %}
                         {% for image in images %}

@@ -241,7 +241,7 @@ class ViewStream(webapp2.RequestHandler):
                 stream_link = 'stream?stream_id=' + stream_key.urlsafe()
                 template_values = { 'images' : images[start:end],
                                     'start' : start,
-                                    'total_pages' : len(images)/3,
+                                    'total_pages' : (len(images) + 3)/3,
                                     'all_images' : images,
                                     'no_file_error' : self.request.get('no_file_error'),
                                     'next_start' : next_start,
