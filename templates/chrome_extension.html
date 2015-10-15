@@ -87,6 +87,7 @@ $("#submit_image").on('click', function(e){
 	            success: function(msg) {
         		    toastr.success("Image uploaded. Redirecting...");
                     location.href = "/stream?stream_name="+stream_name;
+                    console.log("stream name " + stream_name)
 	            }
 	        });
         }

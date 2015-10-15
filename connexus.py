@@ -118,11 +118,9 @@ class Manage(webapp2.RequestHandler):
 
 class DeleteStream(webapp2.RequestHandler):
     def post(self):
-        stream_name = self.request.get_all('stream_name') 
-        logging.info(stream_name[0])
-        for streams in stream_name:
-            logging.info(streams)
-            stream = Stream().query(Stream.name == streams).fetch(1)[0]        
+        stream_ids = self.request.get_all('stream_id') 
+        for stream_id in stream_ids:
+            stream = ndb.Key(urlsafe=stream_id).get()      
             # delete all subcriber, view and image entries to the stream
             ndb.delete_multi(map(lambda x:x.key, Subscriber.query(Subscriber.stream == stream.key).fetch()))
             ndb.delete_multi(map(lambda x:x.key, View.query(View.stream == stream.key).fetch()))
@@ -146,11 +144,11 @@ class DeleteStream(webapp2.RequestHandler):
 
 class Unsubscribe(webapp2.RequestHandler):
     def post(self):
-        unsub_streams = self.request.get_all('stream_name') 
+        unsub_streams = self.request.get_all('stream_id') 
         subscribed_streams = Subscriber().query(Subscriber.email == users.get_current_user().email())
         for subscriber in subscribed_streams.fetch():
-            stream_name = subscriber.stream.get().name
-            if stream_name and stream_name in unsub_streams:
+            stream_id = subscriber.stream
+            if stream_id and stream_id in unsub_streams:
                 subscriber.key.delete()
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.write('Success')
@@ -300,7 +298,7 @@ class Upload(webapp2.RequestHandler):
             image.put()
             time.sleep(2)
 
-        self.redirect('/stream?' + urllib.urlencode({ 'stream_id' : stream_key.urlsafe() })) 
+        self.redirect('/stream?' + urllib.urlencode({ 'stream_name' : stream_key.get().name })) 
 
 
 class Subscribe(webapp2.RequestHandler):
