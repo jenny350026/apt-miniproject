@@ -63,35 +63,36 @@ $("#submit_image").on('click', function(e){
     if (stream_name == null || stream_name == "") {
         toastr.error("Stream name must be filled out");
     }
-
-    $.ajax({
-        url: "/check_stream_name?stream_name=" + stream_name, 
-        type: 'GET',
-    })
-    .done( function(data){ 
-        if(data === "No stream"){
-            toastr.error(stream_name + " does not exist!"); 
-        }
-        else if( data === "No permission"){
-            toastr.error("You don't have permission to upload images to " + stream_name); 
-        }
-        else{
-            var latitude = $("#latitude").val();
-            var longitude = $("#longitude").val();
-            var img = $("#img_url").val();
-            toastr.success("Uploading...");
-	        $.ajax({
-	            type: 'POST',
-	            url: 'upload',
-	            data: 'chrome_upload_stream_name=' + stream_name + '&latitude=' + latitude + '&longitude=' + longitude + '&img_url=' + img,
-	            success: function(msg) {
-        		    toastr.success("Image uploaded. Redirecting...");
-                    location.href = "/stream?stream_name="+stream_name;
-                    console.log("stream name " + stream_name)
-	            }
-	        });
-        }
-    });
+    else{ 
+        $.ajax({
+            url: "/check_stream_name?stream_name=" + stream_name, 
+            type: 'GET',
+        })
+        .done( function(data){ 
+            if(data === "No stream"){
+                toastr.error(stream_name + " does not exist!"); 
+            }
+            else if( data === "No permission"){
+                toastr.error("You don't have permission to upload images to " + stream_name); 
+            }
+            else{
+                var latitude = $("#latitude").val();
+                var longitude = $("#longitude").val();
+                var img = $("#img_url").val();
+                toastr.success("Uploading...");
+    	        $.ajax({
+    	            type: 'POST',
+    	            url: 'upload',
+    	            data: 'chrome_upload_stream_name=' + stream_name + '&latitude=' + latitude + '&longitude=' + longitude + '&img_url=' + img,
+    	            success: function(msg) {
+            		    toastr.success("Image uploaded. Redirecting...");
+                        location.href = "/stream?stream_name="+stream_name;
+                        console.log("stream name " + stream_name)
+    	            }
+    	        });
+            }
+        });
+    }
 });
 
 
