@@ -23,7 +23,7 @@
 						
 						<tr class="my_streams" id="tablerow{{ stream.key.urlsafe() }}">
 							<td id"index{{ stream.name }}">{{ loop.index }}</td>
-							<td><a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true">{{ stream.name }}</a></td>
+							<td><a href="/stream?stream_name={{ stream.name }}&view=true">{{ stream.name }}</a></td>
 							<td>{{ stream.last_update_time.strftime("%Y/%m/%d %I:%M %p") }}</td>
 							<td>{{ stream.num_picture }}</td>
 							<td>{{ stream.view_count }}</td>
@@ -127,7 +127,6 @@ $(document).ready(function() {
 	                if (msg === 'Success') {
         				toastr.success("Stream deleted.");
 	                    for (i = 0; i < my_streams_checked.length; i++) {	  
-
 	                    	$('#tablerow'+ my_streams_checked[i]).remove();
 	                    }
 
@@ -165,7 +164,7 @@ $(document).ready(function() {
 				            	{% for subscription in subscribed %}	
 								<tr class="my_subscribes" id="unsub_tablerow{{ subscription.stream.urlsafe() }}">
 									<td>{{ loop.index }}</td>
-									<td><a href="/stream?stream_id={{ subscription.stream.urlsafe() }}&view=true">{{ subscription.stream.get().name }}</a></td>
+									<td><a href="/stream?stream_name={{ subscription.stream.get().name }}&view=true">{{ subscription.stream.get().name }}</a></td>
 									<td>{{ subscription.stream.get().last_update_time.strftime("%Y-%m-%d %I:%M:%S %p")}}</td>
 									<td>{{ subscription.stream.get().num_picture }}</td>
 									<td>{{ subscription.stream.get().view_count }}</td>
