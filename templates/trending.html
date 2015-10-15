@@ -9,7 +9,7 @@
             <ul class="nav navbar-nav">
                 {% for stream in streams %}
                     <li>
-                        <a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src=
+                        <a href="/stream?stream_name={{ stream.name }}&view=true"><img src=
                             {% if stream.cover_url %}
                                 "{{ stream.cover_url }}"
                             {% else %}

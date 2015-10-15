@@ -20,7 +20,7 @@
             <div class="col-md-4 text-right">
                 <form action="/geoview">
                     <button type="submit" class="btn btn-md btn-primary">Geo View</button>
-                    <input type="hidden" name="stream_id" value="{{ stream.key.urlsafe() }}" />
+                    <input type="hidden" name="stream_name" value="{{ stream.name }}" />
                 </form>
             </div>
             <div id="intelligent_gap"></div>
@@ -62,16 +62,16 @@
                         <ul>
                         <li class="previous"><a href="#fakelink" class="fui-arrow-left"></a></li>
                         {% for index in range(1, total_pages)%}
-                        <li><a href="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ (loop.index - 1) * 3 }}">{{ loop.index }}</a></li>
+                        <li><a href="/stream?stream_name={{ stream.name }}&next_start={{ (loop.index - 1) * 3 }}">{{ loop.index }}</a></li>
                         {% endfor %}
-                        <li class="next"><a href="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" class="fui-arrow-right"></a></li>
+                        <li class="next"><a href="/stream?stream_name={{ stream.name }}&next_start={{ next_start }}" class="fui-arrow-right"></a></li>
                         </ul>
                     </div> <!-- /pagination -->
 
 
                     {% if all_images|length > 3 %}
                     <div class="col-xs-4">                                            
-                        <form action="/stream?stream_id={{ stream.key.urlsafe() }}&next_start={{ next_start }}" method="post">
+                        <form action="/stream?stream_name={{ stream.name }}&next_start={{ next_start }}" method="post">
                     	   <button type="submit" class="btn btn-md btn-primary">More Pictures</button>  
                            <a class="fb-share-button" 
                             data-href={{ share_link }}
