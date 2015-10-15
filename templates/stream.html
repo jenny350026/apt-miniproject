@@ -253,7 +253,7 @@ $(document).ready(function() {
 
     myDropzone1.on("sending", function(file) {
         // Show the total progress bar when upload starts
-        
+        file.previewElement.querySelector(".cancel").setAttribute("disabled", "disabled");
         // And disable the start button
         // file.previewElement.querySelector("#actions .start").setAttribute("disabled", "disabled");
     });
@@ -264,7 +264,6 @@ $(document).ready(function() {
 
     myDropzone1.on("success", function(file) {
         $("#upload-progress").replaceWith(finish_content);
-        file.previewElement.querySelector(".cancel").setAttribute("disabled", "disabled");
         if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length === 0) {
             location.reload();
         }
