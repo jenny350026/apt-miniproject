@@ -14,18 +14,16 @@ import android.widget.Toast;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
-import org.apache.http.Header;
+import cz.msebera.android.httpclient.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.google.gson.Gson;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class ViewAllStreamActivity extends Activity {
-    private AsyncHttpClient httpClient = new AsyncHttpClient();
+    private AsyncHttpClient client = new AsyncHttpClient();
     public static final String REQUEST_ViewAllStreams = "http://apt-miniproject-1078.appspot.com/api/view_all";
     public static final String TAG = "ViewAllStreamActivity";
 
@@ -34,9 +32,9 @@ public class ViewAllStreamActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_all_stream);
 
-        httpClient.get(REQUEST_ViewAllStreams, new AsyncHttpResponseHandler() {
+        client.get(REQUEST_ViewAllStreams, new AsyncHttpResponseHandler() {
             @Override
-            public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody) {
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 String response = "";
                 try {
                     response = new String(responseBody, "UTF-8");
@@ -58,40 +56,40 @@ public class ViewAllStreamActivity extends Activity {
                         Log.v(TAG, jObject2.getString("stream_name"));
                         streamNames.add(jObject2.getString("stream_name"));
                         Log.v(TAG, jObject2.getString("cover_url"));
-                        imageURLs.add(jObject2.getString("cover_url"));
+                        String coverURL = jObject2.getString("cover_url");
+                        if (coverURL.equals("")) {
+                            coverURL = "https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png";
+                        }
+                        imageURLs.add(coverURL);
                     }
                 } catch (JSONException j) {
                     Log.v(TAG, j.toString());
                 }
 
-                    GridView gridview = (GridView) findViewById(R.id.gridView);
-                    gridview.setAdapter(new ImageAdapter(ViewAllStreamActivity.this, imageURLs));
-                    gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                        @Override
-                        public boolean onItemLongClick(AdapterView<?> parent, View v,
-                                                       int position, long id) {
-                            Toast.makeText(ViewAllStreamActivity.this, streamNames.get(position), Toast.LENGTH_SHORT).show();
-                            return true;
-                        }
-                    });
+                GridView gridview = (GridView) findViewById(R.id.gridView);
+                gridview.setAdapter(new ImageAdapter(ViewAllStreamActivity.this, imageURLs));
 
-                    gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View v,
-                                                int position, long id) {
+                gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
+                        Toast.makeText(ViewAllStreamActivity.this, streamNames.get(position), Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                });
 
-                            Intent intent = new Intent(ViewAllStreamActivity.this, ViewSingleActivity.class);
-                            intent.putExtra("position", position);
-                            intent.putExtra("streamName", streamNames.get(position));
-                            startActivity(intent);
-
-                        }
-                    });
-
+                gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                        Intent intent = new Intent(ViewAllStreamActivity.this, ViewSingleActivity.class);
+                        intent.putExtra("position", position);
+                        intent.putExtra("streamName", streamNames.get(position));
+                        startActivity(intent);
+                    }
+                });
             }
 
             @Override
-            public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody, Throwable error) {
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 Log.e(TAG, "There was a problem in retrieving the url : " + error.toString());
             }
         });
