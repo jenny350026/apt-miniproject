@@ -37,7 +37,8 @@ handlers:
   static_dir: toastr
 - url: /static_images
   static_dir: images
-
+- url: /api/.*
+  script: connexus.app
 - url: /.*
   script: connexus.app
   login: required

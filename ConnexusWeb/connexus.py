@@ -356,7 +356,7 @@ class AndroidViewAll(webapp2.RequestHandler):
             
        
         obj['stream'] = stream_list
-        self.response.headers['Content-Type'] = 'application/json'  
+        self.response.headers['Content-Type'] = 'text/plain'  
         self.response.out.write(json.dumps(obj))
 
 class Search(webapp2.RequestHandler):

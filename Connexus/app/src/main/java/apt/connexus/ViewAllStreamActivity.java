@@ -19,6 +19,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.gson.Gson;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class ViewAllStreamActivity extends Activity {
@@ -34,22 +37,32 @@ public class ViewAllStreamActivity extends Activity {
         httpClient.get(REQUEST_ViewAllStreams, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody) {
-                Log.v(TAG, String.valueOf(responseBody));
+                String response = "";
+                try {
+                    response = new String(responseBody, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
 
                 final ArrayList<String> imageURLs = new ArrayList<String>();
                 final ArrayList<String> streamNames = new ArrayList<String>();
                 try {
-                    JSONObject jObject = new JSONObject(String.valueOf(responseBody));
+                    JSONObject jObject = new JSONObject(response);
                     JSONArray streamsDictArr = jObject.getJSONArray("stream");
 
                     for (int i = 0; i < streamsDictArr.length(); i++) {
 
                         String streamsDict = streamsDictArr.getString(i);
                         JSONObject jObject2 = new JSONObject(streamsDict);
+
+                        Log.v(TAG, jObject2.getString("stream_name"));
+                        streamNames.add(jObject2.getString("stream_name"));
                         Log.v(TAG, jObject2.getString("cover_url"));
                         imageURLs.add(jObject2.getString("cover_url"));
-                        streamNames.add(jObject2.getString("stream_name"));
                     }
+                } catch (JSONException j) {
+                    Log.v(TAG, j.toString());
+                }
 
                     GridView gridview = (GridView) findViewById(R.id.gridView);
                     gridview.setAdapter(new ImageAdapter(ViewAllStreamActivity.this, imageURLs));
@@ -75,9 +88,6 @@ public class ViewAllStreamActivity extends Activity {
                         }
                     });
 
-                } catch (JSONException j) {
-                    Log.v(TAG, j.toString());
-                }
             }
 
             @Override
