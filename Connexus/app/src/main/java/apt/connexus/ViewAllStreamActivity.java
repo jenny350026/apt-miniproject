@@ -3,16 +3,94 @@ package apt.connexus;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.Toast;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+
+import org.apache.http.Header;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class ViewAllStreamActivity extends Activity {
+    private AsyncHttpClient httpClient = new AsyncHttpClient();
+    public static final String REQUEST_ViewAllStreams = "http://connexusminiproject.appspot.com/andViewAllStreams";
+    public static final String TAG = "ViewAllStreamActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_all_stream);
+
+        httpClient.get(REQUEST_ViewAllStreams, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody) {
+                Log.v(TAG, String.valueOf(responseBody));
+
+                final ArrayList<String> imageURLs = new ArrayList<String>();
+                final ArrayList<String> streamIDs = new ArrayList<String>();
+                final ArrayList<String> streamNames = new ArrayList<String>();
+                try {
+                    JSONObject jObject = new JSONObject(String.valueOf(responseBody));
+                    String user = jObject.getString("user");
+                    JSONArray streamsDictArr = jObject.getJSONArray("streamDictsArr");
+
+                    for (int i = 0; i < streamsDictArr.length(); i++) {
+                        String streamsDict = streamsDictArr.getString(i);
+                        JSONObject jObject2 = new JSONObject(streamsDict);
+                        imageURLs.add(jObject2.getString("coverURL"));
+                        streamIDs.add(jObject2.getString("streamID"));
+                        streamNames.add(jObject2.getString("streamName"));
+                    }
+
+                    GridView gridview = (GridView) findViewById(R.id.gridView);
+                    gridview.setAdapter(new ImageAdapter(ViewAllStreamActivity.this, imageURLs));
+                    gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                        @Override
+                        public boolean onItemLongClick(AdapterView<?> parent, View v,
+                                                       int position, long id) {
+                            Toast.makeText(ViewAllStreamActivity.this, streamNames.get(position), Toast.LENGTH_SHORT).show();
+                            return true;
+
+                        }
+                    });
+
+                    gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View v,
+                                                int position, long id) {
+
+                            Intent intent = new Intent(ViewAllStreamActivity.this, ViewSingleActivity.class);
+                            intent.putExtra("position", position);
+                            intent.putExtra("streamName", streamNames.get(position));
+                            intent.putExtra("streamID", streamIDs.get(position));
+                            startActivity(intent);
+
+                        }
+                    });
+
+                } catch (JSONException j) {
+                    System.out.println("JSON Error");
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody, Throwable error) {
+                Log.e(TAG, "There was a problem in retrieving the url : " + error.toString());
+            }
+        });
+
+
+
 
         ImageButton stream1btn = (ImageButton) findViewById(R.id.stream1);
         Button nearby_btn = (Button) findViewById(R.id.nearby_btn);
