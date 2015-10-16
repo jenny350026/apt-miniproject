@@ -200,6 +200,20 @@ Connexus: http://apt-miniproject-1078.appspot.com/stream?stream_id=%s""" % (stre
         template_values = {}
         template = JINJA_ENVIRONMENT.get_template('/templates/create.html')
         self.response.write(template.render(template_values))
+
+class AndroidViewStream(webapp2.RequestHandler):
+    def get(self):
+        streams = Stream.query(Stream.name == self.request.get('stream_name')).fetch()
+        obj = dict()
+        for stream in streams: # should only have one
+            images = []
+            for image in Image.query(Image.stream == stream.key).order(-Image.date).fetch():
+                images.append({ 'img_url' : "/img?img_id=" + image.key.urlsafe() })
+            obj['images'] = images
+
+        self.response.headers['Content-Type'] = 'text/plain'  
+        self.response.out.write(json.dumps(obj))
+    
         
 class ViewStream(webapp2.RequestHandler):
     def get(self):
@@ -553,6 +567,7 @@ app = webapp2.WSGIApplication([
     ('/chrome_extension', ChromeExtension),
     ('/check_stream_name', CheckStreamName),
     ('/stream_not_found', StreamNotFound),
-    ('/api/view_all', AndroidViewAll)
+    ('/api/view_all', AndroidViewAll),
+    ('/api/stream', AndroidViewStream)
     
 ], debug=True)
