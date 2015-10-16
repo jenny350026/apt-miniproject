@@ -23,7 +23,7 @@ import java.util.ArrayList;
 
 public class ViewAllStreamActivity extends Activity {
     private AsyncHttpClient httpClient = new AsyncHttpClient();
-    public static final String REQUEST_ViewAllStreams = "http://connexusminiproject.appspot.com/andViewAllStreams";
+    public static final String REQUEST_ViewAllStreams = "http://apt-miniproject-1078.appspot.com/api/view_all";
     public static final String TAG = "ViewAllStreamActivity";
 
     @Override
@@ -37,19 +37,18 @@ public class ViewAllStreamActivity extends Activity {
                 Log.v(TAG, String.valueOf(responseBody));
 
                 final ArrayList<String> imageURLs = new ArrayList<String>();
-                final ArrayList<String> streamIDs = new ArrayList<String>();
                 final ArrayList<String> streamNames = new ArrayList<String>();
                 try {
                     JSONObject jObject = new JSONObject(String.valueOf(responseBody));
-                    String user = jObject.getString("user");
-                    JSONArray streamsDictArr = jObject.getJSONArray("streamDictsArr");
+                    JSONArray streamsDictArr = jObject.getJSONArray("stream");
 
                     for (int i = 0; i < streamsDictArr.length(); i++) {
+
                         String streamsDict = streamsDictArr.getString(i);
                         JSONObject jObject2 = new JSONObject(streamsDict);
-                        imageURLs.add(jObject2.getString("coverURL"));
-                        streamIDs.add(jObject2.getString("streamID"));
-                        streamNames.add(jObject2.getString("streamName"));
+                        Log.v(TAG, jObject2.getString("cover_url"));
+                        imageURLs.add(jObject2.getString("cover_url"));
+                        streamNames.add(jObject2.getString("stream_name"));
                     }
 
                     GridView gridview = (GridView) findViewById(R.id.gridView);
@@ -60,7 +59,6 @@ public class ViewAllStreamActivity extends Activity {
                                                        int position, long id) {
                             Toast.makeText(ViewAllStreamActivity.this, streamNames.get(position), Toast.LENGTH_SHORT).show();
                             return true;
-
                         }
                     });
 
@@ -72,14 +70,13 @@ public class ViewAllStreamActivity extends Activity {
                             Intent intent = new Intent(ViewAllStreamActivity.this, ViewSingleActivity.class);
                             intent.putExtra("position", position);
                             intent.putExtra("streamName", streamNames.get(position));
-                            intent.putExtra("streamID", streamIDs.get(position));
                             startActivity(intent);
 
                         }
                     });
 
                 } catch (JSONException j) {
-                    System.out.println("JSON Error");
+                    Log.v(TAG, j.toString());
                 }
             }
 
@@ -88,8 +85,6 @@ public class ViewAllStreamActivity extends Activity {
                 Log.e(TAG, "There was a problem in retrieving the url : " + error.toString());
             }
         });
-
-
 
 
         ImageButton stream1btn = (ImageButton) findViewById(R.id.stream1);
