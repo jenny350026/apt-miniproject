@@ -1,0 +1,28 @@
+{% extends "/templates/base.html" %}
+
+{% block content %}
+<div class="col-md-10 col-md-offset-1">
+    <div class="panel panel-default">
+        <div class="panel-heading">Social</div>
+
+        <div class="panel-body">
+            <p> <a href="#" id="login-btn">Login with Facebook</a>  to share streams with your friends and groups.</p>
+        </div>
+    </div>
+</div>
+
+<div id="login_check"></div>
+<script type="text/javascript">
+    document.getElementById('login-btn').onclick = function() {
+
+            FB.login(function(response) {
+                if (response.status === 'connected') {
+                    document.getElementById("login_check").innerHTML = "Successfully logged in with Facebook!\n Post streams as status updates"                    
+                }
+            });
+
+      return false;
+    }
+</script>
+    <!-- <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="false"></div> -->
+{% endblock %}

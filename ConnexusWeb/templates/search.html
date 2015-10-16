@@ -1,0 +1,32 @@
+{% extends "/templates/base.html" %}
+
+{% block content %}
+
+{% if no_keyword == "on" %}
+<div>
+    Please enter a keyword.
+</div>
+{% endif %}
+{% if result %}
+<div>
+    <p>
+	{{ result | length }} results for search, 
+	click on an image to view stream
+	</p>
+    <table>
+        <tr>
+        {% for stream in result %}   
+        	<td>
+                <a href="/stream?stream_id={{ stream.key.urlsafe() }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
+                <div> {{ stream.name }} </div>
+            </td>
+        {% endfor %}
+        </tr>
+    </table>
+</div>
+{% else %}
+    {% if no_keyword == "off" %}
+    <div>No result is found.</div>
+    {% endif %}
+{% endif %}
+{% endblock %}

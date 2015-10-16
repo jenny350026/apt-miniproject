@@ -1,0 +1,15 @@
+<html>
+    <body>
+        <h2>Top {{ streams | length }} Trending Streams</h2>
+        <table>
+            <tr>
+                {% for stream in streams %}
+                <td><div>
+                    <a href="/stream?stream_name={{ stream.name }}&view=true"><img src="{{ stream.cover_url }}" width="160" height="160"></img></a>
+                    <p>{{ stream.trending_view_count }} view{% if stream.trending_view_count > 1 %}s{% endif %} in past hour</p>
+                </div></td>
+                {% endfor %}
+            </tr>
+        </table>
+    </body>
+</html>

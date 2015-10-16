@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <!-- jQuery -->
+    <script src="./jquery/jquery-1.11.3.js" type="text/javascript"></script>
+
+    <!-- jQuery UI autocomplete -->
+    <link rel="stylesheet" href="jquery-ui/jquery-ui.min.css" />    
+    <script src="./jquery-ui/jquery-ui.js"></script>
+
+    <!-- Dropzone -->
+    <script src="./dropzone/dist/dropzone.js"></script>
+
+    <!-- Lightbox2 -->
+    <link href="./lightbox2/dist/css/lightbox.css" rel="stylesheet">
+
+    {% block google_api %}
+    {% endblock %}
+    
+    
+
+    <!-- RangeSlider -->
+    <link rel="stylesheet" href="jQRangeSlider/css/iThing.css" type="text/css" />
+    <script src="jQRangeSlider/jQRangeSlider-min.js"></script>
+    <script src="jQRangeSlider/jQDateRangeSlider-min.js"></script>
+    
+    <!-- Bootstrap -->
+    <link href="./Flat-ui/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+
+    <!-- flat-ui -->
+    <script src="./Flat-ui/dist/js/flat-ui.min.js"></script>
+    <link href="./Flat-ui/dist/css/flat-ui.css" rel="stylesheet">
+
+    <!-- toastr -->
+    <link href="./toastr/toastr.css" rel="stylesheet"/>
+    <script type="text/javascript" src="./toastr/toastr.js"></script>
+    
+    <!-- <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->      
+    <!-- <link href="./bootstrap/css/bootstrap-theme.min.css" rel="stylesheet"> -->
+    
+
+    <!-- Custom styles for this template -->
+    <link href="./bootstrap/css/theme.css" rel="stylesheet">
+  <title>Connexus</title>
+
+  <style>
+    .ui-autocomplete {
+      z-index: 1050;
+      width: 500px;
+    }
+  </style>
+  </head>
+
+  <body role="document">
+
+  	<div id="fb-root"></div>
+    
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '834667199987269',
+          xfbml      : true,
+          version    : 'v2.4',
+          oauth      : true
+        });
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+
+      $(document).ready(function(){
+        console.log("haha");
+        if ($('#navbar .drop').css('display') === 'block') {
+          $('#main').css('opacity', '0.6');
+        }
+      });
+
+
+    toastr.options = {
+      "closeButton": false,
+      "debug": false,
+      "newestOnTop": false,
+      "progressBar": false,
+      "positionClass": "toast-bottom-right",
+      "preventDuplicates": false,
+      "onclick": null,
+      "showDuration": "300",
+      "hideDuration": "1000",
+      "timeOut": "4000",
+      "extendedTimeOut": "1000",
+      "showEasing": "swing",
+      "hideEasing": "linear",
+      "showMethod": "fadeIn",
+      "hideMethod": "fadeOut"
+    };
+    </script>
+	{% block header %}
+  <div class="wrapper" style="width: 100%;">
+    <nav class="navbar navbar-inverse navbar-fixed-top">      
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">
+            <i class="fui-home"></i>
+            <span>Connex.us</span>
+          </a>
+        </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+
+          <ul class="nav navbar-nav">
+            <li><a href="/manage">Manage</a></li>
+            <li><a href="/create">Create</a></li>
+            <li><a href="/view_all">View</a></li>
+            
+            <li><a href="/trending">Trending</a></li>
+            <li><a href="/social">Social</a></li>
+            {% if logged_in == true %}
+            <li><a href="{{ url|safe }}">{{ url_linktext }}</li>
+            {% endif %}
+          </ul>
+
+          <form action="\search?" method="post" class="navbar-form navbar-left" role="search">
+            <div class="form-group">
+              <input type="text" placeholder="Search" id="query" name="search" class="form-control ui-autocomplete-input" autocomplete="off">
+            </div>
+            <button id="search_auto" type="submit" class="btn btn-primary">
+              <i class="fui-search"></i>
+              <span>Search</span>
+            </button>
+          </form>                
+            
+        </div><!--/.nav-collapse -->
+
+      
+    </nav>
+
+    <div class="container centered" id="container">
+	{% endblock %}
+	
+	{% block content %}
+	{% endblock %}
+    </div>
+  </div>
+  <script>
+  $(document).ready(function() {
+    var cache = {};
+    $("#query").autocomplete({
+        minLength : 1,
+        source : function(request, response) {
+            var term = request.term;
+            if (term.trim() == '')
+                return;
+            if ( term in cache ) {
+                response( cache[ term ] );
+                return;
+            }
+
+            $(function () {
+                $.getJSON( "/search_request?", request, function( data ) {
+                    cache[ term ] = data;
+                    response($.map( data.stream_names, function(value, key) {
+                        return {
+                            label : value,
+                            value : key
+                        };
+                    }));
+                });
+            });
+        }
+    });
+  });
+  </script>
+  <script src="./lightbox2/dist/js/lightbox.min.js"></script>
+
+  </body>
+</html>
+{% endautoescape %}
