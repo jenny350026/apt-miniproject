@@ -98,6 +98,9 @@ public class LoginActivity extends FragmentActivity implements
         mShouldResolve = false;
         // Show the signed-in UI
         showSignedInUI();
+        Toast.makeText(this, "Welcome! " + Plus.AccountApi.getAccountName(mGoogleApiClient), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, ViewAllStreamActivity.class);
+        startActivity(intent);
     }
     // [END on_connected]
 

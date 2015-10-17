@@ -1,6 +1,7 @@
 package apt.connexus;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +32,7 @@ public class ViewAllStreamActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_all_stream);
+        final Context context = this;
 
         client.get(REQUEST_ViewAllStreams, new AsyncHttpResponseHandler() {
             @Override
@@ -67,7 +69,7 @@ public class ViewAllStreamActivity extends Activity {
                 }
 
                 GridView gridview = (GridView) findViewById(R.id.gridView);
-                gridview.setAdapter(new ImageAdapter(ViewAllStreamActivity.this, imageURLs));
+                gridview.setAdapter(new ImageAdapter(context, imageURLs));
 
                 gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                     @Override
