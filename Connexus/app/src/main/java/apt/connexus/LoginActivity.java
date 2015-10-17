@@ -1,8 +1,11 @@
 package apt.connexus;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -57,6 +60,13 @@ public class LoginActivity extends FragmentActivity implements
                 .addScope(new Scope(Scopes.PROFILE))
                 .addScope(new Scope(Scopes.EMAIL))
                 .build();
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     @Override
@@ -115,11 +125,18 @@ public class LoginActivity extends FragmentActivity implements
     private void onSignInClicked() {
         // User clicked the sign-in button, so begin the sign-in process and automatically
         // attempt to resolve any errors that occur.
-        mShouldResolve = true;
-        mGoogleApiClient.connect();
+        if (!isOnline()) {
+            Toast.makeText(getApplicationContext(),
+                    "You need internet access to perform this action.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        else {
+            mShouldResolve = true;
+            mGoogleApiClient.connect();
 
-        // Show a message to the user that we are signing in.
-        mStatus.setText(R.string.signing_in);
+            // Show a message to the user that we are signing in.
+            mStatus.setText(R.string.signing_in);
+        }
     }
 
     // [START on_sign_out_clicked]

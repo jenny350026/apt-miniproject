@@ -4,12 +4,20 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -22,16 +30,108 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ViewAllStreamActivity extends Activity {
     private AsyncHttpClient client = new AsyncHttpClient();
     public static final String REQUEST_ViewAllStreams = "http://apt-miniproject-1078.appspot.com/api/view_all";
     public static final String TAG = "ViewAllStreamActivity";
 
+    private ViewPager viewPager;
+    private TextView title_textView1, title_textView2, title_textView3;
+    private List<View> views;
+    private int offset = 0;
+    private int currIndex = 0;
+    private View view1,view2,view3;
+
+
+    private void InitViewPager() {
+        viewPager=(ViewPager) findViewById(R.id.vPager);
+        views=new ArrayList<View>();
+        LayoutInflater inflater=getLayoutInflater();
+        view1=inflater.inflate(R.layout.activity_view_all_stream, null);
+        view2=inflater.inflate(R.layout.activity_search_result, null);
+        view3=inflater.inflate(R.layout.activity_nearby, null);
+        views.add(view1);
+        views.add(view2);
+        views.add(view3);
+        viewPager.setAdapter(new MyViewPagerAdapter(views));
+        viewPager.setCurrentItem(0);
+        viewPager.setOnPageChangeListener(new MyOnPageChangeListener());
+    }
+
+    private void InitTextView() {
+        title_textView1 = (TextView) findViewById(R.id.title_textView1);
+        title_textView2 = (TextView) findViewById(R.id.title_textView2);
+        title_textView3 = (TextView) findViewById(R.id.title_textView3);
+
+        title_textView1.setOnClickListener(new MyOnClickListener(0));
+        title_textView2.setOnClickListener(new MyOnClickListener(1));
+        title_textView3.setOnClickListener(new MyOnClickListener(2));
+    }
+
+    private class MyOnClickListener implements View.OnClickListener {
+        private int index=0;
+        public MyOnClickListener(int i){
+            index=i;
+        }
+        public void onClick(View v) {
+            viewPager.setCurrentItem(index);
+        }
+    }
+
+    public class MyViewPagerAdapter extends PagerAdapter {
+        private List<View> mListViews;
+
+        public MyViewPagerAdapter(List<View> mListViews) {
+            this.mListViews = mListViews;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) 	{
+            container.removeView(mListViews.get(position));
+        }
+
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            container.addView(mListViews.get(position), 0);
+            return mListViews.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return  mListViews.size();
+        }
+
+        @Override
+        public boolean isViewFromObject(View arg0, Object arg1) {
+            return arg0==arg1;
+        }
+    }
+
+    public class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
+
+
+        public void onPageScrollStateChanged(int arg0) {
+        }
+
+        public void onPageScrolled(int arg0, float arg1, int arg2) {
+        }
+
+        public void onPageSelected(int arg0) {
+//            Toast.makeText(ViewAllStreamActivity.this, viewPager.getCurrentItem()+"selected", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_all_stream);
+        setContentView(R.layout.viewpager_viewall);
+        InitTextView();
+        InitViewPager();
         final Context context = this;
 
         client.get(REQUEST_ViewAllStreams, new AsyncHttpResponseHandler() {
@@ -95,36 +195,5 @@ public class ViewAllStreamActivity extends Activity {
                 Log.e(TAG, "There was a problem in retrieving the url : " + error.toString());
             }
         });
-
-
-        ImageButton stream1btn = (ImageButton) findViewById(R.id.stream1);
-        Button nearby_btn = (Button) findViewById(R.id.nearby_btn);
-        Button search_btn = (Button) findViewById(R.id.search_btn);
-
-        stream1btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ViewAllStreamActivity.this, ViewSingleActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        nearby_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ViewAllStreamActivity.this, NearbyActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        search_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ViewAllStreamActivity.this, SearchResultActivity.class);
-                startActivity(intent);
-            }
-        });
-
     }
-
 }

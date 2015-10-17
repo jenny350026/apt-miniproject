@@ -12,14 +12,6 @@ public class NearbyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nearby);
 
-        Button view_all_streams_btn = (Button) findViewById(R.id.view_all_streams_btn);
-        view_all_streams_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
     }
 
 

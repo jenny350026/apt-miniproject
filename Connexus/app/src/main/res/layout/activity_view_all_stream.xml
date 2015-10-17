@@ -1,84 +1,35 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context="apt.connexus.ViewAllStreamActivity">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentStart="true">
-        <GridView
-            android:layout_width="wrap_content"
-            android:layout_height="200dp"
-            android:numColumns="4"
-            android:id="@+id/gridView" />
-
-    </LinearLayout>
-
-
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Search"
-        android:id="@+id/search_btn"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="28dp"
-        android:layout_marginBottom="133dp" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="My Subscribed Streams"
-        android:id="@+id/button3"
-        android:layout_alignTop="@+id/search_btn"
-        android:layout_alignStart="@+id/search_btn"
-        android:layout_marginTop="66dp" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:id="@+id/editText"
-        android:layout_above="@+id/search_btn"
-        android:layout_alignStart="@+id/search_btn"
-        android:layout_marginBottom="27dp"
-        android:hint="Find Streams" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Nearby"
-        android:id="@+id/nearby_btn"
-        android:layout_alignTop="@+id/editText"
-        android:layout_toEndOf="@+id/editText"
-        android:layout_marginStart="38dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Connexus"
         android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/search_btn"
         android:textSize="24dp" />
 
-    <ImageButton
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <GridView
+            android:layout_width="wrap_content"
+            android:layout_height="200dp"
+            android:numColumns="4"
+            android:id="@+id/gridView" />
+    </LinearLayout>
+
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/stream1"
-        android:src="@mipmap/ic_launcher"
-        android:layout_alignBottom="@+id/button3"
-        android:layout_toEndOf="@+id/nearby_btn" />
+        android:text="My Subscribed Streams"
+        android:id="@+id/button3" />
 
-
-
-
-</RelativeLayout>
+</LinearLayout>

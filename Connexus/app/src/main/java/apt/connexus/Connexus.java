@@ -4,9 +4,6 @@ import android.content.Context;
 import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 
-/**
- * Created by Gerry on 2015/10/15.
- */
 public class Connexus extends MultiDexApplication {
 
     @Override

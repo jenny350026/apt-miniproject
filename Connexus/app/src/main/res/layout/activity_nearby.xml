@@ -12,13 +12,5 @@
         android:layout_height="wrap_content"
         android:textSize="24dp" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="View All Streams"
-        android:id="@+id/view_all_streams_btn"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="55dp" />
 
 </RelativeLayout>

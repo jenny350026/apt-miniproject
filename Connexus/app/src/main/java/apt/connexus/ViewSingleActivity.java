@@ -2,17 +2,22 @@ package apt.connexus;
 
 import android.app.Activity;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,6 +82,22 @@ public class ViewSingleActivity extends Activity {
 
                 GridView gridview = (GridView) findViewById(R.id.singleStreamGridView);
                 gridview.setAdapter(new ImageAdapter(context, imageURLs));
+                gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View v,
+                                            int position, long id) {
+
+
+                        Dialog imageDialog = new Dialog(context);
+                        imageDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                        imageDialog.setContentView(R.layout.thumbnail_layout);
+                        ImageView image = (ImageView) imageDialog.findViewById(R.id.thumbnail_imageview);
+
+                        Picasso.with(context).load(imageURLs.get(position)).into(image);
+
+                        imageDialog.show();
+                    }
+                });
             }
 
             @Override
