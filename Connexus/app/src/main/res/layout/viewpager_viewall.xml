@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:orientation="vertical" >
+
+
+
+
+<android.support.v4.view.ViewPager
+    android:id="@+id/vPager"
+    android:layout_width="wrap_content"
+    android:layout_height="0dp"
+    android:layout_gravity="center"
+    android:layout_weight="1.0"
+    android:background="#FFFFFF"
+    android:flipInterval="30"
+    android:persistentDrawingCache="animation" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="40.0dip"
+        android:background="@android:color/holo_blue_light" >
+
+        <TextView
+            android:id="@+id/title_textView1"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text=" Streams"
+            android:textSize="20.0dp" />
+
+        <TextView
+            android:id="@+id/title_textView2"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="Search"
+            android:textSize="20.0dp" />
+
+        <TextView
+            android:id="@+id/title_textView3"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="Nearby"
+            android:textSize="20.0dip" />
+    </LinearLayout>
+</LinearLayout>

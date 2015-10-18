@@ -31,4 +31,5 @@ dependencies {
     compile 'com.android.support:multidex:1.0.1'
     compile files('libs/gson-2.4-sources.jar')
     compile files('libs/gson-2.4.jar')
+    compile files('libs/appengine-api-1.0-sdk-1.9.27.jar')
 }

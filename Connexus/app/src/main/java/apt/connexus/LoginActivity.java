@@ -15,6 +15,11 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.appengine.api.oauth.OAuthRequestException;
+
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.Scopes;
@@ -22,11 +27,15 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
+import com.google.appengine.api.users.User;
+
+import java.io.IOException;
 
 public class LoginActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
+
         /* Request code used to invoke sign in user interactions. */
         private static final int RC_SIGN_IN = 0;
         private GoogleApiClient  mGoogleApiClient;
@@ -43,6 +52,8 @@ public class LoginActivity extends FragmentActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -106,6 +117,7 @@ public class LoginActivity extends FragmentActivity implements
         // establish a service connection to Google Play services.
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
+
         // Show the signed-in UI
         showSignedInUI();
         Toast.makeText(this, "Welcome! " + Plus.AccountApi.getAccountName(mGoogleApiClient), Toast.LENGTH_SHORT).show();
@@ -195,6 +207,15 @@ public class LoginActivity extends FragmentActivity implements
                 String name = currentPerson.getDisplayName();
                 mName.setText(name);
 
+                String token;
+                try {
+                    token = GoogleAuthUtil.getToken(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient), "oauth2:" + Scopes.EMAIL);
+                    Log.v(TAG, "token = " + token);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (GoogleAuthException e) {
+                    e.printStackTrace();
+                }
                 // Show users' email address (which requires GET_ACCOUNTS permission)
                 if (true) {
                     String currentAccount = Plus.AccountApi.getAccountName(mGoogleApiClient);

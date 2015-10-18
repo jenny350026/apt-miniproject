@@ -344,12 +344,29 @@ class SearchRequest(webapp2.RequestHandler):
         stream_dict = dict()
         for stream in streams:
             if term.lower() in stream.name.lower():
-                stream_dict[stream.name] = stream.name
+                stream_dict["stream_name"] = stream.name
         obj = dict()
         obj['stream_names'] = stream_dict
 
         self.response.out.write(json.dumps(obj))
 
+class AndroidSearchRequest(webapp2.RequestHandler):
+    def get(self):
+        term = self.request.get('term')
+        streams = Stream.query().order(-Stream.create_time).fetch()
+        obj = dict()
+        stream_list = []
+        for stream in streams:
+            if term.lower() in stream.name.lower():
+                stream_list.append({ 'user_email' : stream.user.email(),
+                                     'stream_name' : stream.name,
+                                     'cover_url' : stream.cover_url
+                                    })
+            
+       
+        obj['stream'] = stream_list
+        self.response.headers['Content-Type'] = 'text/plain'  
+        self.response.out.write(json.dumps(obj))
         
 class ViewAll(webapp2.RequestHandler):
     def get(self):
@@ -568,6 +585,7 @@ app = webapp2.WSGIApplication([
     ('/check_stream_name', CheckStreamName),
     ('/stream_not_found', StreamNotFound),
     ('/api/view_all', AndroidViewAll),
-    ('/api/stream', AndroidViewStream)
+    ('/api/stream', AndroidViewStream),
+    ('/api/search_request', AndroidSearchRequest)
     
 ], debug=True)
