@@ -13,6 +13,7 @@
         android:id="@+id/linearLayout"
         android:layout_above="@+id/view_stream_button"
         android:layout_alignParentStart="true">
+
         <com.google.android.gms.common.SignInButton
             android:id="@+id/sign_in_button"
             android:layout_width="wrap_content"
@@ -75,6 +76,15 @@
             android:text="Email"
             android:id="@+id/email"
             android:gravity="right" />
-    </LinearLayout>>
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Login with existing account on device"
+        android:id="@+id/login_with_existing_account_btn"
+        android:layout_below="@+id/textView2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp" />>
 
 </RelativeLayout>

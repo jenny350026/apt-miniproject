@@ -22,7 +22,9 @@ import com.loopj.android.http.RequestParams;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -40,8 +42,8 @@ public class UploadActivity extends Activity {
 
 
     ImageView selectedImageView;
-    String mCurrentPhotoPath;
-//    Bitmap mbitmap
+    String mCameraPhotoPath;
+    Bitmap myBitmap = null;
 
     private AsyncHttpClient client = new AsyncHttpClient();
 
@@ -59,21 +61,22 @@ public class UploadActivity extends Activity {
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RequestParams params = new RequestParams();
-
-                Bitmap myBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                myBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                myBitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);
 
+                Log.v(TAG, "num bytes" + stream.toByteArray().length);
+
+                RequestParams params = new RequestParams();
                 params.put("file", new ByteArrayInputStream(stream.toByteArray()));
                 params.put("comment", ((TextView) findViewById(R.id.photoComment)).getText().toString());
                 params.put("longitude", 0);
                 params.put("latitude", 0);
                 params.put("stream_id", getIntent().getStringExtra("stream_id"));
-//                params.put("http.protocol.handle-redirects", false);
-                client.setEnableRedirects(false);
+
                 Log.v(TAG, "posting to " + upload_url);
                 Log.v(TAG, "stream_id " + getIntent().getStringExtra("stream_id"));
+
+                Toast.makeText(UploadActivity.this, "Uploading...", Toast.LENGTH_SHORT).show();
 
                 client.post(upload_url, params, new AsyncHttpResponseHandler() {
                     @Override
@@ -86,6 +89,7 @@ public class UploadActivity extends Activity {
                     @Override
                     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                         Log.e(TAG, "There was a problem posting to url : " + error.toString());
+                        Toast.makeText(UploadActivity.this, "Upload failed!", Toast.LENGTH_SHORT).show();
                     }
 
                 });
@@ -139,8 +143,8 @@ public class UploadActivity extends Activity {
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        Log.v(TAG, mCurrentPhotoPath);
+            mCameraPhotoPath = image.getAbsolutePath();
+//        Log.v(TAG, mCurrentPhotoPath);
         return image;
     }
 
@@ -149,31 +153,29 @@ public class UploadActivity extends Activity {
         switch(requestCode) {
             case REQUEST_TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    Log.v(TAG, "displaying image");
-                    Bitmap myBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
-                    Log.v(TAG, myBitmap.toString());
+                    myBitmap = BitmapFactory.decodeFile(mCameraPhotoPath);
                     selectedImageView.setImageBitmap(myBitmap);
                 }
                 break;
             case REQUEST_LIBRARY_PHOTO:
                 if(resultCode == RESULT_OK){
                     Uri selectedImage = data.getData();
-//                    InputStream imageStream = null;
-//                    try {
-//                        imageStream = getContentResolver().openInputStream(selectedImage);
-//                    } catch (FileNotFoundException e) {
-//                        e.printStackTrace();
-//                    }
-//                    Bitmap myBitmap = BitmapFactory.decodeStream(imageStream);
+                    InputStream imageStream = null;
+                    try {
+                        imageStream = getContentResolver().openInputStream(selectedImage);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    myBitmap = BitmapFactory.decodeStream(imageStream);
 //                    mCurrentPhotoPath = (new File(selectedImage.toString())).getAbsolutePath();
-                    mCurrentPhotoPath = selectedImage.getEncodedPath();
+//                    mCurrentPhotoPath = selectedImage.getEncodedPath();
                     selectedImageView.setImageURI(selectedImage);
 
                 }
                 break;
         }
 
-        Log.v(TAG, "photoPath " + mCurrentPhotoPath);
+//        Log.v(TAG, "photoPath " + mCurrentPhotoPath);
     }
 
 

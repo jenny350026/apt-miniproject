@@ -6,19 +6,18 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.appengine.api.oauth.OAuthRequestException;
-
+import com.google.android.gms.auth.UserRecoverableAuthException;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -27,7 +26,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
-import com.google.appengine.api.users.User;
 
 import java.io.IOException;
 
@@ -46,16 +44,24 @@ public class LoginActivity extends FragmentActivity implements
         /* Should we automatically resolve ConnectionResults when possible? */
         private boolean mShouldResolve = false;
 
+        private Button login_with_existing_account_btn;
         private TextView mStatus, mName, mEmail;
 
         private final static String TAG = "LOGIN_ACTIVITY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        login_with_existing_account_btn = (Button) findViewById(R.id.login_with_existing_account_btn);
+        login_with_existing_account_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, AccountList.class);
+                startActivity(intent);
+            }
+        });
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
@@ -120,9 +126,10 @@ public class LoginActivity extends FragmentActivity implements
 
         // Show the signed-in UI
         showSignedInUI();
+        task.execute();
         Toast.makeText(this, "Welcome! " + Plus.AccountApi.getAccountName(mGoogleApiClient), Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, ViewAllStreamActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(this, ViewAllStreamActivity.class);
+//        startActivity(intent);
     }
     // [END on_connected]
 
@@ -199,6 +206,43 @@ public class LoginActivity extends FragmentActivity implements
         updateUI(false);
     }
 
+    AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
+        int REQUEST_CODE_TOKEN_AUTH = 466; // Any number, not really using it anyway.
+        @Override
+        protected String doInBackground(Void... params) {
+            String token = null;
+
+            try {
+                token = GoogleAuthUtil.getToken(
+                        LoginActivity.this,
+                        Plus.AccountApi.getAccountName(mGoogleApiClient),
+                        "oauth2:" + Scopes.EMAIL);
+            } catch (IOException transientEx) {
+                // Network or server error, try later
+                Log.e(TAG, transientEx.toString());
+            } catch (UserRecoverableAuthException e) {
+                // Recover (with e.getIntent())
+                Log.e(TAG, e.toString());
+                Intent recover = e.getIntent();
+                startActivityForResult(recover, REQUEST_CODE_TOKEN_AUTH);
+            } catch (GoogleAuthException authEx) {
+                // The call is not ever expected to succeed
+                // assuming you have already verified that
+                // Google Play services is installed.
+                Log.e(TAG, authEx.toString());
+            }
+
+            return token;
+        }
+
+        @Override
+        protected void onPostExecute(String token) {
+            Log.i(TAG, "Access token retrieved:" + token);
+        }
+
+    };
+
+
     private void updateUI(boolean isSignedIn) {
         if (isSignedIn) {
             Person currentPerson = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
@@ -207,19 +251,10 @@ public class LoginActivity extends FragmentActivity implements
                 String name = currentPerson.getDisplayName();
                 mName.setText(name);
 
-                String token;
-                try {
-                    token = GoogleAuthUtil.getToken(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient), "oauth2:" + Scopes.EMAIL);
-                    Log.v(TAG, "token = " + token);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (GoogleAuthException e) {
-                    e.printStackTrace();
-                }
+
                 // Show users' email address (which requires GET_ACCOUNTS permission)
                 if (true) {
                     String currentAccount = Plus.AccountApi.getAccountName(mGoogleApiClient);
-
                     mEmail.setText(currentAccount);
                 }
             } else {

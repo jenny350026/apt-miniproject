@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.PersistentCookieStore;
 
 import cz.msebera.android.httpclient.Header;
 import org.json.JSONArray;
@@ -32,7 +33,7 @@ import java.util.List;
 public class ViewAllStreamActivity extends Activity {
     private AsyncHttpClient client = new AsyncHttpClient();
     public static final String REQUEST_ViewAllStreams = "http://apt-miniproject-1078.appspot.com/api/view_all";
-    public static final String REQUEST_SearchStreams = "http://apt-miniproject-1078.appspot.com/search_request?term=";
+    public static final String REQUEST_SearchStreams = "http://apt-miniproject-1078.appspot.com/api/search_request?term=";
     public static final String TAG = "ViewAllStreamActivity";
 
     final Context context = this;
@@ -139,7 +140,8 @@ public class ViewAllStreamActivity extends Activity {
         @Override
         public void onClick(View v) {
             String term = search_editText.getText().toString();
-            client.get(REQUEST_SearchStreams+term, search_handler);
+            client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
+            client.get(REQUEST_SearchStreams + term, search_handler);
             Toast.makeText(ViewAllStreamActivity.this, "search " + term, Toast.LENGTH_SHORT).show();
         }
     };
@@ -151,6 +153,7 @@ public class ViewAllStreamActivity extends Activity {
             String response = "";
             try {
                 response = new String(responseBody, "UTF-8");
+                System.out.println(response);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
