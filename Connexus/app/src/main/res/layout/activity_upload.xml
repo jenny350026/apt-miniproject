@@ -25,13 +25,13 @@
         android:layout_height="wrap_content"
         android:text="Use Camera"
         android:id="@+id/camera_btn"
-        android:layout_below="@+id/button2"
+        android:layout_below="@+id/textView4"
         android:layout_alignParentStart="true" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/editText2"
+        android:id="@+id/photoComment"
         android:hint="Add a message"
         android:layout_above="@+id/upload_btn"
         android:layout_alignParentStart="true" />
@@ -48,7 +48,8 @@
         android:layout_width="200dp"
         android:layout_height="250dp"
         android:id="@+id/imageView"
-        android:layout_above="@+id/editText2"
-        android:layout_alignParentStart="true" />
+        android:layout_below="@+id/library_btn"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="29dp" />
 
 </RelativeLayout>

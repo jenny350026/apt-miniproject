@@ -12,10 +12,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -26,11 +31,17 @@ import cz.msebera.android.httpclient.Header;
 public class UploadActivity extends Activity {
 
     static final int REQUEST_TAKE_PHOTO = 1;
+    static final int REQUEST_LIBRARY_PHOTO = 2;
 
-    static final String TAG = "CameraActivity";
+    static final String TAG = "UploadActivity";
 
-    ImageView cameraImageView;
+    static final String upload_url = "http://apt-miniproject-1078.appspot.com/api/upload";
+//    static final String upload_url = "http://localhost:11080/api/upload";
+
+
+    ImageView selectedImageView;
     String mCurrentPhotoPath;
+//    Bitmap mbitmap
 
     private AsyncHttpClient client = new AsyncHttpClient();
 
@@ -41,17 +52,35 @@ public class UploadActivity extends Activity {
 
         Button upload = (Button) findViewById(R.id.upload_btn);
         Button camera_btn = (Button) findViewById(R.id.camera_btn);
+        Button library_btn = (Button) findViewById(R.id.library_btn);
 
-        cameraImageView = (ImageView) findViewById(R.id.imageView);
+        selectedImageView = (ImageView) findViewById(R.id.imageView);
 
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String post_url = "";
-                client.post(post_url, new AsyncHttpResponseHandler() {
+                RequestParams params = new RequestParams();
+
+                Bitmap myBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                myBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+                params.put("file", new ByteArrayInputStream(stream.toByteArray()));
+                params.put("comment", ((TextView) findViewById(R.id.photoComment)).getText().toString());
+                params.put("longitude", 0);
+                params.put("latitude", 0);
+                params.put("stream_id", getIntent().getStringExtra("stream_id"));
+//                params.put("http.protocol.handle-redirects", false);
+                client.setEnableRedirects(false);
+                Log.v(TAG, "posting to " + upload_url);
+                Log.v(TAG, "stream_id " + getIntent().getStringExtra("stream_id"));
+
+                client.post(upload_url, params, new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-
+                        Toast.makeText(UploadActivity.this, "Upload Successful", Toast.LENGTH_SHORT).show();
+                        Log.v(TAG, "Upload Successful");
+                        finish();
                     }
 
                     @Override
@@ -60,11 +89,17 @@ public class UploadActivity extends Activity {
                     }
 
                 });
-
-                finish();
               }
         });
 
+        library_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                photoPickerIntent.setType("image/*");
+                startActivityForResult(photoPickerIntent, REQUEST_LIBRARY_PHOTO);
+            }
+        });
 
 
         camera_btn.setOnClickListener(new View.OnClickListener() {
@@ -111,12 +146,34 @@ public class UploadActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            Log.v(TAG, "displaying image");
-            Bitmap myBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
-            Log.v(TAG, myBitmap.toString());
-            cameraImageView.setImageBitmap(myBitmap);
+        switch(requestCode) {
+            case REQUEST_TAKE_PHOTO:
+                if (resultCode == RESULT_OK) {
+                    Log.v(TAG, "displaying image");
+                    Bitmap myBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
+                    Log.v(TAG, myBitmap.toString());
+                    selectedImageView.setImageBitmap(myBitmap);
+                }
+                break;
+            case REQUEST_LIBRARY_PHOTO:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = data.getData();
+//                    InputStream imageStream = null;
+//                    try {
+//                        imageStream = getContentResolver().openInputStream(selectedImage);
+//                    } catch (FileNotFoundException e) {
+//                        e.printStackTrace();
+//                    }
+//                    Bitmap myBitmap = BitmapFactory.decodeStream(imageStream);
+//                    mCurrentPhotoPath = (new File(selectedImage.toString())).getAbsolutePath();
+                    mCurrentPhotoPath = selectedImage.getEncodedPath();
+                    selectedImageView.setImageURI(selectedImage);
+
+                }
+                break;
         }
+
+        Log.v(TAG, "photoPath " + mCurrentPhotoPath);
     }
 
 

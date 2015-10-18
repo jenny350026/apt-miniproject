@@ -35,12 +35,14 @@ public class ViewSingleActivity extends Activity {
     public static final String TAG = "ViewSingleStream";
     Context context = this;
 
+    private static String stream_id = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_single);
 
-        String streamName = getIntent().getStringExtra("streamName");
+        final String streamName = getIntent().getStringExtra("streamName");
         REQUEST_ViewSingleStream += streamName;
 
 
@@ -59,6 +61,8 @@ public class ViewSingleActivity extends Activity {
                 try {
                     JSONObject jObject = new JSONObject(response);
                     JSONArray streamsDictArr = jObject.getJSONArray("images");
+
+                    stream_id = jObject.getString("stream_id");
 
                     for (int i = 0; i < streamsDictArr.length(); i++) {
 
@@ -123,6 +127,7 @@ public class ViewSingleActivity extends Activity {
                   @Override
                   public void onClick(View v) {
                       Intent intent = new Intent(ViewSingleActivity.this, UploadActivity.class);
+                      intent.putExtra("stream_id", stream_id);
                       startActivity(intent);
                   }
               }
