@@ -6,6 +6,7 @@ from google.appengine.api import images
 from collections import Counter
 from datetime import datetime, timedelta
 from random import randint
+from math import radians, cos, sin, asin, sqrt
 
 import logging
 import jinja2
@@ -461,6 +462,44 @@ class GeoView(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('/templates/geoview.html')
             self.response.write(template.render(template_values))  
 
+
+
+def haversine(lon1, lat1, lon2, lat2):
+    """
+    Calculate the great circle distance between two points 
+    on the earth (specified in decimal degrees)
+    """
+    # convert decimal degrees to radians 
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+    return c * r
+
+class AndroidImageLocation(webapp2.RequestHandler):
+    def get(self):
+        start_lat = self.request.get('lat')
+        start_lng = self.request.get('lng')        
+        image_list = Image.query().order(-Image.date).fetch()
+        image_dict_list = []
+        for image in image_list:
+            image_dict = dict()
+            distance = haversine(float(start_lng), float(start_lat), image.longitude, image.latitude)
+            image_dict['img_url'] = "/img?img_id=" + image.key.urlsafe()
+            image_dict['lat'] = image.latitude
+            image_dict['lng'] = image.longitude
+            image_dict['distance'] = distance
+            image_dict['stream_name'] = image.stream.get().name
+            image_dict_list.append(image_dict)
+        obj = dict()
+        obj['image_location'] = sorted(image_dict_list, key=lambda image_dict: image_dict['distance'])
+        self.response.headers['Content-Type'] = 'application/json'  
+        self.response.out.write(json.dumps(obj))
+
 class GetImageLocation(webapp2.RequestHandler):
     def get(self):
         query_begin_date = self.request.get('start')
@@ -586,6 +625,7 @@ app = webapp2.WSGIApplication([
     ('/stream_not_found', StreamNotFound),
     ('/api/view_all', AndroidViewAll),
     ('/api/stream', AndroidViewStream),
-    ('/api/search_request', AndroidSearchRequest)
+    ('/api/search_request', AndroidSearchRequest),
+    ('/api/image_location', AndroidImageLocation)
     
 ], debug=True)

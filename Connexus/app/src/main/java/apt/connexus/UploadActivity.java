@@ -67,7 +67,7 @@ public class UploadActivity extends Activity {
                 Log.v(TAG, "num bytes" + stream.toByteArray().length);
 
                 RequestParams params = new RequestParams();
-                params.put("file", new ByteArrayInputStream(stream.toByteArray()));
+                params.put("file", new ByteArrayInputStream(stream.toByteArray())
                 params.put("comment", ((TextView) findViewById(R.id.photoComment)).getText().toString());
                 params.put("longitude", 0);
                 params.put("latitude", 0);
