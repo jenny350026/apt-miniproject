@@ -1,9 +1,15 @@
 package apt.connexus;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -23,6 +29,7 @@ import com.loopj.android.http.PersistentCookieStore;
 
 import apt.connexus.adapters.StreamAdapter;
 import apt.connexus.adapters.NearbyAdapter;
+import apt.connexus.adapters.viewPagerAdapter;
 import cz.msebera.android.httpclient.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,19 +44,34 @@ public class ViewAllStreamActivity extends Activity {
     public static final String Domain_name = "http://apt-miniproject-1078.appspot.com";
     public static final String REQUEST_ViewAllStreams = "http://apt-miniproject-1078.appspot.com/api/view_all";
     public static final String REQUEST_SearchStreams = "http://apt-miniproject-1078.appspot.com/api/search_request?term=";
-    public static final String REQUEST_NearbyStreams = "http://apt-miniproject-1078.appspot.com/api/image_location?lat=-3.0&lng=0.0";
+    public static String REQUEST_NearbyStreams = "http://apt-miniproject-1078.appspot.com/api/image_location?";
     public static final String TAG = "ViewAllStreamActivity";
 
     final Context context = this;
     private ViewPager viewPager;
     private TextView title_textView1, title_textView2, title_textView3;
     private List<View> views;
+    private LocationManager locationMgr;
     private int offset = 0;
     private int currIndex = 0;
     private View view1,view2,view3;
     private Button search_btn;
     private EditText search_editText;
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.viewpager_viewall);
+        InitTextView();
+        InitViewPager();
+        client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        locationMgr.removeUpdates(mLocationListener);
+    }
 
     private void InitViewPager() {
         viewPager=(ViewPager) findViewById(R.id.vPager);
@@ -67,7 +89,7 @@ public class ViewAllStreamActivity extends Activity {
         views.add(view1);
         views.add(view2);
         views.add(view3);
-        viewPager.setAdapter(new MyViewPagerAdapter(views));
+        viewPager.setAdapter(new viewPagerAdapter(views));
         viewPager.setCurrentItem(0);
         viewPager.setOnPageChangeListener(new MyOnPageChangeListener());
     }
@@ -92,40 +114,6 @@ public class ViewAllStreamActivity extends Activity {
         }
     }
 
-    public class MyViewPagerAdapter extends PagerAdapter {
-        private List<View> mListViews;
-
-        public MyViewPagerAdapter(List<View> mListViews) {
-            this.mListViews = mListViews;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) 	{
-            container.removeView(mListViews.get(position));
-        }
-
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            container.addView(mListViews.get(position), 0);
-            if(position == 2) {
-                Log.v(TAG, "GET IMAGE LOCATION FROM SERVER");
-                client.get(REQUEST_NearbyStreams, nearby_handler);
-            }
-            return mListViews.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return  mListViews.size();
-        }
-
-        @Override
-        public boolean isViewFromObject(View arg0, Object arg1) {
-            return arg0==arg1;
-        }
-    }
-
     public class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
 
 
@@ -136,7 +124,6 @@ public class ViewAllStreamActivity extends Activity {
         }
 
         public void onPageSelected(int arg0) {
-//            Toast.makeText(ViewAllStreamActivity.this, viewPager.getCurrentItem()+"selected", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -259,33 +246,13 @@ public class ViewAllStreamActivity extends Activity {
                 Log.v(TAG, j.toString());
             }
 
-            GridView gridview = (GridView) view2.findViewById(R.id.search_gridView);
-            gridview.setAdapter(new StreamAdapter(context, imageURLs, streamNames));
-
-            gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
-                    Toast.makeText(ViewAllStreamActivity.this, streamNames.get(position), Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            });
-
-            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                    Intent intent = new Intent(ViewAllStreamActivity.this, ViewSingleActivity.class);
-                    intent.putExtra("position", position);
-                    intent.putExtra("streamName", streamNames.get(position));
-                    startActivity(intent);
-                }
-            });
+            loadGridView(view2, R.id.search_gridView, imageURLs, streamNames, ViewSingleActivity.class);
         }
 
         @Override
-        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-
-        }
+        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {}
     };
+
 
     AsyncHttpResponseHandler view_all_stream_handler = new AsyncHttpResponseHandler() {
         @Override
@@ -319,26 +286,7 @@ public class ViewAllStreamActivity extends Activity {
                 Log.v(TAG, j.toString());
             }
 
-            GridView gridview = (GridView) view1.findViewById(R.id.gridView);
-            gridview.setAdapter(new StreamAdapter(context, imageURLs, streamNames));
-
-            gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
-                    Toast.makeText(ViewAllStreamActivity.this, streamNames.get(position), Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            });
-
-            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                    Intent intent = new Intent(ViewAllStreamActivity.this, ViewSingleActivity.class);
-                    intent.putExtra("position", position);
-                    intent.putExtra("streamName", streamNames.get(position));
-                    startActivity(intent);
-                }
-            });
+            loadGridView(view1, R.id.gridView, imageURLs, streamNames, ViewSingleActivity.class);
         }
 
         @Override
@@ -347,14 +295,93 @@ public class ViewAllStreamActivity extends Activity {
         }
     };
 
+    private void loadGridView(View view, int id, final ArrayList<String> imageURLs, final ArrayList<String> streamNames, final Class<?> cls){
+        GridView gridview = (GridView) view.findViewById(id);
+        gridview.setAdapter(new StreamAdapter(context, imageURLs, streamNames));
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.viewpager_viewall);
-        InitTextView();
-        InitViewPager();
-        client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
+        gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
+                Toast.makeText(ViewAllStreamActivity.this, streamNames.get(position), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                Intent intent = new Intent(ViewAllStreamActivity.this, cls);
+                intent.putExtra("position", position);
+                intent.putExtra("streamName", streamNames.get(position));
+                startActivity(intent);
+            }
+        });
+    }
+
+
+
+
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(final Location location) {
+            //your code here
+            Log.v("Location latitude", String.valueOf(location.getLatitude()));
+            Log.v("Location longitude", String.valueOf(location.getLongitude()));
+            latitude = String.valueOf(location.getLatitude());
+            longitude = String.valueOf(location.getLongitude());
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.v("Location", provider + status);
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.v("Location", provider + " enabled.");
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
+
+    private void initLocation() {
+        locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
+
+            new AlertDialog.Builder(ViewAllStreamActivity.this).setTitle("Location service").setMessage("Start Location service?")
+                    .setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener()
+            {
+
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                }
+            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+            {
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    Toast.makeText(ViewAllStreamActivity.this, "Location service unavailable.", Toast.LENGTH_SHORT).show();
+                }
+            }).show();
+
+        }
+    }
+    private String longitude, latitude;
+
+    public void getNearbyImages(View view) {
+        initLocation();
+        locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10, 10, mLocationListener);
+        locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10, 10, mLocationListener);
+        if(latitude != null) {
+            Log.v(TAG, "GET IMAGE LOCATION FROM SERVER");
+            client.get(REQUEST_NearbyStreams + "lat=" +  latitude + "&lng=" + longitude, nearby_handler);
+        }
+        else
+            Toast.makeText(ViewAllStreamActivity.this, "Location service unavailable.", Toast.LENGTH_SHORT).show();
 
     }
 }

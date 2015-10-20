@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <uses-feature android:name="android.hardware.camera" android:required="true" />
 
@@ -39,20 +40,8 @@
             android:label="@string/title_activity_view_single" >
         </activity>
         <activity
-            android:name=".NearbyActivity"
-            android:label="@string/title_activity_nearby" >
-        </activity>
-        <activity
-            android:name=".SearchResultActivity"
-            android:label="@string/title_activity_search_result" >
-        </activity>
-        <activity
             android:name=".UploadActivity"
             android:label="@string/title_activity_upload" >
-        </activity>
-        <activity
-            android:name=".CameraActivity"
-            android:label="@string/title_activity_camera" >
         </activity>
     </application>
 
