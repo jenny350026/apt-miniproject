@@ -26,6 +26,8 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
+import apt.connexus.adapters.ImageAdapter;
+import apt.connexus.adapters.StreamAdapter;
 import cz.msebera.android.httpclient.Header;
 
 public class ViewSingleActivity extends Activity {
@@ -72,14 +74,13 @@ public class ViewSingleActivity extends Activity {
             } catch (JSONException j) {
                 Log.v(TAG, j.toString());
             }
-
+            Log.v(TAG, "imageUrl size = " + String.valueOf(imageURLs.size()));
             GridView gridview = (GridView) findViewById(R.id.singleStreamGridView);
             gridview.setAdapter(new ImageAdapter(context, imageURLs));
             gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View v,
                                         int position, long id) {
-
 
                     Dialog imageDialog = new Dialog(context);
                     imageDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);

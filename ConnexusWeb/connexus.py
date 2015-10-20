@@ -206,6 +206,7 @@ class AndroidViewStream(webapp2.RequestHandler):
     def get(self):
         streams = Stream.query(Stream.name == self.request.get('stream_name')).fetch()
         obj = dict()
+        obj['stream_id'] = streams[0].key.urlsafe()
         for stream in streams: # should only have one
             images = []
             for image in Image.query(Image.stream == stream.key).order(-Image.date).fetch():
@@ -488,7 +489,14 @@ class AndroidImageLocation(webapp2.RequestHandler):
         image_dict_list = []
         for image in image_list:
             image_dict = dict()
-            distance = haversine(float(start_lng), float(start_lat), image.longitude, image.latitude)
+            if image.latitude:
+                latitude = image.latitude
+                longitude = image.longitude
+            else:
+                latitude = randint(-90, 90)
+                longitude = randint(-180, 180)
+
+            distance = haversine(float(start_lng), float(start_lat), float(longitude), float(latitude))
             image_dict['img_url'] = "/img?img_id=" + image.key.urlsafe()
             image_dict['lat'] = image.latitude
             image_dict['lng'] = image.longitude

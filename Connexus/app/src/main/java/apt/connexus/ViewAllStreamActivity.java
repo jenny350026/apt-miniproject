@@ -21,6 +21,8 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
 
+import apt.connexus.adapters.StreamAdapter;
+import apt.connexus.adapters.NearbyAdapter;
 import cz.msebera.android.httpclient.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,8 +34,10 @@ import java.util.List;
 
 public class ViewAllStreamActivity extends Activity {
     private AsyncHttpClient client = new AsyncHttpClient();
+    public static final String Domain_name = "http://apt-miniproject-1078.appspot.com";
     public static final String REQUEST_ViewAllStreams = "http://apt-miniproject-1078.appspot.com/api/view_all";
     public static final String REQUEST_SearchStreams = "http://apt-miniproject-1078.appspot.com/api/search_request?term=";
+    public static final String REQUEST_NearbyStreams = "http://apt-miniproject-1078.appspot.com/api/image_location?lat=-3.0&lng=0.0";
     public static final String TAG = "ViewAllStreamActivity";
 
     final Context context = this;
@@ -104,6 +108,10 @@ public class ViewAllStreamActivity extends Activity {
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             container.addView(mListViews.get(position), 0);
+            if(position == 2) {
+                Log.v(TAG, "GET IMAGE LOCATION FROM SERVER");
+                client.get(REQUEST_NearbyStreams, nearby_handler);
+            }
             return mListViews.get(position);
         }
 
@@ -133,9 +141,6 @@ public class ViewAllStreamActivity extends Activity {
     }
 
 
-
-
-
     View.OnClickListener search_onclick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -143,6 +148,79 @@ public class ViewAllStreamActivity extends Activity {
             client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
             client.get(REQUEST_SearchStreams + term, search_handler);
             Toast.makeText(ViewAllStreamActivity.this, "search " + term, Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    AsyncHttpResponseHandler nearby_handler = new AsyncHttpResponseHandler(){
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+            String response = "";
+            try {
+                response = new String(responseBody, "UTF-8");
+                System.out.println("Nearby: " + response);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            final ArrayList<String> imageURLs = new ArrayList<String>();
+            final ArrayList<String> streamNames = new ArrayList<String>();
+            final ArrayList<String> distances = new ArrayList<String>();
+            try {
+                JSONObject jObject = new JSONObject(response);
+                JSONArray streamsDictArr = jObject.getJSONArray("image_location");
+
+                for (int i = 0; i < streamsDictArr.length(); i++) {
+
+                    String streamsDict = streamsDictArr.getString(i);
+                    JSONObject jObject2 = new JSONObject(streamsDict);
+
+                    distances.add(jObject2.getString("distance"));
+                    streamNames.add(jObject2.getString("stream_name"));
+                    Log.v(TAG, jObject2.getString("img_url"));
+                    String imageURL = jObject2.getString("img_url");
+                    if (imageURL.equals("")) {
+                        imageURL = "https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png";
+                    }
+                    else {
+                        imageURL = Domain_name + imageURL;
+                    }
+                    imageURLs.add(imageURL);
+                }
+            } catch (JSONException j) {
+                Log.v(TAG, j.toString());
+            }
+
+            GridView gridview = (GridView) view3.findViewById(R.id.nearby_gridView);
+            gridview.setAdapter(new NearbyAdapter(context, imageURLs, distances));
+
+            gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
+                    Toast.makeText(ViewAllStreamActivity.this, streamNames.get(position), Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+
+            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                    Intent intent = new Intent(ViewAllStreamActivity.this, ViewSingleActivity.class);
+                    intent.putExtra("position", position);
+                    intent.putExtra("streamName", streamNames.get(position));
+                    startActivity(intent);
+                }
+            });
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+            String response = "";
+            try {
+                response = new String(responseBody, "UTF-8");
+                System.out.println("Nearby: " + response);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -182,7 +260,7 @@ public class ViewAllStreamActivity extends Activity {
             }
 
             GridView gridview = (GridView) view2.findViewById(R.id.search_gridView);
-            gridview.setAdapter(new ImageAdapter(context, imageURLs));
+            gridview.setAdapter(new StreamAdapter(context, imageURLs, streamNames));
 
             gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
@@ -230,9 +308,7 @@ public class ViewAllStreamActivity extends Activity {
                     String streamsDict = streamsDictArr.getString(i);
                     JSONObject jObject2 = new JSONObject(streamsDict);
 
-                    Log.v(TAG, jObject2.getString("stream_name"));
                     streamNames.add(jObject2.getString("stream_name"));
-                    Log.v(TAG, jObject2.getString("cover_url"));
                     String coverURL = jObject2.getString("cover_url");
                     if (coverURL.equals("")) {
                         coverURL = "https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png";
@@ -244,7 +320,7 @@ public class ViewAllStreamActivity extends Activity {
             }
 
             GridView gridview = (GridView) view1.findViewById(R.id.gridView);
-            gridview.setAdapter(new ImageAdapter(context, imageURLs));
+            gridview.setAdapter(new StreamAdapter(context, imageURLs, streamNames));
 
             gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
@@ -279,5 +355,6 @@ public class ViewAllStreamActivity extends Activity {
         InitTextView();
         InitViewPager();
         client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
+
     }
 }
