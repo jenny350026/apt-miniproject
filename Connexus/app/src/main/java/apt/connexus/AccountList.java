@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -61,12 +62,12 @@ public class AccountList extends ListActivity {
                     client.post(url, new AsyncHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-
+                            Toast.makeText(AccountList.this, "Login successful.", Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
                         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-
+                            Toast.makeText(AccountList.this, "Login fail.", Toast.LENGTH_SHORT).show();
                         }
                     });
                     Intent backToMainActivity = new Intent(getApplicationContext(), LoginActivity.class);

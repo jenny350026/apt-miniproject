@@ -10,14 +10,11 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -42,10 +39,11 @@ import java.util.List;
 public class ViewAllStreamActivity extends Activity {
     private AsyncHttpClient client = new AsyncHttpClient();
     public static final String Domain_name = "http://apt-miniproject-1078.appspot.com";
-    public static final String REQUEST_ViewAllStreams = "http://apt-miniproject-1078.appspot.com/api/view_all";
-    public static final String REQUEST_SearchStreams = "http://apt-miniproject-1078.appspot.com/api/search_request?term=";
-    public static String REQUEST_NearbyStreams = "http://apt-miniproject-1078.appspot.com/api/image_location?";
+    public static final String REQUEST_ViewAllStreams = Domain_name + "/api/view_all";
+    public static final String REQUEST_SearchStreams = Domain_name + "/api/search_request?term=";
+    public static String REQUEST_NearbyStreams = Domain_name + "/api/image_location?";
     public static final String TAG = "ViewAllStreamActivity";
+    private Boolean locationOn = false;
 
     final Context context = this;
     private ViewPager viewPager;
@@ -55,7 +53,6 @@ public class ViewAllStreamActivity extends Activity {
     private int offset = 0;
     private int currIndex = 0;
     private View view1,view2,view3;
-    private Button search_btn;
     private EditText search_editText;
 
     @Override
@@ -64,13 +61,15 @@ public class ViewAllStreamActivity extends Activity {
         setContentView(R.layout.viewpager_viewall);
         InitTextView();
         InitViewPager();
+        client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        locationMgr.removeUpdates(mLocationListener);
+    protected void onStop() {
+        super.onStop();
+        if(locationMgr != null)
+            locationMgr.removeUpdates(mLocationListener);
     }
 
     private void InitViewPager() {
@@ -81,8 +80,6 @@ public class ViewAllStreamActivity extends Activity {
 
         view2=inflater.inflate(R.layout.activity_search_result, null);
 
-        search_btn = (Button) view2.findViewById(R.id.search_btn);
-        search_btn.setOnClickListener(search_onclick);
         search_editText = (EditText) view2.findViewById(R.id.search_editText);
 
         view3=inflater.inflate(R.layout.activity_nearby, null);
@@ -104,6 +101,8 @@ public class ViewAllStreamActivity extends Activity {
         title_textView3.setOnClickListener(new MyOnClickListener(2));
     }
 
+
+
     private class MyOnClickListener implements View.OnClickListener {
         private int index=0;
         public MyOnClickListener(int i){
@@ -123,20 +122,10 @@ public class ViewAllStreamActivity extends Activity {
         public void onPageScrolled(int arg0, float arg1, int arg2) {
         }
 
-        public void onPageSelected(int arg0) {
-        }
+        public void onPageSelected(int arg0) {}
     }
 
 
-    View.OnClickListener search_onclick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            String term = search_editText.getText().toString();
-            client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
-            client.get(REQUEST_SearchStreams + term, search_handler);
-            Toast.makeText(ViewAllStreamActivity.this, "search " + term, Toast.LENGTH_SHORT).show();
-        }
-    };
 
     AsyncHttpResponseHandler nearby_handler = new AsyncHttpResponseHandler(){
         @Override
@@ -229,7 +218,6 @@ public class ViewAllStreamActivity extends Activity {
                 JSONArray streamsDictArr = jObject.getJSONArray("stream");
 
                 for (int i = 0; i < streamsDictArr.length(); i++) {
-
                     String streamsDict = streamsDictArr.getString(i);
                     JSONObject jObject2 = new JSONObject(streamsDict);
 
@@ -271,7 +259,6 @@ public class ViewAllStreamActivity extends Activity {
                 JSONArray streamsDictArr = jObject.getJSONArray("stream");
 
                 for (int i = 0; i < streamsDictArr.length(); i++) {
-
                     String streamsDict = streamsDictArr.getString(i);
                     JSONObject jObject2 = new JSONObject(streamsDict);
 
@@ -324,7 +311,10 @@ public class ViewAllStreamActivity extends Activity {
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(final Location location) {
-            //your code here
+            if(!locationOn) {
+                Toast.makeText(ViewAllStreamActivity.this, "Activated.", Toast.LENGTH_SHORT).show();
+                locationOn = true;
+            }
             Log.v("Location latitude", String.valueOf(location.getLatitude()));
             Log.v("Location longitude", String.valueOf(location.getLongitude()));
             latitude = String.valueOf(location.getLatitude());
@@ -349,25 +339,25 @@ public class ViewAllStreamActivity extends Activity {
 
     private void initLocation() {
         locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER))
-        {
-
-            new AlertDialog.Builder(ViewAllStreamActivity.this).setTitle("Location service").setMessage("Start Location service?")
-                    .setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener()
-            {
-
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                }
-            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-            {
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    Toast.makeText(ViewAllStreamActivity.this, "Location service unavailable.", Toast.LENGTH_SHORT).show();
-                }
-            }).show();
-
+        if (!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            new AlertDialog.Builder(ViewAllStreamActivity.this)
+                    .setTitle("Location service")
+                    .setMessage("Start Location service?")
+                    .setCancelable(false)
+                    .setPositiveButton("OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                    startActivity(intent);
+                                }
+                            })
+                    .setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Toast.makeText(ViewAllStreamActivity.this, "Location service unavailable.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    ).show();
         }
     }
     private String longitude, latitude;
@@ -381,7 +371,12 @@ public class ViewAllStreamActivity extends Activity {
             client.get(REQUEST_NearbyStreams + "lat=" +  latitude + "&lng=" + longitude, nearby_handler);
         }
         else
-            Toast.makeText(ViewAllStreamActivity.this, "Location service unavailable.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ViewAllStreamActivity.this, "Activating location service.", Toast.LENGTH_SHORT).show();
+    }
 
+    public void search(View view) {
+        String term = search_editText.getText().toString();
+        client.get(REQUEST_SearchStreams + term, search_handler);
+        Toast.makeText(ViewAllStreamActivity.this, "search " + term, Toast.LENGTH_SHORT).show();
     }
 }

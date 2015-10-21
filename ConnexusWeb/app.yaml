@@ -41,6 +41,7 @@ handlers:
   script: connexus.app
 - url: /api/.*
   script: connexus.app
+  login: required
 - url: /.*
   script: connexus.app
   login: required

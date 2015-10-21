@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 21
@@ -11,7 +10,6 @@ android {
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
-        multiDexEnabled = true
     }
 
     buildTypes {
@@ -26,7 +24,4 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.+'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.loopj.android:android-async-http:1.4.9'
-    compile 'com.google.android.gms:play-services-identity:8.1.0'
-    compile 'com.google.android.gms:play-services-plus:8.1.0'
-    compile 'com.android.support:multidex:1.0.1'
 }

@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.PersistentCookieStore;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -87,7 +88,7 @@ public class ViewSingleActivity extends Activity {
                     imageDialog.setContentView(R.layout.thumbnail_layout);
                     ImageView image = (ImageView) imageDialog.findViewById(R.id.thumbnail_imageview);
 
-                    Picasso.with(context).load(imageURLs.get(position)).into(image);
+                    Picasso.with(context).load(imageURLs.get(position)).resize(300,300).into(image);
 
                     imageDialog.show();
                 }
@@ -111,6 +112,7 @@ public class ViewSingleActivity extends Activity {
         final String streamName = getIntent().getStringExtra("streamName");
         REQUEST_ViewSingleStream += streamName;
 
+        client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_ViewSingleStream, getSingleStreamHandler);
 
         TextView view_single_textView = (TextView) findViewById(R.id.view_single_textView);
