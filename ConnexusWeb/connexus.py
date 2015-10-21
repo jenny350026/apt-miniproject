@@ -210,6 +210,7 @@ class AndroidViewStream(webapp2.RequestHandler):
             for image in Image.query(Image.stream == stream.key).order(-Image.date).fetch():
                 images.append({ 'img_url' : "/img?img_id=" + image.key.urlsafe() })
             obj['images'] = images
+            obj['stream_id'] = stream.key.urlsafe()
 
         self.response.headers['Content-Type'] = 'text/plain'  
         self.response.out.write(json.dumps(obj))
@@ -276,7 +277,35 @@ class ViewStream(webapp2.RequestHandler):
         redirect_dict = { 'stream_id' : self.request.get('stream_id'), 'next_start' : next_start }
         self.redirect('/stream?' + urllib.urlencode( redirect_dict )) 
         
+class AndroidUpload(webapp2.RequestHandler):
+    def post(self):        
+        image = Image()
+        image.comment = self.request.get('comment')
+        longitude = self.request.get('longitude')
+        latitude = self.request.get('latitude')
+        if longitude:
+            image.longitude = float(longitude)
+        else:
+            image.longitude = randint(-180, 180)
 
+        if latitude:
+            image.latitude = float(latitude)
+        else:
+            image.latitude = randint(-90, 90)
+
+        raw_image = None
+
+        stream_key = ndb.Key(urlsafe = self.request.get('stream_id'))
+        raw_image = self.request.get('file')    
+
+        logging.info('uploading files')
+
+        if raw_image:
+            # image.image = images.resize(raw_image, 400, 400)
+            logging.info('raw_image')
+            image.image = raw_image
+            image.stream = stream_key
+            image.put()
 
 class Upload(webapp2.RequestHandler):
     def post(self):        
@@ -382,7 +411,8 @@ class AndroidViewAll(webapp2.RequestHandler):
         for stream in streams:
             stream_list.append({ 'user_email' : stream.user.email(),
                                  'stream_name' : stream.name,
-                                 'cover_url' : stream.cover_url
+                                 'cover_url' : stream.cover_url,
+                                 'stream_id': stream.key.urlsafe()
                                 })
             
        
@@ -586,6 +616,7 @@ app = webapp2.WSGIApplication([
     ('/stream_not_found', StreamNotFound),
     ('/api/view_all', AndroidViewAll),
     ('/api/stream', AndroidViewStream),
-    ('/api/search_request', AndroidSearchRequest)
+    ('/api/search_request', AndroidSearchRequest),
+    ('/api/upload', AndroidUpload)
     
 ], debug=True)
