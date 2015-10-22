@@ -15,8 +15,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +42,7 @@ public class ViewAllStreamActivity extends Activity {
     private AsyncHttpClient client = new AsyncHttpClient();
     public static final String Domain_name = "http://apt-miniproject-1078.appspot.com";
     public static final String REQUEST_ViewAllStreams = Domain_name + "/api/view_all";
+    public static final String REQUEST_MySubscription = Domain_name + "/api/my_subscription";
     public static final String REQUEST_SearchStreams = Domain_name + "/api/search_request?term=";
     public static String REQUEST_NearbyStreams = Domain_name + "/api/image_location?";
     public static final String TAG = "ViewAllStreamActivity";
@@ -47,13 +50,14 @@ public class ViewAllStreamActivity extends Activity {
 
     final Context context = this;
     private ViewPager viewPager;
-    private TextView title_textView1, title_textView2, title_textView3;
+    private LinearLayout title_linearLayout1, title_linearLayout2, title_linearLayout3;
     private List<View> views;
     private LocationManager locationMgr;
     private int offset = 0;
     private int currIndex = 0;
     private View view1,view2,view3;
     private EditText search_editText;
+    private LinearLayout subscribe_linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,16 +77,20 @@ public class ViewAllStreamActivity extends Activity {
     }
 
     private void InitViewPager() {
-        viewPager=(ViewPager) findViewById(R.id.vPager);
-        views=new ArrayList<View>();
-        LayoutInflater inflater=getLayoutInflater();
-        view1=inflater.inflate(R.layout.activity_view_all_stream, null);
 
-        view2=inflater.inflate(R.layout.activity_search_result, null);
+        viewPager=(ViewPager) findViewById(R.id.vPager);
+        views = new ArrayList<View>();
+        LayoutInflater inflater = getLayoutInflater();
+        view1 = inflater.inflate(R.layout.activity_view_all_stream, null);
+        subscribe_linearLayout = (LinearLayout) view1.findViewById(R.id.subscribe_linearLayout);
+        if(LoginActivity.signedIn)
+            subscribe_linearLayout.setVisibility(View.VISIBLE);
+
+        view2 = inflater.inflate(R.layout.activity_search_result, null);
 
         search_editText = (EditText) view2.findViewById(R.id.search_editText);
 
-        view3=inflater.inflate(R.layout.activity_nearby, null);
+        view3 = inflater.inflate(R.layout.activity_nearby, null);
         views.add(view1);
         views.add(view2);
         views.add(view3);
@@ -92,15 +100,24 @@ public class ViewAllStreamActivity extends Activity {
     }
 
     private void InitTextView() {
-        title_textView1 = (TextView) findViewById(R.id.title_textView1);
-        title_textView2 = (TextView) findViewById(R.id.title_textView2);
-        title_textView3 = (TextView) findViewById(R.id.title_textView3);
+        title_linearLayout1 = (LinearLayout) findViewById(R.id.title_linearLayout1);
+        title_linearLayout2 = (LinearLayout) findViewById(R.id.title_linearLayout2);
+        title_linearLayout3 = (LinearLayout) findViewById(R.id.title_linearLayout3);
 
-        title_textView1.setOnClickListener(new MyOnClickListener(0));
-        title_textView2.setOnClickListener(new MyOnClickListener(1));
-        title_textView3.setOnClickListener(new MyOnClickListener(2));
+        title_linearLayout1.setOnClickListener(new MyOnClickListener(0));
+        title_linearLayout2.setOnClickListener(new MyOnClickListener(1));
+        title_linearLayout3.setOnClickListener(new MyOnClickListener(2));
     }
 
+    public void load_my_subscription(View view) {
+        client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
+        client.get(REQUEST_MySubscription, view_my_subscription_handler);
+    }
+
+    public void load_all_streams(View view) {
+        client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
+        client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
+    }
 
 
     private class MyOnClickListener implements View.OnClickListener {
@@ -201,7 +218,6 @@ public class ViewAllStreamActivity extends Activity {
     };
 
     AsyncHttpResponseHandler search_handler = new AsyncHttpResponseHandler(){
-
         @Override
         public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
             String response = "";
@@ -239,6 +255,46 @@ public class ViewAllStreamActivity extends Activity {
 
         @Override
         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {}
+    };
+
+    AsyncHttpResponseHandler view_my_subscription_handler = new AsyncHttpResponseHandler() {
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+            String response = "";
+            try {
+                response = new String(responseBody, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            final ArrayList<String> imageURLs = new ArrayList<String>();
+            final ArrayList<String> streamNames = new ArrayList<String>();
+            try {
+                JSONObject jObject = new JSONObject(response);
+                JSONArray streamsDictArr = jObject.getJSONArray("stream");
+
+                for (int i = 0; i < streamsDictArr.length(); i++) {
+                    String streamsDict = streamsDictArr.getString(i);
+                    JSONObject jObject2 = new JSONObject(streamsDict);
+
+                    streamNames.add(jObject2.getString("stream_name"));
+                    String coverURL = jObject2.getString("cover_url");
+                    if (coverURL.equals("")) {
+                        coverURL = "https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png";
+                    }
+                    imageURLs.add(coverURL);
+                }
+            } catch (JSONException j) {
+                Log.v(TAG, j.toString());
+            }
+
+            loadGridView(view1, R.id.gridView, imageURLs, streamNames, ViewSingleActivity.class);
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+            Log.e(TAG, "There was a problem in retrieving the url : " + error.toString());
+        }
     };
 
 
@@ -311,19 +367,13 @@ public class ViewAllStreamActivity extends Activity {
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(final Location location) {
-            if(!locationOn) {
-                Toast.makeText(ViewAllStreamActivity.this, "Activated.", Toast.LENGTH_SHORT).show();
-                locationOn = true;
-            }
-            Log.v("Location latitude", String.valueOf(location.getLatitude()));
-            Log.v("Location longitude", String.valueOf(location.getLongitude()));
-            latitude = String.valueOf(location.getLatitude());
-            longitude = String.valueOf(location.getLongitude());
+
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
             Log.v("Location", provider + status);
+
         }
 
         @Override
@@ -360,18 +410,19 @@ public class ViewAllStreamActivity extends Activity {
                     ).show();
         }
     }
+
     private String longitude, latitude;
 
     public void getNearbyImages(View view) {
         initLocation();
-        locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10, 10, mLocationListener);
         locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10, 10, mLocationListener);
+        Toast.makeText(ViewAllStreamActivity.this, "Activating location service.", Toast.LENGTH_SHORT).show();
+        Location location = locationMgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        latitude = String.valueOf(location.getLatitude());
+        longitude = String.valueOf(location.getLongitude());
         if(latitude != null) {
-            Log.v(TAG, "GET IMAGE LOCATION FROM SERVER");
             client.get(REQUEST_NearbyStreams + "lat=" +  latitude + "&lng=" + longitude, nearby_handler);
         }
-        else
-            Toast.makeText(ViewAllStreamActivity.this, "Activating location service.", Toast.LENGTH_SHORT).show();
     }
 
     public void search(View view) {

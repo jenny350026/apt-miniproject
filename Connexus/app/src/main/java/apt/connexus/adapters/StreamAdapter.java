@@ -60,7 +60,7 @@ public class StreamAdapter extends BaseAdapter {
 
 
         Log.v(TAG, imageURLs.get(position));
-        Picasso.with(mContext).load(imageURLs.get(position)).resize(50, 50).centerCrop().into(imageView);
+        Picasso.with(mContext).load(imageURLs.get(position)).resize(200, 200).centerCrop().into(imageView);
         if(streamNames != null) {
             textView.setText(streamNames.get(position));
         }

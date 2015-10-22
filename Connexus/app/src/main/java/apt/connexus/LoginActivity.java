@@ -15,16 +15,20 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
 
+
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Objects;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.cookie.Cookie;
 
 public class LoginActivity extends Activity implements
         LoginDialog.dialogOnClick {
@@ -34,22 +38,34 @@ public class LoginActivity extends Activity implements
     protected AccountManager accountManager;
     private Account[] accounts;
     private Context context = this;
+    public static boolean signedIn = false;
+    private TextView status_textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        status_textView = (TextView) findViewById(R.id.status_textView);
+        checkSignedIn();
         accountManager = AccountManager.get(getApplicationContext());
         accounts = accountManager.getAccountsByType("com.google");
     }
 
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult:" + requestCode + ":" + resultCode + ":" + data);
-
+    private void checkSignedIn() {
+        PersistentCookieStore myCookieStore = new PersistentCookieStore(getApplicationContext());
+        Log.v(TAG, "my cookie store: " + myCookieStore.toString());
+        ArrayList<Cookie> list = new ArrayList<>(myCookieStore.getCookies());
+        for(Cookie cookie: list) {
+            if("apt-miniproject-1078.appspot.com".equals(cookie.getDomain())) {
+                status_textView.setText("You have already signed in!");
+                signedIn = true;
+                return;
+            }
+        }
+        signedIn = false;
+        status_textView.setText("You have not signed in");
     }
+
 
     public boolean isOnline() {
         ConnectivityManager cm =
@@ -58,9 +74,11 @@ public class LoginActivity extends Activity implements
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
+    /************************
+     * Buttons onClick
+     * *********************/
 
     public void onViewStream(View view){
-        Log.v(TAG, "view stream clicked.");
         Intent intent = new Intent(this, ViewAllStreamActivity.class);
         startActivity(intent);
     }
@@ -76,6 +94,22 @@ public class LoginActivity extends Activity implements
         }
     }
 
+
+    public void sign_out(View view) {
+        PersistentCookieStore myCookieStore = new PersistentCookieStore(getApplicationContext());
+        ArrayList<Cookie> list = new ArrayList<>(myCookieStore.getCookies());
+        for(Cookie cookie: list) {
+            if("apt-miniproject-1078.appspot.com".equals(cookie.getDomain())) {
+                myCookieStore.deleteCookie(cookie);
+            }
+        }
+        signedIn = false;
+        status_textView.setText("You have signed out");
+    }
+    /************************
+     * End of Buttons onClick
+     * *********************/
+
     @Override
     public void onAccountClick(int position) {
         Account account = accounts[position];
@@ -83,49 +117,36 @@ public class LoginActivity extends Activity implements
         accountManager.getAuthToken(account, "ah", null, this, new GetAuthTokenCallback(), null);
     }
 
-
     private class GetAuthTokenCallback implements AccountManagerCallback<Bundle> {
         public void run(AccountManagerFuture<Bundle> result) {
             AsyncHttpClient client = new AsyncHttpClient();
             PersistentCookieStore myCookieStore = new PersistentCookieStore(getApplicationContext());
-            Log.v(TAG, myCookieStore.toString());
             client.setCookieStore(myCookieStore);
             try {
-                Bundle bundle;
-                bundle = result.getResult();
+                Bundle bundle = result.getResult();
                 Intent intent = (Intent)bundle.get(AccountManager.KEY_INTENT);
                 if(intent != null) {
                     startActivity(intent);
                 } else {
                     String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-                    Log.v("TOKEN", token);
                     String url = "http://apt-miniproject-1078.appspot.com/_ah/login?continue=http://localhost/&auth=" + token;
                     client.post(url, new AsyncHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                             Toast.makeText(LoginActivity.this, "Login successful.", Toast.LENGTH_SHORT).show();
+                            status_textView.setText("You have already signed in!");
+                            signedIn = true;
                         }
 
                         @Override
                         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                            String response = "";
-                            try {
-                                response = new String(responseBody, "UTF-8");
-                                System.out.println("Fail response: " + response);
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
-                            Toast.makeText(LoginActivity.this, "Login fail.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Login successful.", Toast.LENGTH_SHORT).show();
+                            status_textView.setText("You have already signed in!");
+                            signedIn = true;
                         }
                     });
                 }
-            } catch (OperationCanceledException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (AuthenticatorException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (OperationCanceledException | AuthenticatorException | IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }

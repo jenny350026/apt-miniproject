@@ -88,7 +88,7 @@ public class ViewSingleActivity extends Activity {
                     imageDialog.setContentView(R.layout.thumbnail_layout);
                     ImageView image = (ImageView) imageDialog.findViewById(R.id.thumbnail_imageview);
 
-                    Picasso.with(context).load(imageURLs.get(position)).resize(300,300).into(image);
+                    Picasso.with(context).load(imageURLs.get(position)).resize(500, 500).centerCrop().into(image);
 
                     imageDialog.show();
                 }
@@ -133,6 +133,7 @@ public class ViewSingleActivity extends Activity {
                   public void onClick(View v) {
                       Intent intent = new Intent(ViewSingleActivity.this, UploadActivity.class);
                       intent.putExtra("stream_id", stream_id);
+                      intent.putExtra("stream_name", streamName);
                       startActivity(intent);
                   }
               }

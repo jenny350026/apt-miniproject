@@ -405,6 +405,23 @@ class ViewAll(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('/templates/view.html')
         self.response.write(template.render(template_values))
 
+class AndroidViewSubscription(webapp2.RequestHandler):
+    def get(self):
+        subscribed = Subscriber().query(Subscriber.email == users.get_current_user().email())
+        obj = dict()
+        stream_list = []
+        for sub in subscribed:
+            stream = sub.stream.get()
+            stream_list.append({ 'user_email' : stream.user.email(),
+                     'stream_name' : stream.name,
+                     'cover_url' : stream.cover_url,
+                     'stream_id': stream.key.urlsafe()
+                    })
+       
+        obj['stream'] = stream_list
+        self.response.headers['Content-Type'] = 'text/plain'  
+        self.response.out.write(json.dumps(obj))
+
 class AndroidViewAll(webapp2.RequestHandler):
     def get(self):
         streams = Stream.query().order(-Stream.create_time).fetch()
@@ -665,6 +682,7 @@ app = webapp2.WSGIApplication([
     ('/api/stream', AndroidViewStream),
     ('/api/search_request', AndroidSearchRequest),
     ('/api/upload', AndroidUpload),
-    ('/api/image_location', AndroidImageLocation)
+    ('/api/image_location', AndroidImageLocation),
+    ('/api/my_subscription', AndroidViewSubscription)
     
 ], debug=True)

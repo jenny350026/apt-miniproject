@@ -39,12 +39,16 @@ handlers:
   static_dir: images
 - url: /img
   script: connexus.app
-- url: /api/search_request
+
+- url: /api/my_subscription
+  script: connexus.app
+  login: required
+
+- url: /api/upload
   script: connexus.app
   login: required
 - url: /api/.*
   script: connexus.app
-  login: required
 - url: /.*
   script: connexus.app
   login: required
