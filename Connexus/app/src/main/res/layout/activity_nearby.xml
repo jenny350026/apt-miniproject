@@ -29,12 +29,27 @@
             android:numColumns="4"/>
     </LinearLayout>
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Get Nearby Images"
-        android:onClick="getNearbyImages"
-        android:id="@+id/nearby_btn"
-        android:layout_gravity="center" />
+        android:gravity="center">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Nearby Images"
+            android:onClick="getNearbyImages"
+            android:id="@+id/nearby_btn"
+            android:layout_gravity="center" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="More"
+            android:onClick="moreNearby"
+            android:id="@+id/more_nearby_button" />
+    </LinearLayout>
+
+
 
 </LinearLayout>

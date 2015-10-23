@@ -60,7 +60,7 @@ public class NearbyAdapter extends BaseAdapter {
         textView = (TextView) convertView.findViewById(R.id.adapter_textView);
 
 
-        Log.v(TAG, imageURLs.get(position));
+//        Log.v(TAG, imageURLs.get(position));
         Picasso.with(mContext).load(imageURLs.get(position)).resize(200, 200).into(imageView);
         if(distances != null) {
             String distance = distances.get(position);

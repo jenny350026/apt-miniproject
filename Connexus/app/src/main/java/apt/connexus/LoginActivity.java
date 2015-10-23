@@ -25,7 +25,6 @@ import com.loopj.android.http.PersistentCookieStore;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.cookie.Cookie;
@@ -40,6 +39,7 @@ public class LoginActivity extends Activity implements
     private Context context = this;
     public static boolean signedIn = false;
     private TextView status_textView;
+    public static String userEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +115,8 @@ public class LoginActivity extends Activity implements
         Account account = accounts[position];
         accountManager.invalidateAuthToken("com.google", null);
         accountManager.getAuthToken(account, "ah", null, this, new GetAuthTokenCallback(), null);
+        Log.v(TAG, "account name = " + account.name);
+        userEmail = account.name;
     }
 
     private class GetAuthTokenCallback implements AccountManagerCallback<Bundle> {
@@ -145,6 +147,7 @@ public class LoginActivity extends Activity implements
                             signedIn = true;
                         }
                     });
+
                 }
             } catch (OperationCanceledException | AuthenticatorException | IOException e) {
                 // TODO Auto-generated catch block

@@ -1,31 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@color/background_color"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
-
-
-
-<android.support.v4.view.ViewPager
-    android:id="@+id/vPager"
-    android:layout_width="wrap_content"
-    android:layout_height="0dp"
-    android:layout_gravity="center"
-    android:layout_weight="1.0"
-    android:background="#FFFFFF"
-    android:flipInterval="30"
-    android:persistentDrawingCache="animation" />
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vPager"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="1.0"
+        android:background="#FFFFFF"
+        android:flipInterval="30"
+        android:persistentDrawingCache="animation" />
 
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
         android:layout_height="50.0dip"
-        android:background="#16A085" >
-
-
-
+        android:background="#16A085"
+        android:baselineAligned="false">
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="0dp"
@@ -67,6 +63,12 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_language_white_24dp"/>
         </LinearLayout>
-
     </LinearLayout>
+
+    <com.viewpagerindicator.UnderlinePageIndicator
+        android:id="@+id/titles"
+        android:layout_height="2dp"
+        android:background="#16A085"
+        app:selectedColor="#FFFFFF"
+        android:layout_width="match_parent" />
 </LinearLayout>

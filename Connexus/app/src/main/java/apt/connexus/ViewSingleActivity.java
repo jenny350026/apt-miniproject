@@ -37,9 +37,34 @@ public class ViewSingleActivity extends Activity {
     public String REQUEST_ViewSingleStream = Domain_name + "/api/stream?stream_name=";
     public static final String TAG = "ViewSingleStream";
     Context context = this;
+    private String user_email;
+
+
+    private ArrayList<String> imageURLs;
+    private int currImageIndex = 0;
+
+    public void moreSingle(View view) {
+        if(imageURLs == null)
+            return;
+        currImageIndex += 1;
+        setImageAdapter(currImageIndex);
+    }
+
+    private void setImageAdapter(int currIndex) {
+        int start, end;
+        start = currIndex * 16;
+        if( (currIndex + 1) * 16 > imageURLs.size()) {
+            end = imageURLs.size();
+            currImageIndex = -1;
+        }
+        else {
+            end = (currIndex + 1) * 16;
+        }
+        ArrayList<String> tempImageURLs = new ArrayList<String>(imageURLs.subList(start, end));
+        loadGridView(R.id.singleStreamGridView, tempImageURLs);
+    }
 
     AsyncHttpResponseHandler getSingleStreamHandler =  new AsyncHttpResponseHandler() {
-
         @Override
         public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
             String response = "";
@@ -49,7 +74,7 @@ public class ViewSingleActivity extends Activity {
                 e.printStackTrace();
             }
 
-            final ArrayList<String> imageURLs = new ArrayList<String>();
+            imageURLs = new ArrayList<String>();
             try {
                 JSONObject jObject = new JSONObject(response);
                 JSONArray streamsDictArr = jObject.getJSONArray("images");
@@ -75,24 +100,7 @@ public class ViewSingleActivity extends Activity {
             } catch (JSONException j) {
                 Log.v(TAG, j.toString());
             }
-            Log.v(TAG, "imageUrl size = " + String.valueOf(imageURLs.size()));
-            GridView gridview = (GridView) findViewById(R.id.singleStreamGridView);
-            gridview.setAdapter(new ImageAdapter(context, imageURLs));
-            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View v,
-                                        int position, long id) {
-
-                    Dialog imageDialog = new Dialog(context);
-                    imageDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                    imageDialog.setContentView(R.layout.thumbnail_layout);
-                    ImageView image = (ImageView) imageDialog.findViewById(R.id.thumbnail_imageview);
-
-                    Picasso.with(context).load(imageURLs.get(position)).resize(500, 500).centerCrop().into(image);
-
-                    imageDialog.show();
-                }
-            });
+            setImageAdapter(0);
         }
 
         @Override
@@ -100,6 +108,25 @@ public class ViewSingleActivity extends Activity {
             Log.e(TAG, "There was a problem in retrieving the url : " + error.toString());
         }
     };
+
+    private void loadGridView(int id, final ArrayList<String> urls) {
+        GridView gridview = (GridView) findViewById(id);
+        gridview.setAdapter(new ImageAdapter(context, urls));
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+
+                Dialog imageDialog = new Dialog(context);
+                imageDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                imageDialog.setContentView(R.layout.thumbnail_layout);
+                ImageView image = (ImageView) imageDialog.findViewById(R.id.thumbnail_imageview);
+
+                Picasso.with(context).load(urls.get(position)).resize(500, 500).centerCrop().into(image);
+                imageDialog.show();
+            }
+        });
+    }
 
     private static String stream_id = "";
 
@@ -118,31 +145,34 @@ public class ViewSingleActivity extends Activity {
         TextView view_single_textView = (TextView) findViewById(R.id.view_single_textView);
         view_single_textView.setText("View A Stream: " + streamName);
         Button back_to_streams = (Button) findViewById(R.id.back_to_streams);
+        user_email = getIntent().getStringExtra("userEmail");
+
         Button upload_img = (Button) findViewById(R.id.upload_img);
+        if(user_email.equals(LoginActivity.userEmail))
+            upload_img.setVisibility(View.VISIBLE);
+        back_to_streams.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
-            back_to_streams.setOnClickListener(new View.OnClickListener()  {
-                   @Override
-                   public void onClick(View v) {
-                       finish();
-                   }
-               }
-            );
-
-            upload_img.setOnClickListener(new View.OnClickListener() {
-                  @Override
-                  public void onClick(View v) {
-                      Intent intent = new Intent(ViewSingleActivity.this, UploadActivity.class);
-                      intent.putExtra("stream_id", stream_id);
-                      intent.putExtra("stream_name", streamName);
-                      startActivity(intent);
-                  }
-              }
-            );
-        }
+        upload_img.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ViewSingleActivity.this, UploadActivity.class);
+                intent.putExtra("stream_id", stream_id);
+                intent.putExtra("stream_name", streamName);
+                startActivity(intent);
+            }
+        });
+    }
 
         @Override
         public void onResume(){
             super.onResume();
             client.get(REQUEST_ViewSingleStream, getSingleStreamHandler);
         }
-    }
+
+
+}

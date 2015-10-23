@@ -37,6 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Upload an Image"
+            android:visibility="gone"
             android:id="@+id/upload_img" />
 
         <Button
@@ -44,6 +45,13 @@
             android:layout_height="wrap_content"
             android:text="Streams"
             android:id="@+id/back_to_streams" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="More"
+            android:onClick="moreSingle"
+            android:id="@+id/more_single_button" />
 
     </LinearLayout>
 

@@ -75,6 +75,7 @@ public class UploadActivity extends Activity {
                     Toast.makeText(UploadActivity.this, "Please choose a source.", Toast.LENGTH_SHORT).show();
                 }
                 else {
+                    locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     if(!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER))
                         requestLocation();
                     else {

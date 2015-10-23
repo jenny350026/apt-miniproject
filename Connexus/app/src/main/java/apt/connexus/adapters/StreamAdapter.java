@@ -59,7 +59,7 @@ public class StreamAdapter extends BaseAdapter {
         textView = (TextView) convertView.findViewById(R.id.adapter_textView);
 
 
-        Log.v(TAG, imageURLs.get(position));
+//        Log.v(TAG, imageURLs.get(position));
         Picasso.with(mContext).load(imageURLs.get(position)).resize(200, 200).centerCrop().into(imageView);
         if(streamNames != null) {
             textView.setText(streamNames.get(position));

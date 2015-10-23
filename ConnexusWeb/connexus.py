@@ -549,6 +549,7 @@ class AndroidImageLocation(webapp2.RequestHandler):
             image_dict['lng'] = image.longitude
             image_dict['distance'] = distance
             image_dict['stream_name'] = image.stream.get().name
+            image_dict['user_email'] = image.stream.get().user.email()
             image_dict_list.append(image_dict)
         obj = dict()
         obj['image_location'] = sorted(image_dict_list, key=lambda image_dict: image_dict['distance'])

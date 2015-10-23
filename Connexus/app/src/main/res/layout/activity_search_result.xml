@@ -16,6 +16,12 @@
             android:layout_height="wrap_content"
             android:textSize="24dp"
             android:id="@+id/search_textView" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/search_results_textView" />
+
         <GridView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -38,7 +44,8 @@
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:id="@+id/search_editText"
-            android:hint="Find Streams" />
+            android:hint="Find Streams"
+            android:singleLine="true" />
 
         <Button
             android:layout_width="wrap_content"
