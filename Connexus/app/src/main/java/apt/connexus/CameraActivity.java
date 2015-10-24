@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.List;
 
 
-public class CameraActivity extends ActionBarActivity {
+public class CameraActivity extends Activity {
     private Camera mCamera;
     private CameraPreview mPreview;
 

@@ -12,8 +12,10 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -65,10 +67,10 @@ public class ViewAllStreamActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.viewpager_viewall);
-
-
         InitTextView();
         InitViewPager();
+        initLocation();
+        getNearbyImages();
         client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
     }
@@ -92,6 +94,13 @@ public class ViewAllStreamActivity extends Activity {
         view2 = inflater.inflate(R.layout.activity_search_result, null);
         search_results_textView = (TextView) view2.findViewById(R.id.search_results_textView);
         search_editText = (EditText) view2.findViewById(R.id.search_editText);
+        search_editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                search(v);
+                return true;
+            }
+        });
 
         view3 = inflater.inflate(R.layout.activity_nearby, null);
         views.add(view1);
@@ -472,10 +481,8 @@ public class ViewAllStreamActivity extends Activity {
 
     private String longitude, latitude;
 
-    public void getNearbyImages(View view) {
-        initLocation();
+    public void getNearbyImages() {
         locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10, 10, mLocationListener);
-        Toast.makeText(ViewAllStreamActivity.this, "Activating location service.", Toast.LENGTH_SHORT).show();
         Location location = locationMgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         latitude = String.valueOf(location.getLatitude());
         longitude = String.valueOf(location.getLongitude());
@@ -486,6 +493,8 @@ public class ViewAllStreamActivity extends Activity {
     }
 
     public void search(View view) {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         String term = search_editText.getText().toString();
         client.get(REQUEST_SearchStreams + term, search_handler);
         Toast.makeText(ViewAllStreamActivity.this, "search " + term, Toast.LENGTH_SHORT).show();
