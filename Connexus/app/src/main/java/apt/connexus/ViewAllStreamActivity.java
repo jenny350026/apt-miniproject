@@ -21,6 +21,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,6 +58,7 @@ public class ViewAllStreamActivity extends Activity {
     final Context context = this;
     private ViewPager viewPager;
     private LinearLayout title_linearLayout1, title_linearLayout2, title_linearLayout3;
+    private ImageView title_imageView1, title_imageView2, title_imageView3;
     private List<View> views;
     private LocationManager locationMgr;
     private int offset = 0;
@@ -73,6 +75,9 @@ public class ViewAllStreamActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.viewpager_viewall);
+        title_imageView1 = (ImageView) findViewById(R.id.title_imageView1);
+        title_imageView2 = (ImageView) findViewById(R.id.title_imageView2);
+        title_imageView3 = (ImageView) findViewById(R.id.title_imageView3);
         InitTextView();
         InitViewPager();
         initLocation();
@@ -139,6 +144,7 @@ public class ViewAllStreamActivity extends Activity {
         if(LoginActivity.signedIn)
             subscribe_linearLayout.setVisibility(View.VISIBLE);
 
+
         view2 = inflater.inflate(R.layout.activity_search_result, null);
         search_results_textView = (TextView) view2.findViewById(R.id.search_results_textView);
         search_editText = (EditText) view2.findViewById(R.id.search_editText);
@@ -157,13 +163,16 @@ public class ViewAllStreamActivity extends Activity {
 
         viewPager.setAdapter(new ViewPagerAdapter(views));
         viewPager.setCurrentItem(0);
+        title_imageViews = new ImageView[3];
+        title_imageViews[0] = title_imageView1;
+        title_imageViews[1] = title_imageView2;
+        title_imageViews[2] = title_imageView3;
 
         //Bind the title indicator to the adapter
         UnderlinePageIndicator titleIndicator = (UnderlinePageIndicator) findViewById(R.id.titles);
         titleIndicator.setFades(false);
         titleIndicator.setViewPager(viewPager);
         titleIndicator.setOnPageChangeListener(new MyOnPageChangeListener());
-
     }
 
     private void InitTextView() {
@@ -201,8 +210,19 @@ public class ViewAllStreamActivity extends Activity {
 
     private void changePage(int index){
         setTitle(title_strings[index]);
+        title_imageView1.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_black_24dp));
+        title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_black_24dp));
+        title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_black_24dp));
+        if(index == 0)
+            title_imageView1.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_white_24dp));
+        else if(index == 1)
+            title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_white_24dp));
+        else if(index == 2)
+            title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_white_24dp));
         viewPager.setCurrentItem(index);
     }
+
+    private ImageView[] title_imageViews;
 
     private static final String[] title_strings = {"All Streams", "Search", "Nearby Images"};
 
