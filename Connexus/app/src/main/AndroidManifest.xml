@@ -40,8 +40,8 @@
         <activity
             android:name=".ViewAllStreamActivity"
             android:label="@string/title_activity_view_all_stream"
-            android:logo="@drawable/ic_home_white_24dp"
-            android:windowSoftInputMode="stateHidden" >
+            android:icon="@drawable/ic_home_white_24dp"
+            android:windowSoftInputMode="stateHidden">
         </activity>
         <activity
             android:name=".ViewSingleActivity"

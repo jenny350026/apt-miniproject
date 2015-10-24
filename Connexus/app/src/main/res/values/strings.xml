@@ -13,6 +13,6 @@
     <string name="title_activity_view_single">ViewSingleActivity</string>
     <string name="title_activity_nearby">NearbyActivity</string>
     <string name="title_activity_search_result">SearchResultActivity</string>
-    <string name="title_activity_upload">UploadActivity</string>
+    <string name="title_activity_upload">Upload</string>
     <string name="title_activity_camera">CameraActivity</string>
 </resources>

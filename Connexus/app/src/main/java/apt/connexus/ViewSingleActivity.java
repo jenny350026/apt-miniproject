@@ -1,11 +1,13 @@
 package apt.connexus;
 
+import android.app.ActionBar;
 import android.app.Activity;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -31,7 +33,7 @@ import apt.connexus.adapters.ImageAdapter;
 import apt.connexus.adapters.StreamAdapter;
 import cz.msebera.android.httpclient.Header;
 
-public class ViewSingleActivity extends Activity {
+public class ViewSingleActivity extends ActionBarActivity {
     private AsyncHttpClient client = new AsyncHttpClient();
     public static final String Domain_name = "http://apt-miniproject-1078.appspot.com";
     public String REQUEST_ViewSingleStream = Domain_name + "/api/stream?stream_name=";

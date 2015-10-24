@@ -1,5 +1,6 @@
 package apt.connexus;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -38,7 +40,7 @@ import java.util.Date;
 
 import cz.msebera.android.httpclient.Header;
 
-public class UploadActivity extends Activity {
+public class UploadActivity extends ActionBarActivity {
 
     static final int REQUEST_TAKE_PHOTO = 1;
     static final int REQUEST_LIBRARY_PHOTO = 2;
@@ -59,6 +61,8 @@ public class UploadActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload);
 
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+
         Button upload = (Button) findViewById(R.id.upload_btn);
         Button camera_btn = (Button) findViewById(R.id.camera_btn);
         Button library_btn = (Button) findViewById(R.id.library_btn);
@@ -70,12 +74,11 @@ public class UploadActivity extends Activity {
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(myBitmap == null) {
+                if (myBitmap == null) {
                     Toast.makeText(UploadActivity.this, "Please choose a source.", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    if(!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                    if (!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER))
                         requestLocation();
                     else {
                         locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10, 10, mLocationListener);
@@ -86,7 +89,7 @@ public class UploadActivity extends Activity {
                     }
 
                 }
-              }
+            }
         });
 
         library_btn.setOnClickListener(new View.OnClickListener() {

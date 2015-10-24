@@ -1,5 +1,6 @@
 package apt.connexus;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.Environment;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,7 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 
 
-public class CameraActivity extends Activity {
+public class CameraActivity extends ActionBarActivity {
     private Camera mCamera;
     private CameraPreview mPreview;
 

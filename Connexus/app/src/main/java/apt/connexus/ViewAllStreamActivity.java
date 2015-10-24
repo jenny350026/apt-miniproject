@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -13,6 +14,8 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -43,7 +46,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ViewAllStreamActivity extends Activity {
+public class ViewAllStreamActivity extends ActionBarActivity {
     private AsyncHttpClient client = new AsyncHttpClient();
     public static final String Domain_name = "http://apt-miniproject-1078.appspot.com";
     public static final String REQUEST_ViewAllStreams = Domain_name + "/api/view_all";
@@ -82,10 +85,9 @@ public class ViewAllStreamActivity extends Activity {
         InitViewPager();
         initLocation();
         setTitle(title_strings[0]);
-//        ActionBar mActionBar = getSupportActionBar();
-//        mActionBar.setBackgroundDrawable(new ColorDrawable(0xff16A085));
-//        mActionBar.setDisplayShowTitleEnabled(false);
-//        mActionBar.setDisplayShowTitleEnabled(true);
+        ActionBar mActionBar = getSupportActionBar();
+//        mActionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.theme_color)));
+        mActionBar.setDisplayShowTitleEnabled(true);
 //        mActionBar.setElevation(4f);
 
         swipeContainerAllStreams = (SwipeRefreshLayout) view1.findViewById(R.id.swipeContainer);
