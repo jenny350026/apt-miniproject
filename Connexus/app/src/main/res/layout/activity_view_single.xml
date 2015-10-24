@@ -30,7 +30,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Upload an Image"
+            android:text="Upload Image"
             android:visibility="gone"
             android:id="@+id/upload_img" />
 

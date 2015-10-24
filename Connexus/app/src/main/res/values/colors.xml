@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="background_color" type="color">#FFFFFF</item>
+    <item name="theme_color" type="color">#925ADC</item>
+    <item name="button_color" type="color">#925ADC</item>
 </resources>

@@ -6,7 +6,7 @@
 
 <style name="AppTheme.ActionBarStyle" parent="@android:style/Widget.Holo.ActionBar">
     <item name="android:titleTextStyle">@style/AppTheme.ActionBar.TitleTextStyle</item>
-    <item name="android:background">#16A085</item>
+    <item name="android:background">@color/theme_color</item>
     <item name="elevation">0dp</item>
 </style>
 

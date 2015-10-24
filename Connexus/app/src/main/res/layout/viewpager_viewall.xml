@@ -10,7 +10,7 @@
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
         android:layout_height="50.0dip"
-        android:background="#16A085"
+        android:background="@color/theme_color"
         android:elevation="6dp"
         android:baselineAligned="false">
         <LinearLayout
@@ -59,7 +59,7 @@
     <com.viewpagerindicator.UnderlinePageIndicator
         android:id="@+id/titles"
         android:layout_height="2dp"
-        android:background="#16A085"
+        android:background="@color/theme_color"
         app:selectedColor="#FFFFFF"
         android:elevation="6dp"
         android:layout_width="match_parent" />

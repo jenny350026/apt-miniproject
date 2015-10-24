@@ -47,6 +47,8 @@ public class CameraActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
+        setTitle("Take a Photo");
+
         // Create an instance of Camera
         mCamera = getCameraInstance();
 
@@ -169,14 +171,14 @@ public class CameraActivity extends Activity {
             //float ratio = (float)size.width/size.height;
 
             //portrait
-//            float ratio = (float)size.height/size.width;
-//
-//            int new_width = mPreview.getWidth();
-//            int new_height = Math.round(mPreview.getWidth() / ratio);
+            float ratio = (float)size.height/size.width;
+
+            int new_width = mPreview.getWidth();
+            int new_height = Math.round(mPreview.getWidth() / ratio);
 //
 //            Log.v(TAG, "new width and height " + new_width + " " + new_height);
 
-            mPreview.setLayoutParams(new FrameLayout.LayoutParams(size.height, size.width));
+            mPreview.setLayoutParams(new FrameLayout.LayoutParams(new_width, new_height));
 
             // start preview with new settings
             try {

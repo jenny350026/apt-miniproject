@@ -33,7 +33,7 @@
             android:text="Sign in"
             android:onClick="login_with_existing_account"
             android:id="@+id/login_with_existing_account_btn"
-            android:backgroundTint="#C0392B"
+            android:backgroundTint="@color/button_color"
             android:layout_marginRight="20dp" />
         <Button
             android:layout_width="wrap_content"
@@ -41,7 +41,7 @@
             android:text="Sign out"
             android:onClick="sign_out"
             android:id="@+id/sing_out_button"
-            android:backgroundTint="#2980B9" />
+            android:backgroundTint="@color/button_color" />
     </LinearLayout>
 
     <Button
@@ -51,7 +51,7 @@
         android:id="@+id/view_stream_button"
         android:onClick="onViewStream"
         android:layout_gravity="center_horizontal"
-        android:backgroundTint="#F39C12" />
+        android:backgroundTint="@color/button_color" />
 
     <TextView
         android:layout_width="wrap_content"
