@@ -43,6 +43,7 @@
         </activity>
         <activity
             android:name=".ViewSingleActivity"
+            android:logo="@drawable/ic_image_white_24dp"
             android:label="@string/title_activity_view_single" >
         </activity>
         <activity

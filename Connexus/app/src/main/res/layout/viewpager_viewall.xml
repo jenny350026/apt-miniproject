@@ -6,21 +6,12 @@
     android:background="@color/background_color"
     android:orientation="vertical">
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/vPager"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_gravity="center"
-        android:layout_weight="1.0"
-        android:background="#FFFFFF"
-        android:flipInterval="30"
-        android:persistentDrawingCache="animation" />
-
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
         android:layout_height="50.0dip"
         android:background="#16A085"
+        android:elevation="6dp"
         android:baselineAligned="false">
         <LinearLayout
             android:orientation="horizontal"
@@ -70,5 +61,18 @@
         android:layout_height="2dp"
         android:background="#16A085"
         app:selectedColor="#FFFFFF"
+        android:elevation="6dp"
         android:layout_width="match_parent" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vPager"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="1.0"
+
+        android:background="#FFFFFF"
+        android:flipInterval="30"
+        android:persistentDrawingCache="animation" />
+
 </LinearLayout>

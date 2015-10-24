@@ -15,18 +15,17 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:id="@+id/linearLayout2">
-        <TextView
-            android:text="Connexus nearby"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="24dp"
-            android:id="@+id/textView3" />
-
-        <GridView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/nearby_gridView"
-            android:numColumns="4"/>
+        <android.support.v4.widget.SwipeRefreshLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/swipeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <GridView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/nearby_gridView"
+                android:numColumns="4"/>
+        </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -34,13 +33,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Get Nearby Images"
-            android:onClick="getNearbyImages"
-            android:id="@+id/nearby_btn"
-            android:layout_gravity="center" />
 
         <Button
             android:layout_width="wrap_content"

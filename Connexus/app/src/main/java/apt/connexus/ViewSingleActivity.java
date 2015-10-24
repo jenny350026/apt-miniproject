@@ -142,8 +142,8 @@ public class ViewSingleActivity extends Activity {
         client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_ViewSingleStream, getSingleStreamHandler);
 
-        TextView view_single_textView = (TextView) findViewById(R.id.view_single_textView);
-        view_single_textView.setText("View A Stream: " + streamName);
+        setTitle(streamName);
+
         Button back_to_streams = (Button) findViewById(R.id.back_to_streams);
         user_email = getIntent().getStringExtra("userEmail");
 
@@ -166,6 +166,8 @@ public class ViewSingleActivity extends Activity {
                 startActivity(intent);
             }
         });
+
+
     }
 
         @Override

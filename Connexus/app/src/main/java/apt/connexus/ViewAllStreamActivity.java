@@ -1,5 +1,6 @@
 package apt.connexus;
 
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -63,6 +65,10 @@ public class ViewAllStreamActivity extends Activity {
     private EditText search_editText;
     private LinearLayout subscribe_linearLayout;
 
+    private SwipeRefreshLayout swipeContainerAllStreams;
+    private SwipeRefreshLayout swipeContainerNearby;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +76,48 @@ public class ViewAllStreamActivity extends Activity {
         InitTextView();
         InitViewPager();
         initLocation();
+        setTitle(title_strings[0]);
+//        ActionBar mActionBar = getSupportActionBar();
+//        mActionBar.setBackgroundDrawable(new ColorDrawable(0xff16A085));
+//        mActionBar.setDisplayShowTitleEnabled(false);
+//        mActionBar.setDisplayShowTitleEnabled(true);
+//        mActionBar.setElevation(4f);
+
+        swipeContainerAllStreams = (SwipeRefreshLayout) view1.findViewById(R.id.swipeContainer);
+        // Setup refresh listener which triggers new data loading
+        swipeContainerAllStreams.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
+                client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainerAllStreams.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+        swipeContainerNearby = (SwipeRefreshLayout) view3.findViewById(R.id.swipeContainer);
+        // Setup refresh listener which triggers new data loading
+        swipeContainerNearby.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                getNearbyImages();
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainerNearby.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
         getNearbyImages();
         client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
@@ -147,18 +195,27 @@ public class ViewAllStreamActivity extends Activity {
             index=i;
         }
         public void onClick(View v) {
-            viewPager.setCurrentItem(index);
+            changePage(index);
         }
     }
 
+    private void changePage(int index){
+        setTitle(title_strings[index]);
+        viewPager.setCurrentItem(index);
+    }
+
+    private static final String[] title_strings = {"All Streams", "Search", "Nearby Images"};
+
     public class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
-        public void onPageScrollStateChanged(int arg0) {
+        public void onPageScrollStateChanged(int state) {
         }
 
-        public void onPageScrolled(int arg0, float arg1, int arg2) {
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         }
 
-        public void onPageSelected(int arg0) {}
+        public void onPageSelected(int position) {
+            changePage(position);
+        }
     }
 
 
@@ -227,6 +284,7 @@ public class ViewAllStreamActivity extends Activity {
                     }
                     nearbyImageURLs.add(imageURL);
                 }
+                swipeContainerNearby.setRefreshing(false);
             } catch (JSONException j) {
                 Log.v(TAG, j.toString());
             }
@@ -398,6 +456,7 @@ public class ViewAllStreamActivity extends Activity {
                     }
                     imageURLs.add(coverURL);
                 }
+                swipeContainerAllStreams.setRefreshing(false);
             } catch (JSONException j) {
                 Log.v(TAG, j.toString());
             }
