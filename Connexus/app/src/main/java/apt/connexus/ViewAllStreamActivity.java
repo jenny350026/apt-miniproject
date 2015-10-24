@@ -86,9 +86,9 @@ public class ViewAllStreamActivity extends ActionBarActivity {
         initLocation();
         load_my_subscription();
         setTitle(title_strings[0]);
-        ActionBar mActionBar = getSupportActionBar();
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 //        mActionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.theme_color)));
-        mActionBar.setDisplayShowTitleEnabled(true);
 //        mActionBar.setElevation(4f);
 
         swipeContainerAllStreams = (SwipeRefreshLayout) view1.findViewById(R.id.swipeContainer);
@@ -139,7 +139,7 @@ public class ViewAllStreamActivity extends ActionBarActivity {
     }
 
     private void InitViewPager() {
-        viewPager=(ViewPager) findViewById(R.id.vPager);
+        viewPager = (ViewPager) findViewById(R.id.vPager);
         views = new ArrayList<View>();
         LayoutInflater inflater = getLayoutInflater();
         view1 = inflater.inflate(R.layout.activity_view_all_stream, null);
