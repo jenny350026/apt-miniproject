@@ -24,8 +24,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -164,9 +168,13 @@ public class CameraActivity extends Activity {
             mCamera.setDisplayOrientation(90);
 
             Camera.Parameters parameters = mCamera.getParameters();
-            List<Camera.Size> sizes = mCamera.getParameters().getSupportedPictureSizes();
-            Camera.Size size = sizes.get(0);
-            for(Camera.Size s : sizes)
+            HashSet<Camera.Size> available_sizes = new HashSet<Camera.Size>(mCamera.getParameters().getSupportedPictureSizes());
+            HashSet<Camera.Size> preview_sizes = new HashSet<Camera.Size>(mCamera.getParameters().getSupportedPreviewSizes());
+            available_sizes.retainAll(preview_sizes);
+
+            Camera.Size size = (new ArrayList<Camera.Size>(available_sizes)).get(0);
+
+            for(Camera.Size s : available_sizes)
             {
                 Log.v(TAG, "available size " + s.width + " " + s.height);
                 if(s.width > size.width)
@@ -177,19 +185,18 @@ public class CameraActivity extends Activity {
             parameters.setPictureSize(size.width, size.height);
             mCamera.setParameters(parameters);
 
-//            Camera.Size size = parameters.getPreviewSize();
             //landscape
             //float ratio = (float)size.width/size.height;
 
             //portrait
-            float ratio = (float)size.height/size.width;
+//            float ratio = (float)size.height/size.width;
+//
+//            int new_width = mPreview.getWidth();
+//            int new_height = Math.round(mPreview.getWidth() / ratio);
+//
+//            Log.v(TAG, "new width and height " + new_width + " " + new_height);
 
-            int new_width = mPreview.getWidth();
-            int new_height = Math.round(mPreview.getWidth() * ratio);
-
-            Log.v(TAG, "new width and height " + new_width + " " + new_height);
-
-            mPreview.setLayoutParams(new FrameLayout.LayoutParams(new_width, new_height));
+            mPreview.setLayoutParams(new FrameLayout.LayoutParams(size.height, size.width));
 
             // start preview with new settings
             try {
@@ -214,12 +221,13 @@ public class CameraActivity extends Activity {
             }
 
             try {
+                Toast.makeText(CameraActivity.this, "Saving image...", Toast.LENGTH_SHORT).show();
+
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                 Matrix matrix = new Matrix();
                 matrix.postRotate(90);
                 bitmap = Bitmap.createBitmap(bitmap , 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
-                Toast.makeText(CameraActivity.this, "Saving image...", Toast.LENGTH_SHORT).show();
                 FileOutputStream fos = new FileOutputStream(pictureFile);
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
 
