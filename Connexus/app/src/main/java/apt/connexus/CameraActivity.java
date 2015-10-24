@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.Environment;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -186,13 +185,11 @@ public class CameraActivity extends Activity {
             float ratio = (float)size.height/size.width;
 
             int new_width = mPreview.getWidth();
-            int new_height = Math.round(mPreview.getWidth() / ratio);
+            int new_height = Math.round(mPreview.getWidth() * ratio);
 
             Log.v(TAG, "new width and height " + new_width + " " + new_height);
 
-//            mPreview.setLayoutParams(new FrameLayout.LayoutParams(new_width, new_height));
-            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(new_width, new_height);
-            mPreview.setLayoutParams(lp);
+            mPreview.setLayoutParams(new FrameLayout.LayoutParams(new_width, new_height));
 
             // start preview with new settings
             try {
