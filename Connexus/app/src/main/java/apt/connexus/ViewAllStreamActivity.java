@@ -57,15 +57,14 @@ public class ViewAllStreamActivity extends Activity {
 
     final Context context = this;
     private ViewPager viewPager;
-    private LinearLayout title_linearLayout1, title_linearLayout2, title_linearLayout3;
-    private ImageView title_imageView1, title_imageView2, title_imageView3;
+    private LinearLayout title_linearLayout1, title_linearLayout2, title_linearLayout3, title_linearLayout4;
+    private ImageView title_imageView1, title_imageView2, title_imageView3, title_imageView4;
     private List<View> views;
     private LocationManager locationMgr;
     private int offset = 0;
     private int currIndex = 0;
-    private View view1,view2,view3;
+    private View view1,view2,view3, view4;
     private EditText search_editText;
-    private LinearLayout subscribe_linearLayout;
 
     private SwipeRefreshLayout swipeContainerAllStreams;
     private SwipeRefreshLayout swipeContainerNearby;
@@ -78,9 +77,11 @@ public class ViewAllStreamActivity extends Activity {
         title_imageView1 = (ImageView) findViewById(R.id.title_imageView1);
         title_imageView2 = (ImageView) findViewById(R.id.title_imageView2);
         title_imageView3 = (ImageView) findViewById(R.id.title_imageView3);
+        title_imageView4 = (ImageView) findViewById(R.id.title_imageView4);
         InitTextView();
         InitViewPager();
         initLocation();
+        load_my_subscription();
         setTitle(title_strings[0]);
 //        ActionBar mActionBar = getSupportActionBar();
 //        mActionBar.setBackgroundDrawable(new ColorDrawable(0xff16A085));
@@ -140,10 +141,6 @@ public class ViewAllStreamActivity extends Activity {
         views = new ArrayList<View>();
         LayoutInflater inflater = getLayoutInflater();
         view1 = inflater.inflate(R.layout.activity_view_all_stream, null);
-        subscribe_linearLayout = (LinearLayout) view1.findViewById(R.id.subscribe_linearLayout);
-        if(LoginActivity.signedIn)
-            subscribe_linearLayout.setVisibility(View.VISIBLE);
-
 
         view2 = inflater.inflate(R.layout.activity_search_result, null);
         search_results_textView = (TextView) view2.findViewById(R.id.search_results_textView);
@@ -157,16 +154,15 @@ public class ViewAllStreamActivity extends Activity {
         });
 
         view3 = inflater.inflate(R.layout.activity_nearby, null);
+        view4 = inflater.inflate(R.layout.activity_view_subscribed_stream, null);
         views.add(view1);
         views.add(view2);
         views.add(view3);
+        views.add(view4);
 
         viewPager.setAdapter(new ViewPagerAdapter(views));
         viewPager.setCurrentItem(0);
-        title_imageViews = new ImageView[3];
-        title_imageViews[0] = title_imageView1;
-        title_imageViews[1] = title_imageView2;
-        title_imageViews[2] = title_imageView3;
+
 
         //Bind the title indicator to the adapter
         UnderlinePageIndicator titleIndicator = (UnderlinePageIndicator) findViewById(R.id.titles);
@@ -179,13 +175,15 @@ public class ViewAllStreamActivity extends Activity {
         title_linearLayout1 = (LinearLayout) findViewById(R.id.title_linearLayout1);
         title_linearLayout2 = (LinearLayout) findViewById(R.id.title_linearLayout2);
         title_linearLayout3 = (LinearLayout) findViewById(R.id.title_linearLayout3);
+        title_linearLayout4 = (LinearLayout) findViewById(R.id.title_linearLayout4);
 
         title_linearLayout1.setOnClickListener(new MyOnClickListener(0));
         title_linearLayout2.setOnClickListener(new MyOnClickListener(1));
         title_linearLayout3.setOnClickListener(new MyOnClickListener(2));
+        title_linearLayout4.setOnClickListener(new MyOnClickListener(3));
     }
 
-    public void load_my_subscription(View view) {
+    public void load_my_subscription() {
         client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_MySubscription, view_my_subscription_handler);
     }
@@ -194,8 +192,6 @@ public class ViewAllStreamActivity extends Activity {
         client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
     }
-
-
 
 
     private class MyOnClickListener implements View.OnClickListener {
@@ -213,18 +209,21 @@ public class ViewAllStreamActivity extends Activity {
         title_imageView1.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_black_24dp));
         title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_black_24dp));
         title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_black_24dp));
+        title_imageView4.setImageDrawable(getResources().getDrawable(R.drawable.ic_collections_bookmark_black_24dp));
         if(index == 0)
             title_imageView1.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_white_24dp));
         else if(index == 1)
             title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_white_24dp));
         else if(index == 2)
             title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_white_24dp));
+        else if(index == 3)
+            title_imageView4.setImageDrawable(getResources().getDrawable(R.drawable.ic_collections_bookmark_white_24dp));
         viewPager.setCurrentItem(index);
     }
 
     private ImageView[] title_imageViews;
 
-    private static final String[] title_strings = {"All Streams", "Search", "Nearby Images"};
+    private static final String[] title_strings = {"All Streams", "Search", "Nearby Images", "Subscribed Streams"};
 
     public class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
         public void onPageScrollStateChanged(int state) {
@@ -436,7 +435,7 @@ public class ViewAllStreamActivity extends Activity {
                 Log.v(TAG, j.toString());
             }
 
-            loadGridView(view1, R.id.gridView, imageURLs, streamNames, user_emails);
+            loadGridView(view4, R.id.gridView, imageURLs, streamNames, user_emails);
         }
 
         @Override
