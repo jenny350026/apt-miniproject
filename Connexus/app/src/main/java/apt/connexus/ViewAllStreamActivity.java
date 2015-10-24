@@ -24,12 +24,11 @@ import android.widget.Toast;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
-import com.viewpagerindicator.TitlePageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
 import apt.connexus.adapters.StreamAdapter;
 import apt.connexus.adapters.NearbyAdapter;
-import apt.connexus.adapters.viewPagerAdapter;
+import apt.connexus.adapters.ViewPagerAdapter;
 import cz.msebera.android.httpclient.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,7 +67,6 @@ public class ViewAllStreamActivity extends Activity {
         setContentView(R.layout.viewpager_viewall);
 
 
-
         InitTextView();
         InitViewPager();
         client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
@@ -100,7 +98,7 @@ public class ViewAllStreamActivity extends Activity {
         views.add(view2);
         views.add(view3);
 
-        viewPager.setAdapter(new viewPagerAdapter(views));
+        viewPager.setAdapter(new ViewPagerAdapter(views));
         viewPager.setCurrentItem(0);
 
         //Bind the title indicator to the adapter

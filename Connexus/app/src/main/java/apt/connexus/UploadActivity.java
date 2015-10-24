@@ -49,7 +49,6 @@ public class UploadActivity extends Activity {
 //    static final String upload_url = "http://localhost:11080/api/upload";
 
     private ImageView selectedImageView;
-    private String mCameraPhotoPath;
     private Bitmap myBitmap = null;
     private TextView upload_stream_textView;
 
@@ -103,23 +102,25 @@ public class UploadActivity extends Activity {
         camera_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    // Create the File where the photo should go
-                    File photoFile = null;
-                    try {
-                        photoFile = createImageFile();
-                    } catch (IOException ex) {
-                        ex.getStackTrace();
-                    }
-                    // Continue only if the File was successfully created
-                    if (photoFile != null) {
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                                Uri.fromFile(photoFile));
-                        startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-                    }
-                }
+//                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//
+//                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+//                    // Create the File where the photo should go
+//                    File photoFile = null;
+//                    try {
+//                        photoFile = createImageFile();
+//                    } catch (IOException ex) {
+//                        ex.getStackTrace();
+//                    }
+//                    // Continue only if the File was successfully created
+//                    if (photoFile != null) {
+//                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+//                                Uri.fromFile(photoFile));
+//                        startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+//                    }
+//                }
+                Intent cameraIntent = new Intent(UploadActivity.this, CameraActivity.class);
+                startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO);
             }
         });
     }
@@ -204,30 +205,16 @@ public class UploadActivity extends Activity {
     };
 
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
 
-        // Save a file: path for use with ACTION_VIEW intents
-            mCameraPhotoPath = image.getAbsolutePath();
-//        Log.v(TAG, mCurrentPhotoPath);
-        return image;
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
             case REQUEST_TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    myBitmap = BitmapFactory.decodeFile(mCameraPhotoPath);
+                    Bundle b = data.getExtras();
+                    File f = (File) b.getSerializable("pictureFile");
+                    myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
                     selectedImageView.setImageBitmap(myBitmap);
                 }
                 break;
@@ -241,15 +228,11 @@ public class UploadActivity extends Activity {
                         e.printStackTrace();
                     }
                     myBitmap = BitmapFactory.decodeStream(imageStream);
-//                    mCurrentPhotoPath = (new File(selectedImage.toString())).getAbsolutePath();
-//                    mCurrentPhotoPath = selectedImage.getEncodedPath();
                     selectedImageView.setImageURI(selectedImage);
 
                 }
                 break;
         }
-
-//        Log.v(TAG, "photoPath " + mCurrentPhotoPath);
     }
 
 
