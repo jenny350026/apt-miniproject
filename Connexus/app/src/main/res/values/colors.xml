@@ -2,5 +2,6 @@
 <resources>
     <item name="background_color" type="color">#FFFFFF</item>
     <item name="theme_color" type="color">#925ADC</item>
+    <item name="theme_darker" type="color">#7548B0</item>
     <item name="button_color" type="color">#925ADC</item>
 </resources>
