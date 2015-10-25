@@ -40,7 +40,7 @@
                 android:layout_width="@dimen/title_icons_size"
                 android:layout_height="@dimen/title_icons_size"
                 android:id="@+id/title_imageView3"
-                android:src="@drawable/ic_language_black_24dp"/>
+                android:src="@drawable/ic_collections_bookmark_black_24dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -55,7 +55,7 @@
                 android:layout_width="@dimen/title_icons_size"
                 android:layout_height="@dimen/title_icons_size"
                 android:id="@+id/title_imageView4"
-                android:src="@drawable/ic_collections_bookmark_black_24dp"/>
+                android:src="@drawable/ic_language_black_24dp"/>
         </LinearLayout>
     </LinearLayout>
 
