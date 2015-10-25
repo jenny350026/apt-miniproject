@@ -196,8 +196,9 @@ public class ViewAllStreamActivity extends ActionBarActivity {
         view_subscribed = inflater.inflate(R.layout.activity_view_subscribed_stream, null);
         views.add(view_viewAllStreams);
 //        views.add(view_search);
-        views.add(view_nearby);
+
         views.add(view_subscribed);
+        views.add(view_nearby);
 
         viewPager.setAdapter(new ViewPagerAdapter(views));
         viewPager.setCurrentItem(0);
@@ -247,22 +248,22 @@ public class ViewAllStreamActivity extends ActionBarActivity {
         setTitle(title_strings[index]);
         title_imageView1.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_black_24dp));
 //        title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_black_24dp));
-        title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_black_24dp));
-        title_imageView4.setImageDrawable(getResources().getDrawable(R.drawable.ic_collections_bookmark_black_24dp));
+        title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_collections_bookmark_black_24dp));
+        title_imageView4.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_black_24dp));
         if(index == 0)
             title_imageView1.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_white_24dp));
 //        else if(index == 1)
 //            title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_white_24dp));
         else if(index == 1)
-            title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_white_24dp));
+            title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_collections_bookmark_white_24dp));
         else if(index == 2)
-            title_imageView4.setImageDrawable(getResources().getDrawable(R.drawable.ic_collections_bookmark_white_24dp));
+            title_imageView4.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_white_24dp));
         viewPager.setCurrentItem(index);
     }
 
     private ImageView[] title_imageViews;
 
-    private static final String[] title_strings = {"All Streams", "Nearby Images", "Subscribed Streams"};
+    private static final String[] title_strings = {"All Streams", "Subscribed Streams", "Nearby Images"};
 
     public class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
         public void onPageScrollStateChanged(int state) {
