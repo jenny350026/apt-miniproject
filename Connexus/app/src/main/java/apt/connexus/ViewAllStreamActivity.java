@@ -1,12 +1,11 @@
 package apt.connexus;
 
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,18 +13,18 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.support.v7.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,11 +65,12 @@ public class ViewAllStreamActivity extends ActionBarActivity {
     private LocationManager locationMgr;
     private int offset = 0;
     private int currIndex = 0;
-    private View view1,view2,view3, view4;
-    private EditText search_editText;
+    private View view_viewAllStreams, view_search, view_nearby, view_subscribed;
+//    private EditText search_editText;
 
     private SwipeRefreshLayout swipeContainerAllStreams;
     private SwipeRefreshLayout swipeContainerNearby;
+    private SwipeRefreshLayout swipeContainerSubscribed;
 
 
     @Override
@@ -78,7 +78,7 @@ public class ViewAllStreamActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.viewpager_viewall);
         title_imageView1 = (ImageView) findViewById(R.id.title_imageView1);
-        title_imageView2 = (ImageView) findViewById(R.id.title_imageView2);
+//        title_imageView2 = (ImageView) findViewById(R.id.title_imageView2);
         title_imageView3 = (ImageView) findViewById(R.id.title_imageView3);
         title_imageView4 = (ImageView) findViewById(R.id.title_imageView4);
         InitTextView();
@@ -86,12 +86,12 @@ public class ViewAllStreamActivity extends ActionBarActivity {
         initLocation();
         load_my_subscription();
         setTitle(title_strings[0]);
-        getSupportActionBar().setDisplayShowTitleEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+//        getSupportActionBar().setDisplayShowTitleEnabled(true);
+//        getSupportActionBar().setHomeButtonEnabled(true);
 //        mActionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.theme_color)));
 //        mActionBar.setElevation(4f);
 
-        swipeContainerAllStreams = (SwipeRefreshLayout) view1.findViewById(R.id.swipeContainer);
+        swipeContainerAllStreams = (SwipeRefreshLayout) view_viewAllStreams.findViewById(R.id.swipeContainer);
         // Setup refresh listener which triggers new data loading
         swipeContainerAllStreams.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -109,7 +109,7 @@ public class ViewAllStreamActivity extends ActionBarActivity {
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-        swipeContainerNearby = (SwipeRefreshLayout) view3.findViewById(R.id.swipeContainer);
+        swipeContainerNearby = (SwipeRefreshLayout) view_nearby.findViewById(R.id.swipeContainer);
         // Setup refresh listener which triggers new data loading
         swipeContainerNearby.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -126,9 +126,54 @@ public class ViewAllStreamActivity extends ActionBarActivity {
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
+        swipeContainerSubscribed = (SwipeRefreshLayout) view_subscribed.findViewById(R.id.swipeContainer);
+        // Setup refresh listener which triggers new data loading
+        swipeContainerSubscribed.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                load_my_subscription();
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainerSubscribed.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
         getNearbyImages();
         client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
+        final MenuItem searchMenuItem = menu.findItem(R.id.search);
+        final SearchView searchView =
+                (SearchView) searchMenuItem.getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean queryTextFocused) {
+                if (!queryTextFocused) {
+                    searchMenuItem.collapseActionView();
+                    searchView.setQuery("", false);
+                }
+            }
+        });
+
+        return true;
     }
 
     @Override
@@ -142,25 +187,17 @@ public class ViewAllStreamActivity extends ActionBarActivity {
         viewPager = (ViewPager) findViewById(R.id.vPager);
         views = new ArrayList<View>();
         LayoutInflater inflater = getLayoutInflater();
-        view1 = inflater.inflate(R.layout.activity_view_all_stream, null);
+        view_viewAllStreams = inflater.inflate(R.layout.activity_view_all_stream, null);
 
-        view2 = inflater.inflate(R.layout.activity_search_result, null);
-        search_results_textView = (TextView) view2.findViewById(R.id.search_results_textView);
-        search_editText = (EditText) view2.findViewById(R.id.search_editText);
-        search_editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                search(v);
-                return true;
-            }
-        });
+//        view_search = inflater.inflate(R.layout.activity_search_result, null);
+//        search_results_textView = (TextView) view_search.findViewById(R.id.search_results_textView);
 
-        view3 = inflater.inflate(R.layout.activity_nearby, null);
-        view4 = inflater.inflate(R.layout.activity_view_subscribed_stream, null);
-        views.add(view1);
-        views.add(view2);
-        views.add(view3);
-        views.add(view4);
+        view_nearby = inflater.inflate(R.layout.activity_nearby, null);
+        view_subscribed = inflater.inflate(R.layout.activity_view_subscribed_stream, null);
+        views.add(view_viewAllStreams);
+//        views.add(view_search);
+        views.add(view_nearby);
+        views.add(view_subscribed);
 
         viewPager.setAdapter(new ViewPagerAdapter(views));
         viewPager.setCurrentItem(0);
@@ -175,14 +212,14 @@ public class ViewAllStreamActivity extends ActionBarActivity {
 
     private void InitTextView() {
         title_linearLayout1 = (LinearLayout) findViewById(R.id.title_linearLayout1);
-        title_linearLayout2 = (LinearLayout) findViewById(R.id.title_linearLayout2);
+//        title_linearLayout2 = (LinearLayout) findViewById(R.id.title_linearLayout2);
         title_linearLayout3 = (LinearLayout) findViewById(R.id.title_linearLayout3);
         title_linearLayout4 = (LinearLayout) findViewById(R.id.title_linearLayout4);
 
         title_linearLayout1.setOnClickListener(new MyOnClickListener(0));
-        title_linearLayout2.setOnClickListener(new MyOnClickListener(1));
-        title_linearLayout3.setOnClickListener(new MyOnClickListener(2));
-        title_linearLayout4.setOnClickListener(new MyOnClickListener(3));
+//        title_linearLayout2.setOnClickListener(new MyOnClickListener(1));
+        title_linearLayout3.setOnClickListener(new MyOnClickListener(1));
+        title_linearLayout4.setOnClickListener(new MyOnClickListener(2));
     }
 
     public void load_my_subscription() {
@@ -209,23 +246,23 @@ public class ViewAllStreamActivity extends ActionBarActivity {
     private void changePage(int index){
         setTitle(title_strings[index]);
         title_imageView1.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_black_24dp));
-        title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_black_24dp));
+//        title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_black_24dp));
         title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_black_24dp));
         title_imageView4.setImageDrawable(getResources().getDrawable(R.drawable.ic_collections_bookmark_black_24dp));
         if(index == 0)
             title_imageView1.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_white_24dp));
+//        else if(index == 1)
+//            title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_white_24dp));
         else if(index == 1)
-            title_imageView2.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_white_24dp));
-        else if(index == 2)
             title_imageView3.setImageDrawable(getResources().getDrawable(R.drawable.ic_language_white_24dp));
-        else if(index == 3)
+        else if(index == 2)
             title_imageView4.setImageDrawable(getResources().getDrawable(R.drawable.ic_collections_bookmark_white_24dp));
         viewPager.setCurrentItem(index);
     }
 
     private ImageView[] title_imageViews;
 
-    private static final String[] title_strings = {"All Streams", "Search", "Nearby Images", "Subscribed Streams"};
+    private static final String[] title_strings = {"All Streams", "Nearby Images", "Subscribed Streams"};
 
     public class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
         public void onPageScrollStateChanged(int state) {
@@ -264,7 +301,7 @@ public class ViewAllStreamActivity extends ActionBarActivity {
         ArrayList<String> tempNearbyDistances = new ArrayList<String>(nearbyDistances.subList(start, end));
         ArrayList<String> tempNearbyStreamNames = new ArrayList<String>(nearbyStreamNames.subList(start, end));
         ArrayList<String> tempNearbyUserEmails = new ArrayList<String>(nearbyUserEmails.subList(start, end));
-        loadNearbyGridView(view3, R.id.nearby_gridView, tempNearbyImageURLs, tempNearbyDistances, tempNearbyStreamNames, tempNearbyUserEmails);
+        loadNearbyGridView(view_nearby, R.id.nearby_gridView, tempNearbyImageURLs, tempNearbyDistances, tempNearbyStreamNames, tempNearbyUserEmails);
     }
 
 
@@ -347,62 +384,62 @@ public class ViewAllStreamActivity extends ActionBarActivity {
 
 
 
-    private static ArrayList<String> searchImageURLs, searchStreamNames, searchUserEmails;
+//    private static ArrayList<String> searchImageURLs, searchStreamNames, searchUserEmails;
     private int currSearchIndex = 0;
 
-    private void setSearchAdapter(int currIndex) {
-        int start, end;
-        start = currIndex * 8;
-        if( (currIndex + 1) * 8 > searchImageURLs.size()) {
-            end = searchImageURLs.size();
-            currSearchIndex = 0;
-        }
-        else {
-            end = (currIndex + 1) * 8;
-        }
-        ArrayList<String> tempSearchImageURLs = new ArrayList<String>(searchImageURLs.subList(start, end));
-        ArrayList<String> tempSearchStreamNames = new ArrayList<String>(searchStreamNames.subList(start, end));
-        ArrayList<String> tempSearchUserEmails = new ArrayList<String>(searchUserEmails.subList(start, end));
-        loadGridView(view2, R.id.search_gridView, tempSearchImageURLs, tempSearchStreamNames, tempSearchUserEmails);
-    }
+//    private void setSearchAdapter(int currIndex) {
+//        int start, end;
+//        start = currIndex * 8;
+//        if( (currIndex + 1) * 8 > searchImageURLs.size()) {
+//            end = searchImageURLs.size();
+//            currSearchIndex = 0;
+//        }
+//        else {
+//            end = (currIndex + 1) * 8;
+//        }
+//        ArrayList<String> tempSearchImageURLs = new ArrayList<String>(searchImageURLs.subList(start, end));
+//        ArrayList<String> tempSearchStreamNames = new ArrayList<String>(searchStreamNames.subList(start, end));
+//        ArrayList<String> tempSearchUserEmails = new ArrayList<String>(searchUserEmails.subList(start, end));
+//        loadGridView(view_search, R.id.search_gridView, tempSearchImageURLs, tempSearchStreamNames, tempSearchUserEmails);
+//    }
 
-    AsyncHttpResponseHandler search_handler = new AsyncHttpResponseHandler(){
-        @Override
-        public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-            String response = "";
-            try {
-                response = new String(responseBody, "UTF-8");
-                System.out.println(response);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            searchImageURLs = new ArrayList<String>();
-            searchStreamNames = new ArrayList<String>();
-            searchUserEmails = new ArrayList<>();
-            try {
-                JSONObject jObject = new JSONObject(response);
-                JSONArray streamsDictArr = jObject.getJSONArray("stream");
-                for (int i = 0; i < streamsDictArr.length(); i++) {
-                    String streamsDict = streamsDictArr.getString(i);
-                    JSONObject jObject2 = new JSONObject(streamsDict);
-
-                    searchStreamNames.add(jObject2.getString("stream_name"));
-                    searchUserEmails.add(jObject2.getString("user_email"));
-                    String coverURL = jObject2.getString("cover_url");
-                    if (coverURL.equals("")) {
-                        coverURL = "https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png";
-                    }
-                    searchImageURLs.add(coverURL);
-                }
-            } catch (JSONException j) {
-                Log.v(TAG, j.toString());
-            }
-            search_results_textView.setText(searchImageURLs.size() + " results found.");
-            setSearchAdapter(0);
-        }
-        @Override
-        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {}
-    };
+//    AsyncHttpResponseHandler search_handler = new AsyncHttpResponseHandler(){
+//        @Override
+//        public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+//            String response = "";
+//            try {
+//                response = new String(responseBody, "UTF-8");
+//                System.out.println(response);
+//            } catch (UnsupportedEncodingException e) {
+//                e.printStackTrace();
+//            }
+//            searchImageURLs = new ArrayList<String>();
+//            searchStreamNames = new ArrayList<String>();
+//            searchUserEmails = new ArrayList<>();
+//            try {
+//                JSONObject jObject = new JSONObject(response);
+//                JSONArray streamsDictArr = jObject.getJSONArray("stream");
+//                for (int i = 0; i < streamsDictArr.length(); i++) {
+//                    String streamsDict = streamsDictArr.getString(i);
+//                    JSONObject jObject2 = new JSONObject(streamsDict);
+//
+//                    searchStreamNames.add(jObject2.getString("stream_name"));
+//                    searchUserEmails.add(jObject2.getString("user_email"));
+//                    String coverURL = jObject2.getString("cover_url");
+//                    if (coverURL.equals("")) {
+//                        coverURL = "https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png";
+//                    }
+//                    searchImageURLs.add(coverURL);
+//                }
+//            } catch (JSONException j) {
+//                Log.v(TAG, j.toString());
+//            }
+//            search_results_textView.setText(searchImageURLs.size() + " results found.");
+//            setSearchAdapter(0);
+//        }
+//        @Override
+//        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {}
+//    };
 
     AsyncHttpResponseHandler view_my_subscription_handler = new AsyncHttpResponseHandler() {
         @Override
@@ -433,16 +470,18 @@ public class ViewAllStreamActivity extends ActionBarActivity {
                     }
                     imageURLs.add(coverURL);
                 }
+                swipeContainerSubscribed.setRefreshing(false);
             } catch (JSONException j) {
                 Log.v(TAG, j.toString());
             }
 
-            loadGridView(view4, R.id.gridView, imageURLs, streamNames, user_emails);
+            loadGridView(view_subscribed, R.id.gridView, imageURLs, streamNames, user_emails);
         }
 
         @Override
         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
             Log.e(TAG, "There was a problem in retrieving the url : " + error.toString());
+            swipeContainerSubscribed.setRefreshing(false);
         }
     };
 
@@ -482,7 +521,7 @@ public class ViewAllStreamActivity extends ActionBarActivity {
                 Log.v(TAG, j.toString());
             }
 
-            loadGridView(view1, R.id.gridView, imageURLs, streamNames, user_emails);
+            loadGridView(view_viewAllStreams, R.id.gridView, imageURLs, streamNames, user_emails);
         }
 
         @Override
@@ -572,11 +611,12 @@ public class ViewAllStreamActivity extends ActionBarActivity {
         }
     }
 
-    public void search(View view) {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        String term = search_editText.getText().toString();
-        client.get(REQUEST_SearchStreams + term, search_handler);
-        Toast.makeText(ViewAllStreamActivity.this, "search " + term, Toast.LENGTH_SHORT).show();
-    }
+//    public void search(View view) {
+//        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+//        String term = search_editText.getText().toString();
+//        client.get(REQUEST_SearchStreams + term, search_handler);
+//        Toast.makeText(ViewAllStreamActivity.this, "search " + term, Toast.LENGTH_SHORT).show();
+//    }
+
 }

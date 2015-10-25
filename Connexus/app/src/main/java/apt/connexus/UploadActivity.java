@@ -68,8 +68,7 @@ public class UploadActivity extends ActionBarActivity {
         Button library_btn = (Button) findViewById(R.id.library_btn);
 
         selectedImageView = (ImageView) findViewById(R.id.imageView);
-        upload_stream_textView = (TextView) findViewById(R.id.upload_stream_textView);
-        upload_stream_textView.setText("to \"" + getIntent().getStringExtra("stream_name") +"\"");
+        setTitle("Upload to \"" + getIntent().getStringExtra("stream_name") + "\"");
 
         upload.setOnClickListener(new View.OnClickListener() {
             @Override

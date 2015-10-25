@@ -32,21 +32,6 @@
             android:orientation="horizontal"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:id="@+id/title_linearLayout2"
-            android:gravity="center"
-            android:layout_weight="1.0"
-            android:layout_margin="8dp">
-            <ImageView
-                android:layout_width="@dimen/title_icons_size"
-                android:layout_height="@dimen/title_icons_size"
-                android:id="@+id/title_imageView2"
-                android:src="@drawable/ic_search_black_24dp"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
             android:id="@+id/title_linearLayout3"
             android:gravity="center"
             android:layout_weight="1.0"
@@ -67,8 +52,8 @@
             android:layout_weight="1.0"
             android:layout_margin="8dp">
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/title_icons_size"
+                android:layout_height="@dimen/title_icons_size"
                 android:id="@+id/title_imageView4"
                 android:src="@drawable/ic_collections_bookmark_black_24dp"/>
         </LinearLayout>

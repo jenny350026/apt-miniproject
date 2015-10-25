@@ -7,10 +7,6 @@
     android:background="@color/background_color"
     tools:context="apt.connexus.UploadActivity">
 
-
-
-
-
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -22,14 +18,6 @@
             android:layout_height="wrap_content"
             android:text="Upload"
             android:id="@+id/upload_btn" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Stream: "
-            android:id="@+id/upload_stream_textView"
-            android:textSize="20dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp" />
     </LinearLayout>
 
     <LinearLayout
