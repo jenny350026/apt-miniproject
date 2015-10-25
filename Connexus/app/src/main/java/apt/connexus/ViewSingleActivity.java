@@ -1,14 +1,15 @@
 package apt.connexus;
 
-import android.app.ActionBar;
-import android.app.Activity;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -30,7 +31,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import apt.connexus.adapters.ImageAdapter;
-import apt.connexus.adapters.StreamAdapter;
 import cz.msebera.android.httpclient.Header;
 
 public class ViewSingleActivity extends ActionBarActivity {
@@ -137,6 +137,8 @@ public class ViewSingleActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_view_single);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         final String streamName = getIntent().getStringExtra("streamName");
         REQUEST_ViewSingleStream += streamName;
@@ -146,18 +148,12 @@ public class ViewSingleActivity extends ActionBarActivity {
 
         setTitle(streamName);
 
-        Button back_to_streams = (Button) findViewById(R.id.back_to_streams);
         user_email = getIntent().getStringExtra("userEmail");
 
         Button upload_img = (Button) findViewById(R.id.upload_img);
         if(user_email.equals(LoginActivity.userEmail))
-            upload_img.setVisibility(View.VISIBLE);
-        back_to_streams.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+            upload_img.setEnabled(true);
+
 
         upload_img.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,11 +168,22 @@ public class ViewSingleActivity extends ActionBarActivity {
 
     }
 
-        @Override
-        public void onResume(){
-            super.onResume();
-            client.get(REQUEST_ViewSingleStream, getSingleStreamHandler);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish();
+                return true;
         }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        client.get(REQUEST_ViewSingleStream, getSingleStreamHandler);
+    }
 
 
 }
