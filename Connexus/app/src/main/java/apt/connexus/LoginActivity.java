@@ -1,6 +1,5 @@
 package apt.connexus;
 
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
@@ -10,6 +9,7 @@ import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -22,9 +22,9 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.cookie.Cookie;
@@ -41,9 +41,15 @@ public class LoginActivity extends Activity implements
     private TextView status_textView;
     public static String userEmail;
 
+    private SharedPreferences mPrefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mPrefs = getSharedPreferences("Connexus", MODE_PRIVATE);
+        userEmail = mPrefs.getString("userEmail", "");
+
         setContentView(R.layout.activity_login);
         status_textView = (TextView) findViewById(R.id.status_textView);
         checkSignedIn();
@@ -51,12 +57,24 @@ public class LoginActivity extends Activity implements
         accounts = accountManager.getAccountsByType("com.google");
     }
 
+    protected void onPause() {
+        super.onPause();
+
+        SharedPreferences.Editor ed = mPrefs.edit();
+        ed.putString("userEmail", userEmail);
+        ed.commit();
+    }
+
     private void checkSignedIn() {
         PersistentCookieStore myCookieStore = new PersistentCookieStore(getApplicationContext());
         Log.v(TAG, "my cookie store: " + myCookieStore.toString());
+
+        myCookieStore.clearExpired(new Date());
         ArrayList<Cookie> list = new ArrayList<>(myCookieStore.getCookies());
+        Log.v(TAG, "email " + userEmail);
         for(Cookie cookie: list) {
-            if("apt-miniproject-1078.appspot.com".equals(cookie.getDomain())) {
+            Log.v(TAG, "coookie domain " + cookie.getDomain());
+            if(getString(R.string.domain_name).equals(cookie.getDomain())) {
                 status_textView.setText("You have already signed in!");
                 signedIn = true;
                 return;
@@ -64,8 +82,8 @@ public class LoginActivity extends Activity implements
         }
         signedIn = false;
         status_textView.setText("You have not signed in");
-    }
 
+    }
 
     public boolean isOnline() {
         ConnectivityManager cm =
@@ -94,16 +112,16 @@ public class LoginActivity extends Activity implements
         }
     }
 
-
     public void sign_out(View view) {
         PersistentCookieStore myCookieStore = new PersistentCookieStore(getApplicationContext());
         ArrayList<Cookie> list = new ArrayList<>(myCookieStore.getCookies());
         for(Cookie cookie: list) {
-            if("apt-miniproject-1078.appspot.com".equals(cookie.getDomain())) {
+            if(getString(R.string.domain_name).equals(cookie.getDomain())) {
                 myCookieStore.deleteCookie(cookie);
             }
         }
         signedIn = false;
+        userEmail = "";
         status_textView.setText("You have signed out");
     }
     /************************

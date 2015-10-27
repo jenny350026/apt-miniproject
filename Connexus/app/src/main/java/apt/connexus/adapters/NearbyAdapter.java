@@ -54,7 +54,7 @@ public class NearbyAdapter extends BaseAdapter {
 
         if (convertView == null) {  // if it's not recycled, initialize some attributes
             LayoutInflater a = LayoutInflater.from(mContext);
-            convertView = a.inflate(R.layout.image_adapter, null);
+            convertView = a.inflate(R.layout.image_adapter, parent, false);
         }
         imageView = (ImageView) convertView.findViewById(R.id.adapter_imageView);
         textView = (TextView) convertView.findViewById(R.id.adapter_textView);

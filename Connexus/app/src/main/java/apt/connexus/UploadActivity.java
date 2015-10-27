@@ -17,6 +17,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -68,7 +69,7 @@ public class UploadActivity extends ActionBarActivity {
         Button library_btn = (Button) findViewById(R.id.library_btn);
 
         selectedImageView = (ImageView) findViewById(R.id.imageView);
-        setTitle("Upload to \"" + getIntent().getStringExtra("stream_name") + "\"");
+        setTitle(Html.fromHtml("Upload to <i>" + getIntent().getStringExtra("stream_name") + "</i>"));
 
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,9 +207,6 @@ public class UploadActivity extends ActionBarActivity {
         public void onProviderDisabled(String provider) {}
     };
 
-
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
@@ -231,7 +229,6 @@ public class UploadActivity extends ActionBarActivity {
                     }
                     myBitmap = BitmapFactory.decodeStream(imageStream);
                     selectedImageView.setImageURI(selectedImage);
-
                 }
                 break;
         }

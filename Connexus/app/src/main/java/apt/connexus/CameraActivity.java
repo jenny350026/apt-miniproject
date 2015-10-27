@@ -12,32 +12,28 @@ import android.os.Environment;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 
 
 public class CameraActivity extends ActionBarActivity {
     private Camera mCamera;
     private CameraPreview mPreview;
+
+    private Bitmap bitmap;
 
     private File pictureFile = null;
 
@@ -71,15 +67,41 @@ public class CameraActivity extends ActionBarActivity {
                 }
         );
 
+        Button cancelButton = (Button) findViewById(R.id.button_cancel);
+        cancelButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+
+                    }
+                }
+        );
+
         Button confirmButton = (Button) findViewById(R.id.button_confirm);
         confirmButton.setOnClickListener(
                 new View.OnClickListener(){
                     @Override
                     public void onClick(View v){
-                        Intent intent = new Intent();
-                        intent.putExtra("pictureFile", pictureFile);
-                        setResult(Activity.RESULT_OK, intent);
-                        finish();
+                        if(bitmap == null)
+                            Toast.makeText(CameraActivity.this, "No picture taken!", Toast.LENGTH_SHORT).show();
+                        else {
+                            Toast.makeText(CameraActivity.this, "Saving image...", Toast.LENGTH_SHORT).show();
+                            FileOutputStream fos = null;
+                            try {
+                                pictureFile = createImageFile();
+                                fos = new FileOutputStream(pictureFile);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+
+                            Log.v(TAG, "file written to " + pictureFile.getAbsolutePath());
+                            Intent intent = new Intent();
+                            intent.putExtra("pictureFile", pictureFile);
+                            setResult(Activity.RESULT_OK, intent);
+                            finish();
+                        }
                     }
                 }
         );
@@ -129,6 +151,7 @@ public class CameraActivity extends ActionBarActivity {
 
         public void surfaceDestroyed(SurfaceHolder holder) {
             // empty. Take care of releasing the Camera preview in your activity.
+
         }
 
         public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -175,10 +198,11 @@ public class CameraActivity extends ActionBarActivity {
             //portrait
             float ratio = (float)size.height/size.width;
 
-            int new_width = mPreview.getWidth();
-            int new_height = Math.round(mPreview.getWidth() / ratio);
+            int new_width = Math.round(mPreview.getHeight()*ratio);
+            int new_height = mPreview.getHeight();
+            Log.v(TAG, "old width and height " + mPreview.getWidth() + " " + mPreview.getHeight());
 //
-//            Log.v(TAG, "new width and height " + new_width + " " + new_height);
+            Log.v(TAG, "new width and height " + new_width + " " + new_height);
 
             mPreview.setLayoutParams(new FrameLayout.LayoutParams(new_width, new_height));
 
@@ -198,30 +222,13 @@ public class CameraActivity extends ActionBarActivity {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
 
-            try{
-                pictureFile = createImageFile();
-            } catch (IOException e){
-                Log.d(TAG, "Failed to create image file " + e.getMessage());
-            }
 
-            try {
-                Toast.makeText(CameraActivity.this, "Saving image...", Toast.LENGTH_SHORT).show();
+            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            Matrix matrix = new Matrix();
+            matrix.postRotate(90);
+            bitmap = Bitmap.createBitmap(bitmap , 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                Matrix matrix = new Matrix();
-                matrix.postRotate(90);
-                bitmap = Bitmap.createBitmap(bitmap , 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-
-                FileOutputStream fos = new FileOutputStream(pictureFile);
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-
-                Log.v(TAG, "file written to " + pictureFile.getAbsolutePath());
-
-            } catch (FileNotFoundException e) {
-                Log.d(TAG, "File not found: " + e.getMessage());
-            } catch (IOException e) {
-                Log.d(TAG, "Error accessing file: " + e.getMessage());
-            }
+            mCamera.release();
         }
     };
 

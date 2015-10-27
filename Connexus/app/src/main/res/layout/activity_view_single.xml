@@ -16,7 +16,9 @@
         <GridView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:numColumns="4"
+            android:numColumns="3"
+            android:horizontalSpacing="@dimen/grid_view_spacing_single"
+            android:verticalSpacing="@dimen/grid_view_spacing_single"
             android:id="@+id/singleStreamGridView" />
     </LinearLayout>
 

@@ -6,12 +6,14 @@ import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,8 +39,9 @@ public class SearchActivity extends ActionBarActivity {
     private TextView search_results_textView;
     private static ArrayList<String> searchImageURLs, searchStreamNames, searchUserEmails;
     private int currSearchIndex = 0;
+    private Button more_search_button;
 
-    public static final String REQUEST_SearchStreams = R.string.domain_name + "/api/search_request?term=";
+    public final String REQUEST_SearchStreams = "http://apt-miniproject-1078.appspot.com/api/search_request?term=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +49,10 @@ public class SearchActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_search_result);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         Log.v(TAG, "Activity started");
+        more_search_button = (Button) findViewById(R.id.more_search_button);
 
         search_results_textView = (TextView) findViewById(R.id.search_results_textView);
 
@@ -64,7 +68,7 @@ public class SearchActivity extends ActionBarActivity {
             String query = intent.getStringExtra(SearchManager.QUERY);
             Log.v(TAG, "received query");
 //            client = intent.getSerializableExtra();
-            setTitle("Search Results for \"" + query + "\"");
+            setTitle(Html.fromHtml("Search Results for <i>" + query + "</i>"));
             search(query);
         }
     }
@@ -83,7 +87,6 @@ public class SearchActivity extends ActionBarActivity {
     public void search(String term) {
 //        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 //        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        String REQUEST_SearchStreams = getString(R.string.domain_name) + "/api/search_request?term=";
         client.get(REQUEST_SearchStreams + term, search_handler);
         Toast.makeText(SearchActivity.this, "search " + term, Toast.LENGTH_SHORT).show();
     }
@@ -116,6 +119,8 @@ public class SearchActivity extends ActionBarActivity {
                     }
                     searchImageURLs.add(coverURL);
                 }
+                if(searchImageURLs.size() < number_of_images_in_search_page + 1)
+                    more_search_button.setVisibility(View.GONE);
             } catch (JSONException j) {
                 Log.v(TAG, j.toString());
             }
@@ -126,15 +131,22 @@ public class SearchActivity extends ActionBarActivity {
         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {}
     };
 
+    public void moreSearch(View view) {
+        currSearchIndex++;
+        setSearchAdapter(currSearchIndex);
+    }
+
+    private final int number_of_images_in_search_page = 9;
+
     private void setSearchAdapter(int currIndex) {
         int start, end;
-        start = currIndex * 8;
-        if( (currIndex + 1) * 8 > searchImageURLs.size()) {
+        start = currIndex * number_of_images_in_search_page;
+        if( (currIndex + 1) * number_of_images_in_search_page > searchImageURLs.size()) {
             end = searchImageURLs.size();
-            currSearchIndex = 0;
+            currSearchIndex = -1;
         }
         else {
-            end = (currIndex + 1) * 8;
+            end = (currIndex + 1) * number_of_images_in_search_page;
         }
         ArrayList<String> tempSearchImageURLs = new ArrayList<String>(searchImageURLs.subList(start, end));
         ArrayList<String> tempSearchStreamNames = new ArrayList<String>(searchStreamNames.subList(start, end));
@@ -169,4 +181,6 @@ public class SearchActivity extends ActionBarActivity {
             }
         });
     }
+
+
 }

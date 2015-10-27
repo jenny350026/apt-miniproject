@@ -5,9 +5,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -40,6 +39,7 @@ public class ViewSingleActivity extends ActionBarActivity {
     public static final String TAG = "ViewSingleStream";
     Context context = this;
     private String user_email;
+    private Button more_single_button;
 
 
     private ArrayList<String> imageURLs;
@@ -52,15 +52,17 @@ public class ViewSingleActivity extends ActionBarActivity {
         setImageAdapter(currImageIndex);
     }
 
+    private final int number_of_images_in_a_page = 9;
+
     private void setImageAdapter(int currIndex) {
         int start, end;
-        start = currIndex * 16;
-        if( (currIndex + 1) * 16 > imageURLs.size()) {
+        start = currIndex * number_of_images_in_a_page;
+        if( (currIndex + 1) * number_of_images_in_a_page > imageURLs.size()) {
             end = imageURLs.size();
             currImageIndex = -1;
         }
         else {
-            end = (currIndex + 1) * 16;
+            end = (currIndex + 1) * number_of_images_in_a_page;
         }
         ArrayList<String> tempImageURLs = new ArrayList<String>(imageURLs.subList(start, end));
         loadGridView(R.id.singleStreamGridView, tempImageURLs);
@@ -98,7 +100,10 @@ public class ViewSingleActivity extends ActionBarActivity {
                     }
                     Log.v(TAG, image_url);
                     imageURLs.add(image_url);
+
                 }
+                if(imageURLs.size() < number_of_images_in_a_page + 1)
+                    more_single_button.setVisibility(View.GONE);
             } catch (JSONException j) {
                 Log.v(TAG, j.toString());
             }
@@ -146,12 +151,12 @@ public class ViewSingleActivity extends ActionBarActivity {
         client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_ViewSingleStream, getSingleStreamHandler);
 
-        setTitle(streamName);
+        setTitle(Html.fromHtml("<i>" + streamName + "</i>"));
 
         user_email = getIntent().getStringExtra("userEmail");
-
+        more_single_button = (Button) findViewById(R.id.more_single_button);
         Button upload_img = (Button) findViewById(R.id.upload_img);
-        if(user_email.equals(LoginActivity.userEmail))
+        if(LoginActivity.signedIn && user_email.equals(LoginActivity.userEmail))
             upload_img.setEnabled(true);
 
 

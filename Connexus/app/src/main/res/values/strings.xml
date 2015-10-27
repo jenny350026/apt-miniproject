@@ -16,6 +16,7 @@
     <string name="title_activity_upload">Upload</string>
     <string name="title_activity_camera">CameraActivity</string>
     <string name="title_activity_search">SearchActivity</string>
-    <string name="domain_name">http://apt-miniproject-1078.appspot.com</string>
+    <string name="domain_name">apt-miniproject-1078.appspot.com</string>
     <string name="title_activity_test">TestActivity</string>
+    <string name="no_image_url">https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png</string>
 </resources>

@@ -1,15 +1,20 @@
 package apt.connexus.adapters;
 
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.BaseAdapter;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.GridView;
+import android.widget.LinearLayout;
+
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+
+import apt.connexus.R;
 
 public class ImageAdapter extends BaseAdapter {
     public static final String TAG = "ImageAdapter";
@@ -37,16 +42,14 @@ public class ImageAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
         if (convertView == null) {  // if it's not recycled, initialize some attributes
-            imageView = new ImageView(mContext);
-            imageView.setLayoutParams(new GridView.LayoutParams(200, 200));
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setPadding(8, 8, 8, 8);
-        } else {
-            imageView = (ImageView) convertView;
+            LayoutInflater layoutInflater = LayoutInflater.from(mContext);
+            convertView = layoutInflater.inflate(R.layout.image_view, parent, false);
+
         }
+        imageView = (ImageView) convertView.findViewById(R.id.single_image_view);
 //        Log.v(TAG, imageURLs.get(position));
         Picasso.with(mContext).load(imageURLs.get(position)).resize(300,300).centerCrop().into(imageView);
-        return imageView;
+        return convertView;
     }
 
 }

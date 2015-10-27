@@ -4,12 +4,13 @@
     android:layout_height="match_parent"
     android:background="@drawable/stream_background"
     android:orientation="vertical"
-    android:elevation="10dp"
-    android:padding="0dp">
+    android:elevation="6dp"
+    android:outlineProvider="bounds">
 
     <ImageView
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_marginTop="8dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:scaleType="centerCrop"
         android:layout_gravity="center"
         android:id="@+id/adapter_imageView" />
@@ -20,6 +21,7 @@
         android:layout_height="48dp"
         android:layout_gravity="center_horizontal">
         <TextView
+            android:layout_marginTop="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""

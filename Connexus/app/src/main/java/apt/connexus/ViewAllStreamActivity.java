@@ -50,8 +50,8 @@ public class ViewAllStreamActivity extends ActionBarActivity {
     public static final String Domain_name = "http://apt-miniproject-1078.appspot.com";
     public static final String REQUEST_ViewAllStreams = Domain_name + "/api/view_all";
     public static final String REQUEST_MySubscription = Domain_name + "/api/my_subscription";
-    public static final String REQUEST_SearchStreams = Domain_name + "/api/search_request?term=";
-    public static String REQUEST_NearbyStreams = Domain_name + "/api/image_location?";
+//    public static final String REQUEST_SearchStreams = Domain_name + "/api/search_request?term=";
+    public static final String REQUEST_NearbyStreams = Domain_name + "/api/image_location?";
     public static final String TAG = "ViewAllStreamActivity";
     private Boolean locationOn = false;
     private int nearbyIndex = 0;
@@ -134,7 +134,13 @@ public class ViewAllStreamActivity extends ActionBarActivity {
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
-                load_my_subscription();
+                if (LoginActivity.signedIn)
+                    load_my_subscription();
+                else {
+                    Toast.makeText(ViewAllStreamActivity.this, "You are not logged in!", Toast.LENGTH_SHORT).show();
+                    swipeContainerSubscribed.setRefreshing(false);
+                }
+
             }
         });
         // Configure the refreshing colors
@@ -143,7 +149,8 @@ public class ViewAllStreamActivity extends ActionBarActivity {
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-        getNearbyImages();
+//        getNearbyImages();
+        client.setResponseTimeout(10000);
         client.setCookieStore(new PersistentCookieStore(getApplicationContext()));
         client.get(REQUEST_ViewAllStreams, view_all_stream_handler);
     }
@@ -288,15 +295,18 @@ public class ViewAllStreamActivity extends ActionBarActivity {
         setNearbyAdapter(currNearbyIndex);
     }
 
+    private final int number_of_images_in_a_nearby_page = 9;
+
+
     private void setNearbyAdapter(int currIndex) {
         int start, end;
-        start = currIndex * 16;
-        if( (currIndex + 1) * 16 > nearbyImageURLs.size()) {
+        start = currIndex * number_of_images_in_a_nearby_page;
+        if( (currIndex + 1) * number_of_images_in_a_nearby_page > nearbyImageURLs.size()) {
             end = nearbyImageURLs.size();
             currNearbyIndex = -1;
         }
         else {
-            end = (currIndex + 1) * 16;
+            end = (currIndex + 1) * number_of_images_in_a_nearby_page;
         }
         ArrayList<String> tempNearbyImageURLs = new ArrayList<String>(nearbyImageURLs.subList(start, end));
         ArrayList<String> tempNearbyDistances = new ArrayList<String>(nearbyDistances.subList(start, end));
@@ -336,7 +346,7 @@ public class ViewAllStreamActivity extends ActionBarActivity {
                     Log.v(TAG, jObject2.getString("img_url"));
                     String imageURL = jObject2.getString("img_url");
                     if (imageURL.equals("")) {
-                        imageURL = "https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png";
+                        imageURL = getString(R.string.no_image_url);
                     }
                     else {
                         imageURL = Domain_name + imageURL;
@@ -467,7 +477,7 @@ public class ViewAllStreamActivity extends ActionBarActivity {
                     user_emails.add(jObject2.getString("user_email"));
                     String coverURL = jObject2.getString("cover_url");
                     if (coverURL.equals("")) {
-                        coverURL = "https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png";
+                        coverURL = getString(R.string.no_image_url);
                     }
                     imageURLs.add(coverURL);
                 }
@@ -513,7 +523,7 @@ public class ViewAllStreamActivity extends ActionBarActivity {
 
                     String coverURL = jObject2.getString("cover_url");
                     if (coverURL.equals("")) {
-                        coverURL = "https://upload.wikimedia.org/wikipedia/en/0/0d/Null.png";
+                        coverURL = getString(R.string.no_image_url);
                     }
                     imageURLs.add(coverURL);
                 }
@@ -602,6 +612,10 @@ public class ViewAllStreamActivity extends ActionBarActivity {
     private String longitude, latitude;
 
     public void getNearbyImages() {
+        if (!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            initLocation();
+            return;
+        }
         locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10, 10, mLocationListener);
         Location location = locationMgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         latitude = String.valueOf(location.getLatitude());
