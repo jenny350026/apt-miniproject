@@ -37,6 +37,9 @@ public class CameraActivity extends ActionBarActivity {
 
     private File pictureFile = null;
 
+    Button captureButton;
+    Button confirmButton;
+
     private static final String TAG = "CameraActivity";
 
 
@@ -50,13 +53,20 @@ public class CameraActivity extends ActionBarActivity {
         // Create an instance of Camera
         mCamera = getCameraInstance();
 
+        //set camera to continually auto-focus
+        Camera.Parameters params = mCamera.getParameters();
+//*EDIT*//params.setFocusMode("continuous-picture");
+//It is better to use defined constraints as opposed to String, thanks to AbdelHady
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        mCamera.setParameters(params);
+
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
 
         // Add a listener to the Capture button
-        Button captureButton = (Button) findViewById(R.id.button_capture);
+        captureButton = (Button) findViewById(R.id.button_capture);
         captureButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -72,13 +82,15 @@ public class CameraActivity extends ActionBarActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-
+                        mCamera.startPreview();
+                        captureButton.setEnabled(true);
+                        confirmButton.setEnabled(false);
                     }
                 }
         );
 
-        Button confirmButton = (Button) findViewById(R.id.button_confirm);
+        confirmButton = (Button) findViewById(R.id.button_confirm);
+        confirmButton.setEnabled(false);
         confirmButton.setOnClickListener(
                 new View.OnClickListener(){
                     @Override
@@ -100,6 +112,7 @@ public class CameraActivity extends ActionBarActivity {
                             Intent intent = new Intent();
                             intent.putExtra("pictureFile", pictureFile);
                             setResult(Activity.RESULT_OK, intent);
+                            mCamera.release();
                             finish();
                         }
                     }
@@ -228,7 +241,10 @@ public class CameraActivity extends ActionBarActivity {
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap , 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
-            mCamera.release();
+            mCamera.stopPreview();
+            captureButton.setEnabled(false);
+            confirmButton.setEnabled(true);
+
         }
     };
 
